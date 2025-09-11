@@ -1,12 +1,14 @@
-# starter_seed.py
-# A marimo "seed" for agentic, self-incubating projects
-# ======================================================
-# This document is both narrative and executable.
-# Its purpose is to:
-#   1. Declare the project’s purpose and working style
-#   2. Establish a reproducible environment
-#   3. Encode the agentic loop of “observe → reflect → extend”
-#   4. Generate tasks and notes that become future iterations
+"""starter_seed.py
+
+A marimo "seed" for agentic, self-incubating projects with hooks for
+Codex-style agents.
+
+This document is both narrative and executable. Its purpose is to:
+  1. Declare the project’s purpose and working style
+  2. Establish a reproducible environment
+  3. Encode the agentic loop of "observe → reflect → extend"
+  4. Generate tasks and notes that become future iterations
+"""
 
 import marimo
 
@@ -45,6 +47,8 @@ def environment_declaration():
         "language": "Python 3.11+",
         "package_manager": "uv / pip",
         "core_dependencies": ["marimo", "openai", "requests", "pydantic"],
+        "openai_model": "gpt-4o-mini",
+        "env_var": "OPENAI_API_KEY",
         "philosophy": "Local-first, agentic expansion, reproducible research",
     }
     return env
@@ -70,20 +74,53 @@ def agentic_loop():
             f"⚙️ Explore feature #{random.randint(1,100)}",
         ]
         return reflections, tasks
-
     return reflect_and_propose
 
+# CELL 4 — Codex task generator
+@app.cell
+def codex_task_generator():
+    import os
+    from typing import List
 
-# CELL 4 — First cycle
+    def codex_propose(notes: str, model: str = "gpt-4o-mini") -> List[str]:
+        """Use an OpenAI model to propose next tasks."""
+        try:
+            from openai import OpenAI
+        except Exception as e:  # pragma: no cover - graceful degradation
+            return [f"OpenAI package not installed: {e}"]
+
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        if client.api_key is None:
+            return ["Set OPENAI_API_KEY to enable Codex suggestions."]
+
+        prompt = (
+            "Given the project notes:\n"
+            f"{notes}\nGenerate three follow-up coding tasks."
+        )
+        response = client.responses.create(model=model, input=prompt)
+        text = response.output_text.strip()
+        return [line.strip("-• ") for line in text.splitlines() if line.strip()]
+
+    return codex_propose
+
+
+# CELL 5 — First cycle
 @app.cell
 def first_cycle(agentic_loop):
     reflections, tasks = agentic_loop("Seed document freshly run.")
     return reflections, tasks
 
 
-# CELL 5 — Display
+# CELL 6 — Codex-assisted suggestions
 @app.cell
-def display(introduction, environment_declaration, first_cycle):
+def codex_demo(codex_task_generator):
+    suggestions = codex_task_generator("Seed document freshly run.")
+    return suggestions
+
+
+# CELL 7 — Display
+@app.cell
+def display(introduction, environment_declaration, first_cycle, codex_demo):
     from pprint import pprint
 
     print(introduction)
@@ -94,25 +131,29 @@ def display(introduction, environment_declaration, first_cycle):
     pprint(first_cycle[0])
     pprint(first_cycle[1])
 
+    print("\n---\nCodex suggestions:\n")
+    pprint(codex_demo)
 
-# CELL 6 — Self-extension hook
+
+# CELL 8 — Self-extension hook
 @app.cell
 def extension_protocol():
     protocol = """
     ## 🔄 Extension Protocol
-    
+
     To extend this project:
     1. Read the reflections and tasks from the last cycle.
     2. Propose modifications or new cells.
     3. Commit changes back into this marimo document.
-    
+
     Agents may add new cells with:
     ```python
     @app.cell
     def new_feature(...):
         ...
     ```
-    
+
+    Set `OPENAI_API_KEY` to enable Codex-powered task suggestions.
     Each cycle should preserve provenance: append, don’t overwrite.
     """
     return protocol

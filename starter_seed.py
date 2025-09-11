@@ -85,19 +85,24 @@ def codex_task_generator():
     def codex_propose(notes: str, model: str = "gpt-4o-mini") -> List[str]:
         """Use an OpenAI model to propose next tasks."""
         try:
-            from openai import OpenAI
+            from openai import OpenAI, OpenAIError
         except Exception as e:  # pragma: no cover - graceful degradation
             return [f"OpenAI package not installed: {e}"]
 
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        if client.api_key is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
             return ["Set OPENAI_API_KEY to enable Codex suggestions."]
 
+        client = OpenAI(api_key=api_key)
         prompt = (
             "Given the project notes:\n"
             f"{notes}\nGenerate three follow-up coding tasks."
         )
-        response = client.responses.create(model=model, input=prompt)
+        try:
+            response = client.responses.create(model=model, input=prompt)
+        except Exception as e:  # pragma: no cover - network failures
+            return [f"OpenAI request failed: {e}"]
+
         text = response.output_text.strip()
         return [line.strip("-• ") for line in text.splitlines() if line.strip()]
 

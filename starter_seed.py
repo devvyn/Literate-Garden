@@ -11,6 +11,7 @@ This document is both narrative and executable. Its purpose is to:
 """
 
 import marimo
+from textwrap import dedent
 
 __generated_with__ = "0.9.16"
 app = marimo.App()
@@ -19,9 +20,10 @@ app = marimo.App()
 # CELL 1 — Introduction
 @app.cell
 def introduction():
-    intro_text = """
+    intro_text = dedent(
+        """
     # 🌱 Agentic Project Seed
-    
+
     Welcome! This is a self-incubating marimo document designed to be
     the genesis of a project. Think of it as a seed crystal dropped
     into solution: over time, structures will accrete, iterate, and 
@@ -37,6 +39,7 @@ def introduction():
     2. A prioritized task list
     3. Hooks for external agents (e.g. Codex) to act
     """
+    )
     return intro_text
 
 
@@ -143,7 +146,8 @@ def display(introduction, environment_declaration, first_cycle, codex_demo):
 # CELL 8 — Self-extension hook
 @app.cell
 def extension_protocol():
-    protocol = """
+    protocol = dedent(
+        """
     ## 🔄 Extension Protocol
 
     To extend this project:
@@ -161,5 +165,6 @@ def extension_protocol():
     Set `OPENAI_API_KEY` to enable Codex-powered task suggestions.
     Each cycle should preserve provenance: append, don’t overwrite.
     """
+    )
     return protocol
 

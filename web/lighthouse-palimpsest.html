@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lighthouse Palimpsest — Diegetic Console</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --brass: #d7aa5d;
+      --ink: #0d1b2a;
+      --seafoam: #3a506b;
+      --ghost: rgba(216, 232, 255, 0.8);
+    }
+
+    body {
+      font-family: "Cormorant Garamond", serif;
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1b263b 0%, #000814 70%);
+      color: var(--ghost);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+    }
+
+    .console {
+      width: min(720px, 90vw);
+      border: 2px solid var(--brass);
+      border-radius: 18px;
+      padding: 2.5rem;
+      background: linear-gradient(145deg, rgba(13, 27, 42, 0.95), rgba(58, 80, 107, 0.6));
+      box-shadow: 0 35px 60px rgba(0, 0, 0, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .console::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--beam-angle, 40%) 0%, rgba(215, 170, 93, 0.45), transparent 55%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      transition: background 0.4s ease;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(2.2rem, 5vw, 3.1rem);
+      letter-spacing: 0.04em;
+      color: var(--brass);
+      text-shadow: 0 0 15px rgba(215, 170, 93, 0.35);
+    }
+
+    .timeline {
+      margin: 2rem 0;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .timeline button {
+      background: rgba(11, 18, 31, 0.85);
+      border: 1px solid rgba(215, 170, 93, 0.4);
+      color: var(--ghost);
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.3s ease;
+      cursor: pointer;
+    }
+
+    .timeline button[data-active="true"] {
+      border-color: var(--brass);
+      background: rgba(215, 170, 93, 0.12);
+      transform: translateY(-4px);
+    }
+
+    .pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: 0.6rem;
+      background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(0.9);
+        opacity: 0.7;
+      }
+      50% {
+        transform: scale(1.3);
+        opacity: 1;
+      }
+    }
+
+    .log {
+      min-height: 140px;
+      padding: 1.5rem;
+      border-radius: 16px;
+      background: rgba(9, 15, 24, 0.9);
+      border: 1px solid rgba(215, 170, 93, 0.2);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      transition: border 0.3s ease;
+    }
+
+    .log strong {
+      color: var(--brass);
+      letter-spacing: 0.06em;
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.95rem;
+      color: rgba(216, 232, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+  </style>
+</head>
+<body>
+  <article class="console" data-agent-hook>
+    <!-- COLLAB NOTE: Hook additional shader thumbnails to the data-agent-hook attribute for quick slotting. -->
+    <h1>Lens Alignment Console</h1>
+    <p>Select an era shard to pivot the beacon. The overlay shows how timelines occlude or reveal each other.</p>
+
+    <div class="timeline" id="timeline"></div>
+
+    <section class="log" id="log">
+      Rotate the brass rings to let the sea remember.
+    </section>
+
+    <footer>Prototype vignette &mdash; Lighthouse Palimpsest</footer>
+  </article>
+
+  <script>
+    const shards = [
+      {
+        label: "1796 Storm Charter",
+        era: "Age of Reckoning",
+        log: "Charts bloom across the pane as the storm of '96 unfreezes. Captain Mireille's last coordinates shimmer into place.",
+        beamAngle: "20%"
+      },
+      {
+        label: "1834 Keeper's Revolt",
+        era: "Lantern War",
+        log: "Brass teeth grind. The beam widens, revealing graffiti scratched by keepers planning the revolt.",
+        beamAngle: "60%"
+      },
+      {
+        label: "1899 Phantom Regatta",
+        era: "Spectral Accord",
+        log: "Illusory sails cut through the fog. The console hums as ghost flotillas accept your guidance.",
+        beamAngle: "45%"
+      }
+    ];
+
+    const timelineEl = document.getElementById("timeline");
+    const logEl = document.getElementById("log");
+    const consoleEl = document.querySelector(".console");
+
+    shards.forEach((shard, index) => {
+      const button = document.createElement("button");
+      button.innerHTML = `<span>${shard.label}</span><span>${shard.era}<span class="pulse"></span></span>`;
+      button.dataset.index = index;
+      button.addEventListener("click", () => activateShard(shard, button));
+      if (index === 0) {
+        activateShard(shard, button);
+      }
+      timelineEl.appendChild(button);
+    });
+
+    function activateShard(shard, button) {
+      timelineEl
+        .querySelectorAll("button")
+        .forEach((btn) => btn.setAttribute("data-active", btn === button));
+
+      logEl.innerHTML = `<strong>${shard.label}</strong><br>${shard.log}`;
+      consoleEl.style.setProperty("--beam-angle", shard.beamAngle);
+    }
+  </script>
+</body>
+</html>

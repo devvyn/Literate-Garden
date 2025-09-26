@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurora Chord Pilgrimage — Harmony Sketch</title>
+    <link rel="stylesheet" href="styles/common.css" />
+    <style>
+      canvas#sky {
+        width: 100%;
+        height: clamp(320px, 40vh, 480px);
+        border-radius: 24px;
+        background: rgba(3, 9, 24, 0.9);
+        border: 1px solid rgba(148, 241, 255, 0.25);
+      }
+
+      .constellation-log {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .constellation-log article {
+        border: 1px solid rgba(148, 241, 255, 0.2);
+        border-radius: 16px;
+        padding: 0.8rem;
+        background: rgba(6, 18, 35, 0.72);
+        min-height: 120px;
+      }
+
+      .constellation-log h4 {
+        margin: 0 0 0.35rem 0;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-muted);
+      }
+
+      .constellation-log p {
+        margin: 0;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <aside class="sidebar">
+        <span class="badge">Aurora Chord Pilgrimage</span>
+        <h1>Harmony Sketch Vertical</h1>
+        <p>
+          Micro-slice showing how constellation drawing influences harmonic color. 
+          This captures the award pitch: synesthetic traversal where aurora motion reflects the
+          emotional register of the music.
+        </p>
+        <p class="annotation">
+          COLLAB HANDOFF: Extend the chord palette by editing <code>const harmonyModes</code> in the script below. 
+          Remember to log updates in <code>docs/game_concepts.md</code>.
+        </p>
+        <footer>Last touched: <span id="timestamp"></span></footer>
+      </aside>
+      <section class="demo-surface">
+        <header>
+          <h2>Auroral Canvas</h2>
+          <h3>Draw lines to seed constellations. Harmonies pulse on beat ticks.</h3>
+        </header>
+        <canvas id="sky" width="900" height="520" aria-label="Aurora sketch canvas"></canvas>
+        <div class="control-panel">
+          <label>
+            Harmony Mode
+            <select id="mode-select">
+              <option value="0">Lyric Ionian</option>
+              <option value="1">Glacial Dorian</option>
+              <option value="2">Nebula Lydian</option>
+            </select>
+          </label>
+          <label>
+            Pulse Tempo
+            <input id="tempo" type="range" min="50" max="160" value="92" />
+          </label>
+          <label>
+            Aurora Warmth
+            <input id="warmth" type="range" min="0" max="100" value="40" />
+          </label>
+          <button id="pulse">Play Harmony Pulse</button>
+        </div>
+        <div class="annotation">
+          <strong>Festival Hook:</strong> Constellation density drives both aurora speed and chord complexity, 
+          showcasing the synesthetic feedback loop critics love to dissect.
+        </div>
+        <div class="constellation-log" id="log"></div>
+      </section>
+    </main>
+    <script type="module">
+      import { clamp, createTicker, createElement, readableTimestamp } from "./scripts/common.js";
+
+      const canvas = document.getElementById("sky");
+      const ctx = canvas.getContext("2d");
+      const tempoSlider = document.getElementById("tempo");
+      const warmthSlider = document.getElementById("warmth");
+      const modeSelect = document.getElementById("mode-select");
+      const log = document.getElementById("log");
+      const timestamp = document.getElementById("timestamp");
+      const pulseButton = document.getElementById("pulse");
+
+      timestamp.textContent = readableTimestamp();
+
+      const harmonyModes = [
+        {
+          name: "Lyric Ionian",
+          chords: [0, 4, 7],
+          colorStops: ["#0f3a79", "#5ecfff", "#f4f1ff"],
+        },
+        {
+          name: "Glacial Dorian",
+          chords: [0, 3, 7],
+          colorStops: ["#061c42", "#2a7f9d", "#d3f6ff"],
+        },
+        {
+          name: "Nebula Lydian",
+          chords: [0, 4, 6],
+          colorStops: ["#1b0f44", "#7f3bce", "#ffe8ff"],
+        },
+      ];
+
+      const starfield = Array.from({ length: 120 }, (_, index) => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        baseRadius: Math.random() * 1.6 + 0.2,
+        twinkleSpeed: Math.random() * 0.001 + 0.0004,
+        offset: index * 12.42,
+      }));
+
+      const constellations = [];
+      let drawing = false;
+      let lastPoint = null;
+
+      canvas.addEventListener("pointerdown", (event) => {
+        drawing = true;
+        lastPoint = getCanvasPoint(event);
+        constellations.push({
+          points: [lastPoint],
+          createdAt: Date.now(),
+          mode: harmonyModes[Number(modeSelect.value)].name,
+        });
+        renderLog();
+      });
+
+      canvas.addEventListener("pointermove", (event) => {
+        if (!drawing) return;
+        const point = getCanvasPoint(event);
+        const current = constellations[constellations.length - 1];
+        current.points.push(point);
+        lastPoint = point;
+      });
+
+      window.addEventListener("pointerup", () => {
+        drawing = false;
+        lastPoint = null;
+      });
+
+      function getCanvasPoint(event) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+          y: ((event.clientY - rect.top) / rect.height) * canvas.height,
+        };
+      }
+
+      let lastBeat = 0;
+      let beatInterval = tempoToMs(Number(tempoSlider.value));
+      let auroraWarmth = Number(warmthSlider.value);
+
+      tempoSlider.addEventListener("input", () => {
+        beatInterval = tempoToMs(Number(tempoSlider.value));
+      });
+
+      warmthSlider.addEventListener("input", () => {
+        auroraWarmth = Number(warmthSlider.value);
+      });
+
+      modeSelect.addEventListener("change", () => {
+        renderLog();
+      });
+
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      let gainNode = audioCtx.createGain();
+      gainNode.gain.value = 0.0;
+      gainNode.connect(audioCtx.destination);
+
+      pulseButton.addEventListener("click", async () => {
+        if (audioCtx.state === "suspended") {
+          await audioCtx.resume();
+        }
+        triggerChord();
+        pulseButton.textContent = "Pulse Played";
+        setTimeout(() => (pulseButton.textContent = "Play Harmony Pulse"), 1200);
+      });
+
+      function triggerChord() {
+        const mode = harmonyModes[Number(modeSelect.value)];
+        const root = 220;
+        const density = clamp(constellations.reduce((acc, constellation) => acc + constellation.points.length, 0) / 120, 0, 1.5);
+        const spread = 1 + density * 0.5;
+        mode.chords.forEach((interval, index) => {
+          const oscillator = audioCtx.createOscillator();
+          const freq = root * Math.pow(2, (interval + index * spread) / 12);
+          oscillator.type = "sine";
+          oscillator.frequency.value = freq;
+
+          const env = audioCtx.createGain();
+          env.gain.value = 0;
+          oscillator.connect(env).connect(gainNode);
+          oscillator.start();
+          const now = audioCtx.currentTime;
+          env.gain.linearRampToValueAtTime(0.22, now + 0.05);
+          env.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+          oscillator.stop(now + 1.6);
+        });
+        gainNode.gain.cancelScheduledValues(audioCtx.currentTime);
+        gainNode.gain.setTargetAtTime(0.2 + density * 0.25, audioCtx.currentTime, 0.4);
+      }
+
+      const stopTicker = createTicker((delta) => {
+        drawSky(delta);
+        const now = performance.now();
+        if (now - lastBeat > beatInterval) {
+          lastBeat = now;
+          animateAurora();
+        }
+      });
+
+      function tempoToMs(bpm) {
+        return (60 / bpm) * 1000;
+      }
+
+      let auroraPhase = 0;
+      function animateAurora() {
+        auroraPhase = (auroraPhase + 0.2 + auroraWarmth / 200) % (Math.PI * 2);
+      }
+
+      function drawSky(delta) {
+        const mode = harmonyModes[Number(modeSelect.value)];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        const warmthFactor = auroraWarmth / 100;
+        mode.colorStops.forEach((stop, index) => {
+          const color = adjustWarmth(stop, warmthFactor);
+          gradient.addColorStop(index / (mode.colorStops.length - 1), color);
+        });
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        starfield.forEach((star) => {
+          const twinkle = (Math.sin(performance.now() * star.twinkleSpeed + star.offset) + 1) / 2;
+          const radius = star.baseRadius + twinkle * 0.8;
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${0.2 + twinkle * 0.6})`;
+          ctx.fill();
+        });
+        ctx.restore();
+
+        constellations.forEach((constellation, index) => {
+          const opacity = clamp(1 - (performance.now() - constellation.createdAt) / 16000, 0.15, 1);
+          ctx.lineWidth = 1.6 + Math.sin(auroraPhase + index) * 0.4;
+          ctx.strokeStyle = `rgba(148, 241, 255, ${opacity})`;
+          ctx.beginPath();
+          constellation.points.forEach((point, idx) => {
+            if (idx === 0) {
+              ctx.moveTo(point.x, point.y);
+            } else {
+              ctx.lineTo(point.x, point.y);
+            }
+          });
+          ctx.stroke();
+        });
+      }
+
+      function adjustWarmth(hex, warmth) {
+        const rgb = hexToRgb(hex);
+        const warmed = {
+          r: clamp(rgb.r + warmth * 80, 0, 255),
+          g: clamp(rgb.g + warmth * 40, 0, 255),
+          b: clamp(rgb.b - warmth * 60, 0, 255),
+        };
+        return `rgba(${warmed.r}, ${warmed.g}, ${warmed.b}, 0.92)`;
+      }
+
+      function hexToRgb(hex) {
+        const parsed = hex.replace("#", "");
+        const bigint = parseInt(parsed, 16);
+        return {
+          r: (bigint >> 16) & 255,
+          g: (bigint >> 8) & 255,
+          b: bigint & 255,
+        };
+      }
+
+      function renderLog() {
+        log.innerHTML = "";
+        constellations.slice(-6).forEach((constellation, index) => {
+          const article = createElement("article");
+          const title = createElement("h4", null, `Sequence ${constellations.length - 5 + index}`);
+          const body = createElement(
+            "p",
+            null,
+            `${constellation.points.length} points • Mode: ${constellation.mode}`
+          );
+          article.append(title, body);
+          log.append(article);
+        });
+      }
+
+      window.addEventListener("beforeunload", () => {
+        stopTicker();
+      });
+    </script>
+  </body>
+</html>

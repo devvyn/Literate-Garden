@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chrono Bloom Conservatory</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="scene.css" />
+</head>
+<body class="scene scene--chrono">
+  <!-- Collaboration Note: The timeline widget is a shared component; extend in scene.js rather than duplicating logic. -->
+  <header class="scene__header">
+    <a class="scene__back" href="index.html">← Back to Showcase</a>
+    <h1>Chrono Bloom Conservatory</h1>
+    <p>Conduct living botanicals through time-sculpted growth challenges.</p>
+  </header>
+
+  <main class="scene__main">
+    <section class="scene__panel">
+      <div class="timeline">
+        <div class="timeline__marker" data-label="Dawn"></div>
+        <div class="timeline__marker timeline__marker--active" data-label="Noon"></div>
+        <div class="timeline__marker" data-label="Dusk"></div>
+        <div class="timeline__marker" data-label="Midnight"></div>
+      </div>
+      <div class="garden">
+        <div class="garden__plant garden__plant--sprout"></div>
+        <div class="garden__plant garden__plant--bloom"></div>
+        <div class="garden__plant garden__plant--vine"></div>
+        <div class="garden__pulse"></div>
+      </div>
+    </section>
+
+    <aside class="scene__sidebar">
+      <h2>Pitch Beats</h2>
+      <ul>
+        <li>Audio-reactive flora tuned to an original seasonal score.</li>
+        <li>Spatial puzzle loops measured in branching growth tiers.</li>
+        <li>Award positioning: Experimental Gameplay Workshop, IGF Excellence in Audio.</li>
+      </ul>
+
+      <div class="scene__callout">
+        <h3>Feasibility Notes</h3>
+        <p>Prototype leverages WebGL instancing; console slice maps to Unreal Sequencer tracks.</p>
+      </div>
+    </aside>
+  </main>
+
+  <section class="scene__footer">
+    <h2>Next Actions</h2>
+    <ol>
+      <li>Integrate shader mockups from rendering squad (ETA: 2 days).</li>
+      <li>Compose seasonal leitmotifs &amp; dynamic stems.</li>
+      <li>Author branching narrative beats for the mentorship seedlings.</li>
+    </ol>
+  </section>
+
+  <script src="scene.js"></script>
+</body>
+</html>

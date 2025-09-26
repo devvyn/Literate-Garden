@@ -22,3 +22,14 @@ Each cycle of the notebook produces:
 
 Extend the project by appending new cells and preserving the narrative in `starter_seed.py`.
 
+---
+
+## Dream Demo Addendum
+
+> Collaboration Beacon: Reference this section when sharing pitch materials externally. Update links if the showcase structure changes.
+
+- **Concept Briefs**: `docs/game-concepts.md` captures three festival-ready demos, feasibility notes, and the blockers log.
+- **Web Showcase**: Open `web/index.html` to browse the interactive mockups. Individual scenes live alongside shared assets (`scene.css`, `scene.js`).
+- **Parallel Workflows**: Inline HTML comments call out shared components and ownership expectations for async contributors.
+
+When extending the slate, mirror the existing folder conventions and append your blockers or discoveries to the log for smooth handoffs.

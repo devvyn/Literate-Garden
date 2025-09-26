@@ -1,0 +1,174 @@
+/* COLLAB NOTE: Shared style tokens for all web demos. Extend cautiously—update docs/game_concepts.md if you alter the thematic palettes. */
+:root {
+  color-scheme: dark;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Spline Sans", "Inter", system-ui, sans-serif;
+  --color-ink: rgba(240, 247, 255, 0.92);
+  --color-muted: rgba(197, 215, 232, 0.66);
+  --color-accent: #94f1ff;
+  --color-warm: #ffb86b;
+  --color-deep: #0b1222;
+  --shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.45);
+  --border-soft: rgba(148, 241, 255, 0.32);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-body);
+  background: radial-gradient(circle at 20% 20%, rgba(148, 241, 255, 0.08), transparent 55%),
+              radial-gradient(circle at 80% 0%, rgba(255, 184, 107, 0.12), transparent 60%),
+              var(--color-deep);
+  color: var(--color-ink);
+}
+
+main {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: 2rem;
+  padding: 2.5rem clamp(1.5rem, 4vw, 4rem);
+  align-items: stretch;
+}
+
+.sidebar {
+  background: rgba(9, 17, 34, 0.82);
+  border: 1px solid var(--border-soft);
+  border-radius: 24px;
+  padding: 1.75rem;
+  box-shadow: var(--shadow-soft);
+  position: sticky;
+  top: 2rem;
+  height: fit-content;
+}
+
+.sidebar h1 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.sidebar p {
+  color: var(--color-muted);
+  line-height: 1.5;
+  margin-top: 0;
+}
+
+.sidebar .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: rgba(148, 241, 255, 0.12);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.demo-surface {
+  background: rgba(5, 10, 24, 0.72);
+  border: 1px solid rgba(148, 241, 255, 0.18);
+  border-radius: 28px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-surface header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.demo-surface h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.6rem);
+  margin: 0;
+}
+
+.demo-surface h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.control-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.control-panel label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.control-panel input[type="range"],
+.control-panel input[type="color"],
+.control-panel select {
+  margin-top: 0.4rem;
+  background: rgba(148, 241, 255, 0.1);
+  border: 1px solid rgba(148, 241, 255, 0.35);
+  border-radius: 999px;
+  height: 2.4rem;
+  padding: 0 0.8rem;
+  color: var(--color-ink);
+}
+
+.control-panel button {
+  background: linear-gradient(135deg, rgba(148, 241, 255, 0.9), rgba(255, 184, 107, 0.9));
+  color: #03111d;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(148, 241, 255, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.control-panel button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(148, 241, 255, 0.55);
+}
+
+.annotation {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+footer {
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: rgba(197, 215, 232, 0.4);
+}
+
+@media (max-width: 960px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+}

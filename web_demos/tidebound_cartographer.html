@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tidebound Cartographer — Littoral Resonance</title>
+    <link rel="stylesheet" href="styles/common.css" />
+    <style>
+      #chart {
+        width: 100%;
+        height: clamp(320px, 42vh, 520px);
+        border-radius: 24px;
+        border: 1px solid rgba(148, 241, 255, 0.24);
+        background: linear-gradient(180deg, rgba(9, 21, 38, 0.85), rgba(9, 15, 26, 0.95));
+      }
+
+      .logbook {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+      }
+
+      .logbook article {
+        border: 1px solid rgba(148, 241, 255, 0.2);
+        border-radius: 18px;
+        background: rgba(8, 17, 32, 0.7);
+        padding: 1rem;
+      }
+
+      .logbook h4 {
+        margin: 0 0 0.35rem 0;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        color: var(--color-muted);
+        text-transform: uppercase;
+      }
+
+      .logbook p {
+        margin: 0;
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <aside class="sidebar">
+        <span class="badge">Tidebound Cartographer</span>
+        <h1>Littoral Resonance Map</h1>
+        <p>
+          A storytelling map where tides expose relic glyphs. Critic-friendly because it visualizes decision
+          tension: raise the tide for traversal, lower it to reveal truth.
+        </p>
+        <p class="annotation">
+          COLLAB REMINDER: Next contributor can wire co-op hooks by broadcasting slider deltas via WebRTC. Leave note in docs when ready.
+        </p>
+        <footer>Last touched: <span id="timestamp"></span></footer>
+      </aside>
+      <section class="demo-surface">
+        <header>
+          <h2>Tidal Array</h2>
+          <h3>Balance tide height and resonance to expose the coastline's memory.</h3>
+        </header>
+        <canvas id="chart" width="900" height="520" aria-label="Dynamic tide chart"></canvas>
+        <div class="control-panel">
+          <label>
+            Tide Height
+            <input id="tide" type="range" min="0" max="100" value="50" />
+          </label>
+          <label>
+            Resonance Gain
+            <input id="resonance" type="range" min="0" max="100" value="60" />
+          </label>
+          <label>
+            Chronicle Depth
+            <input id="chronicle" type="range" min="0" max="4" value="2" />
+          </label>
+          <button id="scan">Log Shoreline Scan</button>
+        </div>
+        <div class="annotation">
+          Glyphs illuminate when the tide height complements resonance gain. Use scans to capture strong alignments.
+        </div>
+        <div class="logbook" id="log"></div>
+      </section>
+    </main>
+    <script type="module">
+      import { clamp, createTicker, createElement, readableTimestamp } from "./scripts/common.js";
+
+      const canvas = document.getElementById("chart");
+      const ctx = canvas.getContext("2d");
+      const tideSlider = document.getElementById("tide");
+      const resonanceSlider = document.getElementById("resonance");
+      const chronicleSlider = document.getElementById("chronicle");
+      const log = document.getElementById("log");
+      const scanButton = document.getElementById("scan");
+      const timestamp = document.getElementById("timestamp");
+
+      timestamp.textContent = readableTimestamp();
+
+      let tide = Number(tideSlider.value);
+      let resonance = Number(resonanceSlider.value);
+      let chronicleDepth = Number(chronicleSlider.value);
+
+      tideSlider.addEventListener("input", () => (tide = Number(tideSlider.value)));
+      resonanceSlider.addEventListener("input", () => (resonance = Number(resonanceSlider.value)));
+      chronicleSlider.addEventListener("input", () => (chronicleDepth = Number(chronicleSlider.value)));
+
+      const glyphs = Array.from({ length: 12 }, (_, index) => ({
+        x: (canvas.width / 12) * index + 50,
+        y: canvas.height * (0.32 + Math.sin(index * 0.8) * 0.08),
+        intensity: Math.random() * 0.4 + 0.2,
+        symbol: ["∴", "☍", "⌘", "✧", "⌖", "❖"][index % 6],
+      }));
+
+      const shoreSegments = Array.from({ length: 40 }, (_, index) => ({
+        x: (canvas.width / 39) * index,
+        baseY: canvas.height * (0.5 + Math.sin(index * 0.23) * 0.12),
+      }));
+
+      scanButton.addEventListener("click", () => {
+        const harmony = computeHarmony();
+        const entry = createElement("article");
+        const title = createElement("h4", null, readableTimestamp());
+        const body = createElement(
+          "p",
+          null,
+          `Tide ${tide.toFixed(0)} • Resonance ${resonance.toFixed(0)} • Harmony ${(harmony * 100).toFixed(1)}%`
+        );
+        entry.append(title, body);
+        log.prepend(entry);
+        while (log.children.length > 6) {
+          log.removeChild(log.lastChild);
+        }
+      });
+
+      createTicker((delta) => {
+        drawChart(delta);
+      });
+
+      function drawChart(delta) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawSea();
+        drawCoastline();
+        drawGlyphs();
+        drawOverlayText();
+      }
+
+      function drawSea() {
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, "rgba(10, 36, 58, 0.92)");
+        grad.addColorStop(1, "rgba(3, 12, 24, 0.95)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        const tideFactor = tide / 100;
+        for (let i = 0; i < 6; i++) {
+          const amplitude = 18 + i * 6 * (0.6 + tideFactor);
+          const speed = 0.0009 + i * 0.0002;
+          drawWaveLayer(amplitude, speed, i);
+        }
+        ctx.restore();
+      }
+
+      function drawWaveLayer(amplitude, speed, index) {
+        ctx.beginPath();
+        const baseline = canvas.height * (0.55 + index * 0.05 - (tide / 100) * 0.12);
+        for (let x = 0; x <= canvas.width; x += 12) {
+          const theta = performance.now() * speed + x * 0.015 + index * 1.2;
+          const y = baseline + Math.sin(theta) * amplitude;
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = `rgba(148, 241, 255, ${0.05 + index * 0.08})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      function drawCoastline() {
+        ctx.beginPath();
+        shoreSegments.forEach((segment, index) => {
+          const tideOffset = (tide / 100 - 0.5) * 40;
+          const resonanceLift = Math.sin(performance.now() * 0.0005 + index * 0.4) * (resonance / 100) * 12;
+          const y = segment.baseY - tideOffset - resonanceLift;
+          if (index === 0) ctx.moveTo(segment.x, y);
+          else ctx.lineTo(segment.x, y);
+        });
+        ctx.strokeStyle = "rgba(255, 184, 107, 0.55)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      function drawGlyphs() {
+        const harmony = computeHarmony();
+        glyphs.forEach((glyph, index) => {
+          const tideInfluence = clamp(1 - Math.abs(glyph.y - currentTideHeight()) / 120, 0, 1);
+          const resonanceInfluence = clamp(resonance / 100, 0, 1);
+          const depthInfluence = clamp(chronicleDepth / 4, 0, 1);
+          const glow = glyph.intensity * (0.4 + harmony * 0.6) * (tideInfluence + resonanceInfluence * 0.6 + depthInfluence * 0.8);
+
+          ctx.save();
+          ctx.translate(glyph.x, glyph.y);
+          ctx.globalAlpha = clamp(glow, 0.08, 0.95);
+          ctx.fillStyle = "#94f1ff";
+          ctx.font = `${18 + depthInfluence * 16}px 'Spline Sans', 'Inter', sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(glyph.symbol, 0, 0);
+          ctx.restore();
+        });
+      }
+
+      function drawOverlayText() {
+        const harmony = computeHarmony();
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.font = "600 16px 'Inter', sans-serif";
+        ctx.fillText(`Harmony Index: ${(harmony * 100).toFixed(1)}%`, 24, 36);
+        ctx.fillText(`Chronicle Depth: ${chronicleDepth}`, 24, 60);
+        ctx.fillText(`Resonance Gain: ${resonance}`, 24, 84);
+        ctx.restore();
+      }
+
+      function computeHarmony() {
+        const tideFactor = tide / 100;
+        const resonanceFactor = resonance / 100;
+        const chronicleFactor = chronicleDepth / 4;
+        const drift = Math.sin(performance.now() * 0.0007) * 0.1;
+        return clamp(0.32 + tideFactor * 0.3 + resonanceFactor * 0.25 + chronicleFactor * 0.2 + drift, 0, 1);
+      }
+
+      function currentTideHeight() {
+        return canvas.height * (0.58 - (tide / 100) * 0.25);
+      }
+    </script>
+  </body>
+</html>

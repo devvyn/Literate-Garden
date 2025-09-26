@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Echoes of Laurel Vault — Synesthetic Loop</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #06020d;
+      --flora: #94ffdf;
+      --percussion: #ff8bd1;
+      --ambient: #78a6ff;
+      --text: #f6f4ff;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 20% 20%, rgba(148, 255, 223, 0.12), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(255, 139, 209, 0.15), transparent 45%),
+        var(--bg);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    main {
+      width: min(960px, 90vw);
+      padding: 2.5rem;
+      background: rgba(8, 4, 18, 0.84);
+      border-radius: 28px;
+      border: 1px solid rgba(148, 255, 223, 0.3);
+      box-shadow: 0 35px 70px rgba(0, 0, 0, 0.55);
+      position: relative;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: 0.08em;
+    }
+
+    p {
+      max-width: 640px;
+      line-height: 1.6;
+      color: rgba(246, 244, 255, 0.82);
+    }
+
+    .pads {
+      margin-top: 2rem;
+      display: grid;
+      gap: 1.2rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    button.pad {
+      position: relative;
+      border: none;
+      border-radius: 18px;
+      padding: 1.5rem 1.2rem;
+      background: rgba(15, 7, 30, 0.88);
+      color: inherit;
+      font-size: 1.05rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    button.pad::after {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      transition: border 0.18s ease;
+    }
+
+    button.pad[data-tone="percussion"]::after { border-color: rgba(255, 139, 209, 0.4); }
+    button.pad[data-tone="flora"]::after { border-color: rgba(148, 255, 223, 0.4); }
+    button.pad[data-tone="ambient"]::after { border-color: rgba(120, 166, 255, 0.4); }
+
+    button.pad[data-active="true"] {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 20px 45px rgba(148, 255, 223, 0.4);
+    }
+
+    button.pad span { display: block; font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.7; }
+
+    #visualizer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    .pulse {
+      position: absolute;
+      border-radius: 999px;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.4);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(246, 244, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div id="visualizer"></div>
+    <h1>Chord Bloom Pad</h1>
+    <p>Trigger a triad to visualize how percussion, flora, and ambient layers weave into the vault's rhythm defense.</p>
+    <div class="pads" id="pads">
+      <!-- COLLAB NOTE: Add new pad definitions in the padsConfig array; no layout changes required. -->
+    </div>
+    <footer>Echoes of Laurel Vault — Festival Pitch Loop</footer>
+  </main>
+
+  <script>
+    const padsConfig = [
+      {
+        label: "Pulsevine",
+        tone: "flora",
+        description: "Vines swell to guard the western archway.",
+        color: "rgba(148, 255, 223, 0.75)",
+      },
+      {
+        label: "Glass Chime",
+        tone: "percussion",
+        description: "Crystalline beats scatter spores into defensive arcs.",
+        color: "rgba(255, 139, 209, 0.75)",
+      },
+      {
+        label: "Mist Choir",
+        tone: "ambient",
+        description: "Fog harmonics lull invaders into staggered steps.",
+        color: "rgba(120, 166, 255, 0.75)",
+      },
+      {
+        label: "Heartwood",
+        tone: "flora",
+        description: "The vault's trunk resonates, expanding the pulse shield.",
+        color: "rgba(148, 255, 223, 0.6)",
+      },
+    ];
+
+    const padsRoot = document.getElementById("pads");
+    const visualizer = document.getElementById("visualizer");
+
+    padsConfig.forEach((pad) => {
+      const button = document.createElement("button");
+      button.className = "pad";
+      button.dataset.tone = pad.tone;
+      button.innerHTML = `<strong>${pad.label}</strong><span>${pad.tone}</span>`;
+      button.addEventListener("click", () => {
+        flashPad(button, pad);
+      });
+      button.title = pad.description;
+      padsRoot.appendChild(button);
+    });
+
+    // BLOCKER NOTE: Audio stems are not wired yet; waiting on asset delivery before hooking Web Audio API layers.
+    let activePulse;
+
+    function flashPad(button, pad) {
+      padsRoot.querySelectorAll(".pad").forEach((padEl) => padEl.dataset.active = "false");
+      button.dataset.active = "true";
+
+      if (activePulse) {
+        activePulse.remove();
+      }
+
+      const pulse = document.createElement("div");
+      pulse.className = "pulse";
+      const rect = button.getBoundingClientRect();
+      const mainRect = document.querySelector("main").getBoundingClientRect();
+      pulse.style.left = `${rect.left + rect.width / 2 - mainRect.left}px`;
+      pulse.style.top = `${rect.top + rect.height / 2 - mainRect.top}px`;
+      pulse.style.background = `radial-gradient(circle, ${pad.color}, transparent 60%)`;
+
+      visualizer.appendChild(pulse);
+      requestAnimationFrame(() => {
+        pulse.style.opacity = 1;
+        pulse.style.transform = "translate(-50%, -50%) scale(2.4)";
+      });
+
+      setTimeout(() => {
+        pulse.style.opacity = 0;
+        pulse.style.transform = "translate(-50%, -50%) scale(3.4)";
+        setTimeout(() => pulse.remove(), 400);
+      }, 450);
+
+      activePulse = pulse;
+    }
+  </script>
+</body>
+</html>

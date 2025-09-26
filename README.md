@@ -22,3 +22,10 @@ Each cycle of the notebook produces:
 
 Extend the project by appending new cells and preserving the narrative in `starter_seed.py`.
 
+## Indie Demo Concept Showcase
+
+The `docs/` and `web/` directories now outline award-ready demo concepts and the interaction patterns they emphasize.
+
+- Read `docs/game_concepts.md` for suitability and feasibility breakdowns across the slate.
+- Open `web/index.html` in a browser to explore the interactive pattern library.
+- COLLAB NOTE: Keep cross-discipline updates flowing—drop renderer discoveries into `docs/rendering.md` and networking findings into `TODO-networking.md` so async contributors stay aligned.

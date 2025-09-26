@@ -1,0 +1,217 @@
+:root {
+  --bg: #080c15;
+  --bg-panel: rgba(17, 26, 46, 0.85);
+  --accent: #ff9f1c;
+  --accent-soft: rgba(255, 159, 28, 0.16);
+  --text: #f6f7fb;
+  --muted: #8f99b8;
+  --success: #4caf50;
+  --warning: #ff6b6b;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #17233d, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  padding: 4rem 8vw 2rem;
+  text-align: center;
+  background: linear-gradient(120deg, rgba(255, 159, 28, 0.16), rgba(0, 188, 212, 0.12));
+  backdrop-filter: blur(6px);
+}
+
+.hero h1 {
+  margin-bottom: 0.5rem;
+  font-size: clamp(2.5rem, 5vw, 3.4rem);
+}
+
+.hero p {
+  margin: 0 auto;
+  max-width: 56ch;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+main {
+  flex: 1;
+  padding: 2rem 8vw 4rem;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+#toggle-feasibility {
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background: var(--accent);
+  color: #1b1404;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#toggle-feasibility[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 159, 28, 0.22);
+}
+
+#toggle-feasibility:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--bg-panel);
+  border-radius: 1.2rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  position: relative;
+  overflow: hidden;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -40% 30% auto;
+  height: 160px;
+  background: radial-gradient(circle, rgba(255, 159, 28, 0.35), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover,
+.card:focus-within {
+  transform: translateY(-6px);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.card:hover::before,
+.card:focus-within::before {
+  opacity: 1;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.card .tagline {
+  color: var(--muted);
+  font-size: 0.98rem;
+  margin: 0;
+}
+
+.card .mechanic {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.card .suitability,
+.card .feasibility {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.card .feasibility {
+  display: none;
+  padding: 0.75rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 159, 28, 0.45);
+}
+
+.card[data-show-feasibility="true"] .feasibility {
+  display: block;
+}
+
+.pulse-bar {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.pulse-bar span {
+  display: inline-block;
+  width: 6px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.pulse-bar span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.pulse-bar span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scaleY(0.6);
+    background: var(--accent-soft);
+  }
+  50% {
+    transform: scaleY(1.4);
+    background: var(--accent);
+  }
+}
+
+.roadmap {
+  margin-top: 4rem;
+  padding: 2rem;
+  background: rgba(17, 26, 46, 0.65);
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+footer {
+  padding: 2rem 8vw 3rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

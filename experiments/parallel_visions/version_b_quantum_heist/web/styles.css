@@ -1,0 +1,105 @@
+:root {
+  --bg: radial-gradient(circle at top right, #0c1327, #02030a 65%);
+  --accent: #66fcf1;
+  --accent-2: #45a29e;
+  --warning: #ff5370;
+  --text: #f5f6ff;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 3rem 1.5rem;
+}
+
+main {
+  max-width: 960px;
+  width: 100%;
+  background: rgba(7, 12, 24, 0.8);
+  border: 1px solid rgba(102, 252, 241, 0.2);
+  border-radius: 22px;
+  padding: 2.5rem;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.45);
+}
+
+header h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  margin-bottom: 0.3rem;
+}
+
+.tagline {
+  margin-top: 0;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+section {
+  margin-block: 2.3rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(60px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  border: 1px solid rgba(102, 252, 241, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(102, 252, 241, 0.25);
+}
+
+.tile[data-state="1"] {
+  box-shadow: inset 0 0 0 2px rgba(102, 252, 241, 0.6);
+}
+
+.tile[data-state="2"] {
+  box-shadow: inset 0 0 0 2px rgba(255, 83, 112, 0.6);
+}
+
+.tile::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  color: rgba(245, 246, 255, 0.85);
+}
+
+.status {
+  font-weight: 600;
+  color: var(--accent);
+  min-height: 2rem;
+}
+
+.blocker {
+  color: var(--warning);
+  font-style: italic;
+}
+
+button {
+  background: linear-gradient(120deg, rgba(102, 252, 241, 0.2), rgba(69, 162, 158, 0.4));
+  color: var(--text);
+  border: 1px solid rgba(102, 252, 241, 0.3);
+  border-radius: 999px;
+  padding: 0.75rem 1.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}

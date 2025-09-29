@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clockwork Canopy Atelier — Lumen Balancer</title>
+    <link rel="stylesheet" href="styles/common.css" />
+    <style>
+      #canopy-wrapper {
+        position: relative;
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 241, 255, 0.2);
+        min-height: 320px;
+      }
+
+      canvas#canopy {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1rem;
+      }
+
+      .status-card {
+        border-radius: 18px;
+        background: rgba(9, 16, 32, 0.68);
+        border: 1px solid rgba(148, 241, 255, 0.2);
+        padding: 1rem;
+      }
+
+      .status-card h4 {
+        margin: 0;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-muted);
+      }
+
+      .status-card strong {
+        font-size: 1.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <aside class="sidebar">
+        <span class="badge">Clockwork Canopy Atelier</span>
+        <h1>Lumen Balancer Readiness</h1>
+        <p>
+          This slice demonstrates how mechanical flora reacts to artisan adjustments. 
+          Parallax gears respond to the player's tuning and surface actionable ecology metrics for show judges.
+        </p>
+        <p class="annotation">
+          COLLAB QUEUE: Future iteration should expose NPC requests via overlay cards. Keep <code>statusRegistry</code> synchronized.
+        </p>
+        <footer>Last touched: <span id="timestamp"></span></footer>
+      </aside>
+      <section class="demo-surface">
+        <header>
+          <h2>Canopy Stabilizer</h2>
+          <h3>Adjust solar angle &amp; gear cadence to keep flora in luminous equilibrium.</h3>
+        </header>
+        <div id="canopy-wrapper">
+          <canvas id="canopy" width="900" height="520" aria-label="Clockwork canopy visualization"></canvas>
+        </div>
+        <div class="control-panel">
+          <label>
+            Solar Angle
+            <input id="sun" type="range" min="-45" max="45" value="10" />
+          </label>
+          <label>
+            Gear Cadence
+            <input id="cadence" type="range" min="0" max="100" value="55" />
+          </label>
+          <label>
+            Moisture Feed
+            <input id="moisture" type="range" min="0" max="100" value="64" />
+          </label>
+        </div>
+        <div class="status-grid" id="status"></div>
+        <div class="annotation">
+          <strong>Award Pitch:</strong> Judges witness a responsive ecology where each tuning tick impacts canopy health.
+          Data journaling shown below provides production transparency.
+        </div>
+      </section>
+    </main>
+    <script type="module">
+      import { clamp, createTicker, createElement, readableTimestamp } from "./scripts/common.js";
+
+      const canvas = document.getElementById("canopy");
+      const ctx = canvas.getContext("2d");
+      const sunSlider = document.getElementById("sun");
+      const cadenceSlider = document.getElementById("cadence");
+      const moistureSlider = document.getElementById("moisture");
+      const statusGrid = document.getElementById("status");
+      const timestamp = document.getElementById("timestamp");
+
+      timestamp.textContent = readableTimestamp();
+
+      const canopyLayers = [
+        { color: "rgba(73, 164, 193, 0.15)", scale: 1.6, gearCount: 6 },
+        { color: "rgba(130, 203, 172, 0.28)", scale: 1.0, gearCount: 5 },
+        { color: "rgba(255, 215, 134, 0.38)", scale: 0.68, gearCount: 4 },
+      ];
+
+      const gears = canopyLayers.flatMap((layer, layerIndex) =>
+        Array.from({ length: layer.gearCount }, (_, index) => ({
+          layerIndex,
+          radius: 40 + layerIndex * 26 + Math.random() * 20,
+          theta: Math.random() * Math.PI * 2,
+          speed: (Math.random() * 0.002 + 0.0008) * (layerIndex % 2 === 0 ? 1 : -1),
+          x: (canvas.width / (layer.gearCount + 1)) * (index + 1) + (layerIndex - 1) * 45,
+          y: canvas.height * (0.45 + layerIndex * 0.18) + Math.sin(index) * 12,
+        }))
+      );
+
+      const statusRegistry = [
+        { label: "Canopy Flux", unit: "%", color: "#94f1ff" },
+        { label: "Moisture Sync", unit: "%", color: "#7be4b7" },
+        { label: "Lumen Drift", unit: "%", color: "#ffb86b" },
+      ];
+
+      let sunAngle = Number(sunSlider.value);
+      let cadence = Number(cadenceSlider.value);
+      let moisture = Number(moistureSlider.value);
+
+      sunSlider.addEventListener("input", () => (sunAngle = Number(sunSlider.value)));
+      cadenceSlider.addEventListener("input", () => (cadence = Number(cadenceSlider.value)));
+      moistureSlider.addEventListener("input", () => (moisture = Number(moistureSlider.value)));
+
+      createTicker((delta) => {
+        drawCanopy(delta);
+        updateStatus();
+      });
+
+      function drawCanopy(delta) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, "#0e1428");
+        gradient.addColorStop(1, "#1b2d3f");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height * 0.3);
+        ctx.rotate((sunAngle * Math.PI) / 1800);
+        ctx.fillStyle = "rgba(255, 184, 107, 0.35)";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 320, 120, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        canopyLayers.forEach((layer, layerIndex) => {
+          ctx.save();
+          ctx.globalCompositeOperation = "screen";
+          ctx.fillStyle = layer.color;
+          ctx.beginPath();
+          ctx.ellipse(
+            canvas.width / 2,
+            canvas.height * (0.65 + layerIndex * 0.08),
+            canvas.width * 0.55 * layer.scale,
+            canvas.height * 0.2 * layer.scale,
+            0,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+          ctx.restore();
+        });
+
+        gears.forEach((gear) => {
+          const cadenceFactor = cadence / 100;
+          const moistureOffset = (moisture / 100 - 0.5) * 0.002;
+          gear.theta += gear.speed * delta * (1 + cadenceFactor) + moistureOffset;
+          const oscillation = Math.sin(gear.theta * 2) * 12 * (gear.layerIndex + 1);
+
+          ctx.save();
+          ctx.translate(gear.x, gear.y + oscillation);
+          ctx.rotate(gear.theta);
+          drawGear(gear.radius - gear.layerIndex * 6, 12 + gear.layerIndex * 3, gear.layerIndex);
+          ctx.restore();
+        });
+
+        drawBranchwork();
+      }
+
+      function drawGear(radius, teeth, layerIndex) {
+        ctx.beginPath();
+        const toothDepth = 6 + layerIndex * 2;
+        for (let i = 0; i < teeth; i++) {
+          const angle = (i / teeth) * Math.PI * 2;
+          const outer = radius + toothDepth;
+          const inner = radius - toothDepth * 0.6;
+          ctx.lineTo(Math.cos(angle) * outer, Math.sin(angle) * outer);
+          ctx.lineTo(Math.cos(angle + Math.PI / teeth) * inner, Math.sin(angle + Math.PI / teeth) * inner);
+        }
+        ctx.closePath();
+        const colorPalette = ["#6ec5ff", "#94f1ff", "#ffcc95"];
+        ctx.fillStyle = colorPalette[layerIndex % colorPalette.length];
+        ctx.globalAlpha = 0.76;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(5, 10, 20, 0.88)";
+        ctx.fill();
+      }
+
+      function drawBranchwork() {
+        ctx.save();
+        ctx.strokeStyle = "rgba(148, 241, 255, 0.35)";
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.moveTo(canvas.width * 0.1, canvas.height * 0.9);
+        ctx.bezierCurveTo(
+          canvas.width * 0.3,
+          canvas.height * 0.6,
+          canvas.width * 0.4,
+          canvas.height * 0.8,
+          canvas.width * 0.55,
+          canvas.height * 0.55
+        );
+        ctx.bezierCurveTo(
+          canvas.width * 0.65,
+          canvas.height * 0.45,
+          canvas.width * 0.9,
+          canvas.height * 0.7,
+          canvas.width * 0.95,
+          canvas.height * 0.48
+        );
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function updateStatus() {
+        const flux = clamp(72 + Math.sin(performance.now() * 0.0008 + cadence) * 16 - sunAngle * 0.2, 35, 96);
+        const moistureSync = clamp(58 + Math.cos(performance.now() * 0.0006 + moisture) * 18, 20, 99);
+        const lumenDrift = clamp(42 + Math.sin(performance.now() * 0.001 + sunAngle) * 24 - cadence * 0.18, 5, 88);
+        const values = [flux, moistureSync, lumenDrift];
+
+        statusGrid.innerHTML = "";
+        statusRegistry.forEach((entry, index) => {
+          const card = createElement("article", "status-card");
+          const title = createElement("h4", null, entry.label);
+          const metric = createElement("strong", null, values[index].toFixed(1));
+          const unit = createElement("div", null, entry.unit);
+          unit.style.color = entry.color;
+          card.append(title, metric, unit);
+          statusGrid.append(card);
+        });
+      }
+    </script>
+  </body>
+</html>

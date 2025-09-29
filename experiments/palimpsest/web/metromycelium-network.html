@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MetroMycelium — Organic Transit Topology</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050505;
+      --glow: #91ffb4;
+      --accent: #ff9bf5;
+      --node: rgba(10, 10, 10, 0.85);
+      --text: #e0ffef;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at center, #0f0f0f 0%, #050505 60%);
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    main {
+      position: relative;
+      width: min(960px, 90vw);
+      aspect-ratio: 16 / 9;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(7, 21, 13, 0.92), rgba(4, 10, 8, 0.85));
+      border: 1px solid rgba(145, 255, 180, 0.35);
+      box-shadow: 0 45px 70px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    header {
+      position: absolute;
+      top: 1.6rem;
+      left: 2rem;
+      right: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      font-size: 0.85rem;
+      color: rgba(224, 255, 239, 0.7);
+    }
+
+    section#insight {
+      position: absolute;
+      bottom: 1.8rem;
+      left: 2rem;
+      right: 2rem;
+      background: rgba(3, 12, 8, 0.8);
+      border: 1px solid rgba(145, 255, 180, 0.25);
+      border-radius: 18px;
+      padding: 1.2rem 1.4rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      backdrop-filter: blur(4px);
+    }
+
+    .badge {
+      background: rgba(255, 155, 245, 0.1);
+      border: 1px solid rgba(255, 155, 245, 0.4);
+      padding: 0.3rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      margin-left: 0.75rem;
+    }
+
+    #note {
+      position: absolute;
+      top: 60%;
+      right: 1.6rem;
+      transform: translateY(-50%);
+      font-size: 0.8rem;
+      writing-mode: vertical-rl;
+      color: rgba(224, 255, 239, 0.35);
+      letter-spacing: 0.25em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <canvas id="network" width="960" height="540"></canvas>
+    <header>
+      <span>MetroMycelium — Prototype Grid</span>
+      <span class="badge">COLONY v0.2</span>
+    </header>
+    <section id="insight">
+      Pulse routes to see the colony improvise. Each commuter story updates the nutrient bias.
+    </section>
+    <div id="note">COLLAB NOTE: Expand the commuter vignette generator by appending to sampleStories in the script.</div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("network");
+    const ctx = canvas.getContext("2d");
+    const insightEl = document.getElementById("insight");
+
+    const nodes = Array.from({ length: 16 }, (_, i) => ({
+      x: 120 + (i % 4) * 220 + Math.random() * 40,
+      y: 120 + Math.floor(i / 4) * 120 + Math.random() * 40,
+      mass: 0.6 + Math.random() * 0.9,
+      pulse: 0,
+    }));
+
+    const connections = [];
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        if (Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y) < 260 && Math.random() > 0.5) {
+          connections.push({ a: nodes[i], b: nodes[j], weight: 0.2 + Math.random() * 0.7 });
+        }
+      }
+    }
+
+    const sampleStories = [
+      "Kaito shares ferments on the line, spiking nutrient flow toward the harbor district.",
+      "Archivist Noor rethreads a lost folklore stop, inviting elder spores to glow again.",
+      "A choir of commuters hums in sync, granting a temporary buff to empathy transit speeds.",
+      "The night market sends luminescent pollen, requesting express routes to stall 12.",
+    ];
+
+    let storyIndex = 0;
+    function draw(time = 0) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = "lighter";
+
+      connections.forEach((conn) => {
+        const { a, b, weight } = conn;
+        const pulse = (Math.sin(time / 400 + a.mass + b.mass) + 1) / 2;
+        ctx.strokeStyle = `rgba(145, 255, 180, ${0.08 + pulse * 0.6})`;
+        ctx.lineWidth = weight * 3;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      });
+
+      nodes.forEach((node) => {
+        const pulse = (Math.sin(time / 300 + node.mass) + 1) / 2;
+        const radius = 6 + pulse * 9;
+        ctx.fillStyle = `rgba(255, 155, 245, ${0.4 + pulse * 0.4})`;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = `rgba(145, 255, 180, 0.6)`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    function pulseStory() {
+      insightEl.textContent = sampleStories[storyIndex % sampleStories.length];
+      storyIndex += 1;
+    }
+
+    canvas.addEventListener("click", pulseStory);
+    pulseStory();
+    draw();
+  </script>
+</body>
+</html>

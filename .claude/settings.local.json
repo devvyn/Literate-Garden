@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/devvynmurphy/devvyn-meta-project/status/**)",
+      "Read(//Users/devvynmurphy/infrastructure/agent-bridge/bridge/inbox/code/**)",
+      "Read(//Users/devvynmurphy/devvyn-meta-project/bridge/inbox/code/**)",
+      "Read(//Users/devvynmurphy/devvyn-meta-project/**)",
+      "Bash(./scripts/bridge-register.sh register:*)",
+      "Bash(./scripts/bridge-receive.sh:*)",
+      "Bash(cat:*)",
+      "Bash(chmod:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(git fetch:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"=== $branch ===\")",
+      "Bash(done)",
+      "Bash(git checkout:*)",
+      "Bash(git stash push:*)",
+      "Bash(git stash:*)",
+      "Bash(python:*)",
+      "Bash(/dev/null)",
+      "Bash(./scripts/bridge-send.sh:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

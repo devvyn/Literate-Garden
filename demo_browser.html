@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Literate Garden: Game Demo Gallery</title>
+    <style>
+        :root {
+            --bloom: #ff6b9d;
+            --clockwork: #ff9f43;
+            --palimpsest: #5f27cd;
+            --patterns: #00d2d3;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text: #eee;
+            --text-muted: #aaa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #0f3460 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 2px solid var(--patterns);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, var(--bloom), var(--clockwork), var(--palimpsest), var(--patterns));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: rgba(15, 52, 96, 0.8);
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: var(--bg-card);
+            color: var(--text);
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .tab-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .tab-button.active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .tab-button[data-tab="bloom"].active {
+            border-color: var(--bloom);
+            background: linear-gradient(135deg, var(--bloom)20, var(--bg-card));
+        }
+
+        .tab-button[data-tab="clockwork"].active {
+            border-color: var(--clockwork);
+            background: linear-gradient(135deg, var(--clockwork)20, var(--bg-card));
+        }
+
+        .tab-button[data-tab="palimpsest"].active {
+            border-color: var(--palimpsest);
+            background: linear-gradient(135deg, var(--palimpsest)20, var(--bg-card));
+        }
+
+        .tab-button[data-tab="patterns"].active {
+            border-color: var(--patterns);
+            background: linear-gradient(135deg, var(--patterns)20, var(--bg-card));
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .concept-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .bloom .concept-card { border-color: var(--bloom); }
+        .clockwork .concept-card { border-color: var(--clockwork); }
+        .palimpsest .concept-card { border-color: var(--palimpsest); }
+        .patterns .concept-card { border-color: var(--patterns); }
+
+        .concept-card h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+
+        .concept-card .fantasy {
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .concept-card .mechanic {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+        }
+
+        .concept-card .demo-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .concept-card .demo-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .overview-section {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .overview-section h2 {
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card.bloom .number { color: var(--bloom); }
+        .stat-card.clockwork .number { color: var(--clockwork); }
+        .stat-card.palimpsest .number { color: var(--palimpsest); }
+        .stat-card.patterns .number { color: var(--patterns); }
+
+        .iframe-viewer {
+            margin-top: 2rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            display: none;
+        }
+
+        .iframe-viewer.active {
+            display: block;
+        }
+
+        .iframe-viewer iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
+        }
+
+        .close-iframe {
+            background: rgba(255, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .close-iframe:hover {
+            background: rgba(255, 0, 0, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🌱 Literate Garden: Dream Demo Gallery</h1>
+        <p>Four Parallel Visions • 17 Award-Ready Concepts • Unified Interactive Showcase</p>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="tab-button active" data-tab="overview">📊 Overview</button>
+        <button class="tab-button" data-tab="bloom">🌸 Bloom Collection</button>
+        <button class="tab-button" data-tab="clockwork">⚙️ Clockwork Collection</button>
+        <button class="tab-button" data-tab="palimpsest">🏛️ Palimpsest Collection</button>
+        <button class="tab-button" data-tab="patterns">🎨 Pattern Library</button>
+    </nav>
+
+    <!-- Overview Tab -->
+    <div class="tab-content active" data-tab="overview">
+        <div class="overview-section">
+            <h2>The Experiment</h2>
+            <p style="line-height: 1.8; font-size: 1.1rem;">
+                Four independent Codex agents explored "award-ready indie game demo concepts" in parallel branches.
+                Each agent developed concept documentation, interactive prototypes, and collaboration breadcrumbs.
+                This gallery <strong>merges all four visions</strong> into a unified, explorable showcase—demonstrating
+                how literate programming coordinates parallel creative exploration.
+            </p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card bloom">
+                <div class="number">3</div>
+                <div>Bloom Concepts</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-muted);">
+                    Synesthetic mechanics
+                </div>
+            </div>
+            <div class="stat-card clockwork">
+                <div class="number">3</div>
+                <div>Clockwork Concepts</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-muted);">
+                    Systems depth
+                </div>
+            </div>
+            <div class="stat-card palimpsest">
+                <div class="number">3</div>
+                <div>Palimpsest Concepts</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-muted);">
+                    Narrative layering
+                </div>
+            </div>
+            <div class="stat-card patterns">
+                <div class="number">8</div>
+                <div>Pattern Library</div>
+                <div style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-muted);">
+                    Reusable mechanics
+                </div>
+            </div>
+        </div>
+
+        <div class="overview-section" style="margin-top: 2rem;">
+            <h2>Untangling Strategy</h2>
+            <p style="line-height: 1.8;">
+                <strong>Challenge:</strong> Four branches modified README.md and created overlapping web directories.<br><br>
+                <strong>Solution:</strong> Collision-free directory structure + unified interactive gallery
+            </p>
+            <ul style="margin-top: 1rem; margin-left: 2rem; line-height: 2;">
+                <li>✅ Unified content without losing creative work</li>
+                <li>✅ Navigation across all collections</li>
+                <li>✅ Preserved provenance of each concept</li>
+                <li>✅ Side-by-side comparison capability</li>
+                <li>✅ Literate programming demonstration</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bloom Tab -->
+    <div class="tab-content bloom" data-tab="bloom">
+        <h2>🌸 Bloom Collection</h2>
+        <p style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-muted);">
+            Three botanical and celestial concepts emphasizing <strong>synesthetic mechanics</strong> and <strong>emotional resonance</strong>.
+        </p>
+
+        <div class="concept-grid">
+            <div class="concept-card" onclick="showDemo('experiments/bloom/web/chrono-bloom.html', 'Chrono Bloom Conservatory')">
+                <h3>Chrono Bloom Conservatory</h3>
+                <div class="fantasy">
+                    A living botanical timepiece where flora respond to temporal puzzles and music-based growth cues
+                </div>
+                <div class="mechanic">
+                    <strong>Signature Mechanic:</strong> Conduct a symphony of seasons, scrubbing time to orchestrate plant evolution
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.9rem;">
+                    <strong>Timeline:</strong> 8-10 weeks with 3-person pod<br>
+                    <strong>Tech:</strong> Spline-based animation, audio-reactive shaders
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+
+            <div class="concept-card" onclick="showDemo('experiments/bloom/web/luminous-threadbreakers.html', 'Luminous Threadbreakers')">
+                <h3>Luminous Threadbreakers</h3>
+                <div class="fantasy">
+                    Rogue-weaver heroes stitching constellations to mend a fractured night sky
+                </div>
+                <div class="mechanic">
+                    <strong>Signature Mechanic:</strong> Thread-slingshot traversal knots patterns into enemy weaknesses
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.9rem;">
+                    <strong>Timeline:</strong> 6 weeks web demo; 4 months console<br>
+                    <strong>Tech:</strong> Godot rope physics, SDF rendering
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+
+            <div class="concept-card" onclick="showDemo('experiments/bloom/web/emberwake-courier.html', 'Emberwake Courier Guild')">
+                <h3>Emberwake Courier Guild</h3>
+                <div class="fantasy">
+                    Ember-powered courier racing across volcanic archipelagos to deliver stories before they fade
+                </div>
+                <div class="mechanic">
+                    <strong>Signature Mechanic:</strong> Momentum surfing over magma jets, chaining deliveries
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.9rem;">
+                    <strong>Timeline:</strong> 4 weeks greybox + 6 weeks art<br>
+                    <strong>Tech:</strong> Unity spline racing, heat-haze FX
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clockwork Tab -->
+    <div class="tab-content clockwork" data-tab="clockwork">
+        <h2>⚙️ Clockwork Collection</h2>
+        <p style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-muted);">
+            Three <strong>systems-driven</strong> concepts emphasizing emergent behavior and technical depth.
+        </p>
+
+        <div class="concept-grid">
+            <div class="concept-card" onclick="showDemo('experiments/clockwork/web/aurora_chord.html', 'Aurora Chord Pilgrimage')">
+                <h3>Aurora Chord Pilgrimage</h3>
+                <div class="fantasy">
+                    Synth-driven pilgrimage across frozen skylines where constellations respond to musical harmony
+                </div>
+                <div class="mechanic">
+                    <strong>Core Systems:</strong> Constellation drawing → chord progressions, harmony-modulated weather
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+
+            <div class="concept-card" onclick="showDemo('experiments/clockwork/web/clockwork_canopy.html', 'Clockwork Canopy Atelier')">
+                <h3>Clockwork Canopy Atelier</h3>
+                <div class="fantasy">
+                    Arboreal city whose clockwork flora must be tuned daily to keep the canopy alive
+                </div>
+                <div class="mechanic">
+                    <strong>Core Systems:</strong> Time-of-day sunlight puzzles, gear-based flora, persistent ecology
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+
+            <div class="concept-card" onclick="showDemo('experiments/clockwork/web/tidebound_cartographer.html', 'Tidebound Cartographer')">
+                <h3>Tidebound Cartographer</h3>
+                <div class="fantasy">
+                    Charting a living coastline where tides reveal or erase ancient civilizations
+                </div>
+                <div class="mechanic">
+                    <strong>Core Systems:</strong> Tidal rhythm puzzles, narrative mapping, asymmetric co-op
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Palimpsest Tab -->
+    <div class="tab-content palimpsest" data-tab="palimpsest">
+        <h2>🏛️ Palimpsest Collection</h2>
+        <p style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-muted);">
+            Three <strong>narrative-forward</strong> concepts emphasizing memory, layering, and historical rewriting.
+        </p>
+
+        <div class="concept-grid">
+            <div class="concept-card" onclick="showDemo('experiments/palimpsest/web/lighthouse-palimpsest.html', 'Lighthouse Palimpsest')">
+                <h3>Lighthouse Palimpsest ⭐⭐⭐⭐</h3>
+                <div class="fantasy">
+                    Memory-forging narrative: rotate a brass lighthouse to layer timelines and solve spectral cartography
+                </div>
+                <div class="mechanic">
+                    <strong>Hook:</strong> "What if you could rotate a lighthouse and literally change the past?"
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+
+            <div class="concept-card" onclick="showDemo('experiments/palimpsest/web/metromycelium-network.html', 'MetroMycelium')">
+                <h3>MetroMycelium</h3>
+                <div class="fantasy">
+                    Bioluminescent transit sim where fungal networks replace subway lines beneath a neon eco-city
+                </div>
+                <div class="mechanic">
+                    <strong>Hook:</strong> "Grow a glowing subway, and the riders tell the story back to you"
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+
+            <div class="concept-card" onclick="showDemo('experiments/palimpsest/web/echoes-synesthetic-loop.html', 'Echoes of Laurel Vault')">
+                <h3>Echoes of Laurel Vault</h3>
+                <div class="fantasy">
+                    Rhythm-combat meets botanical caretaking; each beat sprouts defenses in an ancient arboretum
+                </div>
+                <div class="mechanic">
+                    <strong>Hook:</strong> "Defend an ancient garden by drumming plants into existence"
+                </div>
+                <span class="demo-link">🎮 Launch Interactive Demo</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patterns Tab -->
+    <div class="tab-content patterns" data-tab="patterns">
+        <h2>🎨 Interaction Pattern Library</h2>
+        <p style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-muted);">
+            Distilled patterns ready for <strong>immediate prototyping</strong>. Festival-targeted full concepts included.
+        </p>
+
+        <div class="concept-grid">
+            <div class="concept-card">
+                <h3>Rhythmic Environmental Tuning</h3>
+                <div class="fantasy">
+                    From: <em>Clockwork Skylark</em>
+                </div>
+                <div class="mechanic">
+                    Let players "conduct" the world with rhythmic input. Works excellently with haptic controllers.
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Applications:</strong> Weather control, plant growth timing, musical puzzles
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Diegetic Journaling UI</h3>
+                <div class="fantasy">
+                    From: <em>Nocturne Cartographers</em>
+                </div>
+                <div class="mechanic">
+                    Collapse menu friction by making the interface part of the world. Sells narrative cohesion.
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Applications:</strong> Dream journals, field notes, spell books
+                </div>
+            </div>
+
+            <div class="concept-card">
+                <h3>Procedural Growth as Feedback</h3>
+                <div class="fantasy">
+                    From: <em>Bloom//Breaker</em>
+                </div>
+                <div class="mechanic">
+                    Visually communicate strategic mastery through real-time growth. Naturally beautiful.
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Applications:</strong> Garden combat, territory control, skill trees
+                </div>
+            </div>
+        </div>
+
+        <div class="overview-section" style="margin-top: 2rem;">
+            <h2>Full Festival Slate</h2>
+            <div style="margin-top: 1rem;">
+                <ul style="line-height: 2; margin-left: 2rem;">
+                    <li><strong>Clockwork Skylark</strong> → IndieCade (Innovation), IGF Nuovo</li>
+                    <li><strong>Nocturne Cartographers</strong> → LudoNarraCon, Day of the Devs</li>
+                    <li><strong>Bloom//Breaker</strong> → SXSW Gaming Awards, MIX</li>
+                    <li><strong>Echoes of the Tidelocked</strong> → BAFTA Games (Multiplayer)</li>
+                    <li><strong>Wavelength Wardens</strong> → A MAZE., AMAZE XR</li>
+                </ul>
+            </div>
+            <button class="demo-link" style="margin-top: 1rem; cursor: pointer; border: none;"
+                    onclick="showDemo('experiments/patterns/web/index.html', 'Interactive Pattern Library')">
+                🎮 Launch Full Pattern Library
+            </button>
+        </div>
+    </div>
+
+    <!-- iFrame Viewer -->
+    <div class="iframe-viewer" id="iframeViewer">
+        <button class="close-iframe" onclick="closeDemo()">✕ Close Demo</button>
+        <h3 id="demoTitle" style="margin-bottom: 1rem;"></h3>
+        <iframe id="demoFrame" src=""></iframe>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+
+                // Update buttons
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+
+                // Update content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.querySelector(`.tab-content[data-tab="${tab}"]`).classList.add('active');
+
+                // Close iframe if open
+                closeDemo();
+            });
+        });
+
+        // Demo viewer
+        function showDemo(path, title) {
+            const viewer = document.getElementById('iframeViewer');
+            const frame = document.getElementById('demoFrame');
+            const titleEl = document.getElementById('demoTitle');
+
+            titleEl.textContent = title;
+            frame.src = path;
+            viewer.classList.add('active');
+            viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function closeDemo() {
+            const viewer = document.getElementById('iframeViewer');
+            const frame = document.getElementById('demoFrame');
+
+            viewer.classList.remove('active');
+            frame.src = '';
+        }
+    </script>
+</body>
+</html>

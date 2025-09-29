@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quantum Jam Session — Audio Sandbox Slice</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 40% 30%, #1d0f3b, #050310);
+      color: #f4f2ff;
+      font-family: 'Chakra Petch', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .console {
+      background: rgba(28,18,56,0.8);
+      border-radius: 26px;
+      padding: 2.5rem;
+      width: min(720px, 90vw);
+      box-shadow: 0 24px 60px rgba(20,10,40,0.65);
+      border: 1px solid rgba(200,120,255,0.2);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 2.2rem;
+      letter-spacing: 0.08em;
+    }
+    .orbits {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin: 2rem 0;
+    }
+    .orbit {
+      border: 1px solid rgba(200,120,255,0.3);
+      border-radius: 20px;
+      padding: 1.25rem;
+      background: rgba(60,30,110,0.25);
+    }
+    button, input[type="range"] {
+      width: 100%;
+      margin-top: 0.75rem;
+    }
+    button {
+      background: rgba(200,120,255,0.8);
+      border: none;
+      border-radius: 12px;
+      padding: 0.7rem 1rem;
+      color: #120018;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(200,120,255,0.45);
+    }
+    .status {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <section class="console">
+    <h1>Quantum Jam Session</h1>
+    <p>Activate orbiting nodes to weave harmonics. Adjust the resonance filter and drift tempo in real-time.</p>
+    <div class="orbits" id="orbits"></div>
+    <label>
+      Resonance Filter
+      <input type="range" id="filter" min="200" max="4000" value="1200" />
+    </label>
+    <label>
+      Orbit Drift (Tempo)
+      <input type="range" id="tempo" min="60" max="160" value="100" />
+    </label>
+    <p class="status" id="status">Status: Waiting for orbit ignition.</p>
+  </section>
+  <script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.2;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1200;
+    masterGain.connect(filter).connect(audioCtx.destination);
+
+    const nodes = [
+      { id: 'pulse', label: 'Pulse Orbit', freq: 220, type: 'sawtooth' },
+      { id: 'glimmer', label: 'Glimmer Orbit', freq: 330, type: 'triangle' },
+      { id: 'drift', label: 'Drift Orbit', freq: 440, type: 'sine' }
+    ];
+
+    const activeLoops = new Map();
+
+    function createOrbitCard(node) {
+      const card = document.createElement('div');
+      card.className = 'orbit';
+      card.innerHTML = `<strong>${node.label}</strong><p>${node.type.toUpperCase()} waveform @ ${node.freq}hz</p>`;
+      const toggle = document.createElement('button');
+      toggle.textContent = 'Engage Orbit';
+      toggle.addEventListener('click', () => toggleOrbit(node, toggle));
+      card.appendChild(toggle);
+      return card;
+    }
+
+    function toggleOrbit(node, toggleButton) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (activeLoops.has(node.id)) {
+        const { gain } = activeLoops.get(node.id);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+        setTimeout(() => {
+          const { oscillator, gain } = activeLoops.get(node.id);
+          oscillator.stop();
+          oscillator.disconnect();
+          gain.disconnect();
+          activeLoops.delete(node.id);
+          toggleButton.textContent = 'Engage Orbit';
+          updateStatus();
+        }, 600);
+        return;
+      }
+
+      const oscillator = audioCtx.createOscillator();
+      oscillator.type = node.type;
+      oscillator.frequency.value = node.freq;
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.25, audioCtx.currentTime + 0.4);
+
+      oscillator.connect(gain).connect(masterGain);
+      oscillator.start();
+
+      activeLoops.set(node.id, { oscillator, gain });
+      toggleButton.textContent = 'Disengage Orbit';
+      updateStatus();
+    }
+
+    function updateStatus() {
+      const statusEl = document.getElementById('status');
+      if (!activeLoops.size) {
+        statusEl.textContent = 'Status: Waiting for orbit ignition.';
+        return;
+      }
+      const activeNames = nodes
+        .filter(node => activeLoops.has(node.id))
+        .map(node => node.label)
+        .join(', ');
+      statusEl.textContent = `Status: ${activeNames} humming.`;
+    }
+
+    function applyFilter(value) {
+      filter.frequency.linearRampToValueAtTime(value, audioCtx.currentTime + 0.2);
+    }
+
+    function applyTempo(value) {
+      // EXTENSION HOOK: Tie into sequencer tempo once loops are grid-synced.
+      const rate = value / 100;
+      masterGain.gain.linearRampToValueAtTime(0.2 * rate, audioCtx.currentTime + 0.5);
+    }
+
+    document.getElementById('filter').addEventListener('input', event => {
+      applyFilter(Number(event.target.value));
+    });
+
+    document.getElementById('tempo').addEventListener('input', event => {
+      applyTempo(Number(event.target.value));
+    });
+
+    const orbitsEl = document.getElementById('orbits');
+    nodes.forEach(node => orbitsEl.appendChild(createOrbitCard(node)));
+
+    // EXTENSION HOOK: Sequence engine or visual orbit display can mount here.
+  </script>
+</body>
+</html>

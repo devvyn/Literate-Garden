@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Grand Catalogue: 36 Indie Game Concepts</title>
+    <style>
+        :root {
+            --bloom: #ff6b9d;
+            --clockwork: #ff9f43;
+            --palimpsest: #5f27cd;
+            --patterns: #00d2d3;
+            --visionary: #a855f7;
+            --codex-1: #10b981;
+            --codex-2: #3b82f6;
+            --codex-3: #f59e0b;
+            --codex-4: #ef4444;
+            --bg-dark: #0a0a0a;
+            --bg-card: #1a1a1a;
+            --text: #f5f5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, transparent 100%);
+            border-bottom: 2px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--bloom), var(--clockwork), var(--palimpsest), var(--patterns), var(--visionary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 10s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: #a0a0a0;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-stats {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        .collection-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid;
+            background: rgba(26, 26, 26, 0.8);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn.bloom { border-color: var(--bloom); }
+        .nav-btn.clockwork { border-color: var(--clockwork); }
+        .nav-btn.palimpsest { border-color: var(--palimpsest); }
+        .nav-btn.patterns { border-color: var(--patterns); }
+        .nav-btn.visionary { border-color: var(--visionary); }
+        .nav-btn.codex-1 { border-color: var(--codex-1); }
+        .nav-btn.codex-2 { border-color: var(--codex-2); }
+        .nav-btn.codex-3 { border-color: var(--codex-3); }
+        .nav-btn.codex-4 { border-color: var(--codex-4); }
+
+        .collection-section {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .collection-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid;
+        }
+
+        .collection-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .collection-header .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            font-style: italic;
+        }
+
+        .concepts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .concept-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .concept-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+        }
+
+        .bloom .concept-card { border-color: var(--bloom); }
+        .bloom .concept-card::before { background: var(--bloom); }
+
+        .clockwork .concept-card { border-color: var(--clockwork); }
+        .clockwork .concept-card::before { background: var(--clockwork); }
+
+        .palimpsest .concept-card { border-color: var(--palimpsest); }
+        .palimpsest .concept-card::before { background: var(--palimpsest); }
+
+        .patterns .concept-card { border-color: var(--patterns); }
+        .patterns .concept-card::before { background: var(--patterns); }
+
+        .visionary .concept-card { border-color: var(--visionary); }
+        .visionary .concept-card::before { background: var(--visionary); }
+
+        .codex-1 .concept-card { border-color: var(--codex-1); }
+        .codex-1 .concept-card::before { background: var(--codex-1); }
+
+        .codex-2 .concept-card { border-color: var(--codex-2); }
+        .codex-2 .concept-card::before { background: var(--codex-2); }
+
+        .codex-3 .concept-card { border-color: var(--codex-3); }
+        .codex-3 .concept-card::before { background: var(--codex-3); }
+
+        .codex-4 .concept-card { border-color: var(--codex-4); }
+        .codex-4 .concept-card::before { background: var(--codex-4); }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+            color: #aaa;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 3rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--visionary), var(--patterns));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #888;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            border: 2px solid var(--visionary);
+        }
+
+        .modal-header {
+            padding: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>🎮 Grand Catalogue</h1>
+        <p class="hero-subtitle">Literate Garden: Complete Collection</p>
+        <p class="hero-stats">36 Indie Game Concepts • 7 Collections • Multi-Agent Collaboration</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-number">36</div>
+            <div class="stat-label">Total Concepts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">7</div>
+            <div class="stat-label">Collections</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Playable</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Possibilities</div>
+        </div>
+    </div>
+
+    <!-- Collection Navigation -->
+    <nav class="collection-nav">
+        <button class="nav-btn bloom" onclick="scrollTo('bloom')">🌸 Bloom (3)</button>
+        <button class="nav-btn clockwork" onclick="scrollTo('clockwork')">⚙️ Clockwork (3)</button>
+        <button class="nav-btn palimpsest" onclick="scrollTo('palimpsest')">🏛️ Palimpsest (3)</button>
+        <button class="nav-btn patterns" onclick="scrollTo('patterns')">🎨 Patterns (8)</button>
+        <button class="nav-btn visionary" onclick="scrollTo('visionary')">✨ Visionary (3)</button>
+        <button class="nav-btn codex-1" onclick="scrollTo('codex-1')">🌊 Codex 1 (4)</button>
+        <button class="nav-btn codex-2" onclick="scrollTo('codex-2')">🎯 Codex 2 (4)</button>
+        <button class="nav-btn codex-3" onclick="scrollTo('codex-3')">🌈 Codex 3 (4)</button>
+        <button class="nav-btn codex-4" onclick="scrollTo('codex-4')">🎨 Codex 4 (4)</button>
+    </nav>
+
+    <!-- Bloom Collection -->
+    <section class="collection-section bloom" id="bloom">
+        <div class="collection-header" style="border-color: var(--bloom);">
+            <h2 style="color: var(--bloom);">🌸 Bloom Collection</h2>
+            <p class="subtitle">Synesthetic mechanics and emotional resonance</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/bloom/web/chrono-bloom.html', 'Chrono Bloom Conservatory')">
+                <div class="card-content">
+                    <h3 class="card-title">Chrono Bloom Conservatory</h3>
+                    <p class="card-description">Botanical timepiece with temporal puzzles and music-based growth cues</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(255, 107, 157, 0.2);">8-10 weeks</span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/bloom/web/luminous-threadbreakers.html', 'Luminous Threadbreakers')">
+                <div class="card-content">
+                    <h3 class="card-title">Luminous Threadbreakers</h3>
+                    <p class="card-description">Rogue-weaver heroes stitching constellations to mend fractured night sky</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(255, 107, 157, 0.2);">6 weeks</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/bloom/web/emberwake-courier.html', 'Emberwake Courier Guild')">
+                <div class="card-content">
+                    <h3 class="card-title">Emberwake Courier Guild</h3>
+                    <p class="card-description">Ember-powered courier racing to deliver stories before they fade</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(255, 107, 157, 0.2);">10 weeks</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Clockwork Collection -->
+    <section class="collection-section clockwork" id="clockwork">
+        <div class="collection-header" style="border-color: var(--clockwork);">
+            <h2 style="color: var(--clockwork);">⚙️ Clockwork Collection</h2>
+            <p class="subtitle">Systems depth and emergent behavior</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/clockwork/web/aurora_chord.html', 'Aurora Chord Pilgrimage')">
+                <div class="card-content">
+                    <h3 class="card-title">Aurora Chord Pilgrimage</h3>
+                    <p class="card-description">Synth-driven pilgrimage where constellations respond to musical harmony</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(255, 159, 67, 0.2);">Medium</span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/clockwork/web/clockwork_canopy.html', 'Clockwork Canopy Atelier')">
+                <div class="card-content">
+                    <h3 class="card-title">Clockwork Canopy Atelier</h3>
+                    <p class="card-description">Arboreal city with clockwork flora tuned daily to keep canopy alive</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(255, 159, 67, 0.2);">Medium</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/clockwork/web/tidebound_cartographer.html', 'Tidebound Cartographer')">
+                <div class="card-content">
+                    <h3 class="card-title">Tidebound Cartographer</h3>
+                    <p class="card-description">Chart living coastline where tides reveal ancient civilizations</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(255, 159, 67, 0.2);">Medium</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Palimpsest Collection -->
+    <section class="collection-section palimpsest" id="palimpsest">
+        <div class="collection-header" style="border-color: var(--palimpsest);">
+            <h2 style="color: var(--palimpsest);">🏛️ Palimpsest Collection</h2>
+            <p class="subtitle">Narrative layering and memory themes</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/palimpsest/web/lighthouse-palimpsest.html', 'Lighthouse Palimpsest')">
+                <div class="card-content">
+                    <h3 class="card-title">Lighthouse Palimpsest ⭐⭐⭐⭐</h3>
+                    <p class="card-description">Rotate brass lighthouse to layer timelines and solve spectral cartography</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(95, 39, 205, 0.2);">12 weeks</span>
+                        <span>TOP PRIORITY</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/palimpsest/web/metromycelium-network.html', 'MetroMycelium')">
+                <div class="card-content">
+                    <h3 class="card-title">MetroMycelium</h3>
+                    <p class="card-description">Bioluminescent transit sim with fungal networks as subway lines</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(95, 39, 205, 0.2);">Complex</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/palimpsest/web/echoes-synesthetic-loop.html', 'Echoes of Laurel Vault')">
+                <div class="card-content">
+                    <h3 class="card-title">Echoes of Laurel Vault</h3>
+                    <p class="card-description">Rhythm-combat meets botanical caretaking in ancient arboretum</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(95, 39, 205, 0.2);">Quick Win</span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Patterns Collection -->
+    <section class="collection-section patterns" id="patterns">
+        <div class="collection-header" style="border-color: var(--patterns);">
+            <h2 style="color: var(--patterns);">🎨 Pattern Library</h2>
+            <p class="subtitle">Reusable interaction patterns + festival concepts</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/patterns/web/index.html', 'Interactive Pattern Library')">
+                <div class="card-content">
+                    <h3 class="card-title">Interactive Pattern Library</h3>
+                    <p class="card-description">3 distilled patterns + 5 festival-ready full concepts with mechanics</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(0, 210, 211, 0.2);">8 Concepts</span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Visionary Series -->
+    <section class="collection-section visionary" id="visionary">
+        <div class="collection-header" style="border-color: var(--visionary);">
+            <h2 style="color: var(--visionary);">✨ Visionary Series</h2>
+            <p class="subtitle">Technical excellence meets creative innovation</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/visionary-series/concept-01-memory-constellation/web/index.html', 'Memory Constellation Navigator')">
+                <div class="card-content">
+                    <h3 class="card-title">Memory Constellation Navigator</h3>
+                    <p class="card-description">3D perspective puzzles where memories reveal through constellation alignment</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(168, 85, 247, 0.2);">24 weeks</span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/visionary-series/concept-02-recursive-garden/web/index.html', 'Recursive Garden Architect')">
+                <div class="card-content">
+                    <h3 class="card-title">Recursive Garden Architect</h3>
+                    <p class="card-description">Fractal gardens where every plant contains entire garden (infinite recursion)</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(168, 85, 247, 0.2);">26 weeks</span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/visionary-series/concept-03-tidal-echo/web/index.html', 'Tidal Echo Composer')">
+                <div class="card-content">
+                    <h3 class="card-title">Tidal Echo Composer ⭐⭐⭐⭐⭐</h3>
+                    <p class="card-description">Manipulate tides to reveal musical phrases carved in coastal rocks</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(168, 85, 247, 0.2);">28 weeks</span>
+                        <span>AUDIO EXCELLENCE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Codex Set 1 -->
+    <section class="collection-section codex-1" id="codex-1">
+        <div class="collection-header" style="border-color: var(--codex-1);">
+            <h2 style="color: var(--codex-1);">🌊 Codex Parallel Visions: Set 1</h2>
+            <p class="subtitle">Narrative quartet with unique mechanics</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-1-quartet/aurora-suture.html', 'Aurora Suture')">
+                <div class="card-content">
+                    <h3 class="card-title">Aurora Suture</h3>
+                    <p class="card-description">Stitch light into wounded skies with visual poetry and puzzles</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(16, 185, 129, 0.2);">Codex</span>
+                        <span>🌟 HIGH</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-1-quartet/coral-wake.html', 'Coral Wake')">
+                <div class="card-content">
+                    <h3 class="card-title">Coral Wake</h3>
+                    <p class="card-description">Navigate dream-memories through living coral reef ecosystems</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(16, 185, 129, 0.2);">Codex</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-1-quartet/monument-echo.html', 'Monument Echo')">
+                <div class="card-content">
+                    <h3 class="card-title">Monument Echo</h3>
+                    <p class="card-description">Architectural puzzles that echo through time and space</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(16, 185, 129, 0.2);">Codex</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-1-quartet/solstice-run.html', 'Solstice Run')">
+                <div class="card-content">
+                    <h3 class="card-title">Solstice Run</h3>
+                    <p class="card-description">Time-based runner through seasonal shifts and celestial cycles</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(16, 185, 129, 0.2);">Codex</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Codex Set 2 -->
+    <section class="collection-section codex-2" id="codex-2">
+        <div class="collection-header" style="border-color: var(--codex-2);">
+            <h2 style="color: var(--codex-2);">🎯 Codex Parallel Visions: Set 2</h2>
+            <p class="subtitle">Abstract quartet - minimalist mechanics-focused</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-2-quartet/version-a.html', 'Abstract Concept A')">
+                <div class="card-content">
+                    <h3 class="card-title">Abstract Concept A</h3>
+                    <p class="card-description">Minimalist prototype exploring core mechanic (explore to discover)</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(59, 130, 246, 0.2);">Codex</span>
+                        <span>🔍</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-2-quartet/version-b.html', 'Abstract Concept B')">
+                <div class="card-content">
+                    <h3 class="card-title">Abstract Concept B</h3>
+                    <p class="card-description">Mechanics-first exploration (play to understand theme)</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(59, 130, 246, 0.2);">Codex</span>
+                        <span>🔍</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-2-quartet/version-c.html', 'Abstract Concept C')">
+                <div class="card-content">
+                    <h3 class="card-title">Abstract Concept C</h3>
+                    <p class="card-description">Pure interaction design study (discover through play)</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(59, 130, 246, 0.2);">Codex</span>
+                        <span>🔍</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-2-quartet/version-d.html', 'Abstract Concept D')">
+                <div class="card-content">
+                    <h3 class="card-title">Abstract Concept D</h3>
+                    <p class="card-description">Experimental mechanic prototype (emergent gameplay)</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(59, 130, 246, 0.2);">Codex</span>
+                        <span>🔍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Codex Set 3 -->
+    <section class="collection-section codex-3" id="codex-3">
+        <div class="collection-header" style="border-color: var(--codex-3);">
+            <h2 style="color: var(--codex-3);">🌈 Codex Parallel Visions: Set 3</h2>
+            <p class="subtitle">Genre-bending experimental concepts</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-3-visions/solarpunk-symphony.html', 'Solarpunk Symphony')">
+                <div class="card-content">
+                    <h3 class="card-title">Solarpunk Symphony</h3>
+                    <p class="card-description">Eco-city builder meets rhythm game with hopeful green futures</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(245, 158, 11, 0.2);">Codex</span>
+                        <span>🌟 HIGH</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-3-visions/quantum-heist.html', 'Quantum Heist')">
+                <div class="card-content">
+                    <h3 class="card-title">Quantum Heist</h3>
+                    <p class="card-description">Superposition-based stealth puzzler with quantum mechanics</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(245, 158, 11, 0.2);">Codex</span>
+                        <span>🌟 HIGH</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-3-visions/mycelial-opera.html', 'Mycelial Opera')">
+                <div class="card-content">
+                    <h3 class="card-title">Mycelial Opera</h3>
+                    <p class="card-description">Fungal network storytelling through underground ecosystems</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(245, 158, 11, 0.2);">Codex</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-3-visions/cloudforged-ritual.html', 'Cloudforged Ritual')">
+                <div class="card-content">
+                    <h3 class="card-title">Cloudforged Ritual</h3>
+                    <p class="card-description">Atmospheric crafting game with weather manipulation systems</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(245, 158, 11, 0.2);">Codex</span>
+                        <span>⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Codex Set 4 -->
+    <section class="collection-section codex-4" id="codex-4">
+        <div class="collection-header" style="border-color: var(--codex-4);">
+            <h2 style="color: var(--codex-4);">🎨 Codex Parallel Visions: Set 4</h2>
+            <p class="subtitle">High-concept experimental mechanics</p>
+        </div>
+        <div class="concepts-grid">
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-4-concepts/echoes-in-neon.html', 'Echoes in Neon')">
+                <div class="card-content">
+                    <h3 class="card-title">Echoes in Neon</h3>
+                    <p class="card-description">Sound-painting in cyberpunk landscapes with audio-reactive visuals</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(239, 68, 68, 0.2);">Codex</span>
+                        <span>🎵 AUDIO</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-4-concepts/botanical-bard.html', 'Botanical Bard')">
+                <div class="card-content">
+                    <h3 class="card-title">Botanical Bard</h3>
+                    <p class="card-description">Music composition through organic plant growth mechanics</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(239, 68, 68, 0.2);">Codex</span>
+                        <span>🎵 AUDIO</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-4-concepts/astral-weaver.html', 'Astral Weaver')">
+                <div class="card-content">
+                    <h3 class="card-title">Astral Weaver</h3>
+                    <p class="card-description">Constellation-based narrative puzzles with cosmic storytelling</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(239, 68, 68, 0.2);">Codex</span>
+                        <span>⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+            <div class="concept-card" onclick="openDemo('experiments/codex-parallel-visions/set-4-concepts/quantum-jam.html', 'Quantum Jam')">
+                <div class="card-content">
+                    <h3 class="card-title">Quantum Jam</h3>
+                    <p class="card-description">Musical improvisation in probabilistic soundscapes</p>
+                    <div class="card-meta">
+                        <span class="card-badge" style="background: rgba(239, 68, 68, 0.2);">Codex</span>
+                        <span>🎵 AUDIO</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><strong>Grand Catalogue</strong> • Literate Garden</p>
+        <p style="margin-top: 1rem;">36 Concepts • 7 Collections • Multi-Agent Collaboration</p>
+        <p style="margin-top: 0.5rem; color: #444;">Generated 2025-09-29 • Open Source Creativity</p>
+    </div>
+
+    <!-- Modal for Demo Viewer -->
+    <div class="modal" id="demoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Demo</h2>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <iframe class="modal-iframe" id="modalFrame" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function scrollTo(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function openDemo(path, title) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalFrame').src = path;
+            document.getElementById('demoModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('demoModal').classList.remove('active');
+            document.getElementById('modalFrame').src = '';
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close modal on background click
+        document.getElementById('demoModal').addEventListener('click', (e) => {
+            if (e.target.id === 'demoModal') closeModal();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Version A · Solarpunk Harmonics</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Version A focuses on synesthetic solarpunk vibes with tactile musical gardening -->
+  <main>
+    <header>
+      <h1>Version A · Solarpunk Harmonics</h1>
+      <p class="tagline">Conduct living architecture by remixing light, wind, and chorus.</p>
+    </header>
+
+    <section class="concept">
+      <h2>Concept Snapshot</h2>
+      <p><strong>Core Fantasy:</strong> You are the maestro of a floating solarpunk conservatory, weaving light-beams to sculpt responsive eco-instruments.</p>
+      <p><strong>Signature Loop:</strong> Adjust solar prisms → trigger plant instruments → capture resonant motifs → unlock new bioluminescent species.</p>
+      <p><strong>Audience Appeal:</strong> Cozy/creative gamers, music-lovers, accessibility-first showcases.</p>
+    </section>
+
+    <section class="feasibility">
+      <h2>Suitability &amp; Feasibility</h2>
+      <ul>
+        <li><strong>Technical Scope:</strong> WebGL-free prototype using SVG gradients, audio sprites, lightweight state machine.</li>
+        <li><strong>Gameplay Loop:</strong> Three-phase cadence (tune prisms → harvest chords → improvise set), supports 5-minute festival session.</li>
+        <li><strong>Audience Hooks:</strong> Screenshottable color stories, streamer-friendly improvisation, inclusive tone mapping.</li>
+      </ul>
+    </section>
+
+    <section class="demo" aria-label="Interactive light-garden sketch">
+      <h2>Light Garden Sequencer</h2>
+      <p class="annotation">Adjust the sun dial and wind chimes to hear how the garden responds.</p>
+      <div class="controls">
+        <label for="sun">Sun Angle</label>
+        <input id="sun" type="range" min="0" max="360" value="180" />
+
+        <label for="wind">Wind Pulse</label>
+        <input id="wind" type="range" min="0" max="6" value="3" step="1" />
+      </div>
+      <canvas id="garden" width="480" height="320" role="img" aria-label="Stylized garden reacting to sliders"></canvas>
+      <div id="motifReadout" aria-live="polite"></div>
+    </section>
+
+    <section class="handoff">
+      <h2>Collaboration Notes</h2>
+      <p><!-- This note helps the next agent know what's next -->Next steps: swap mocked audio cues with layered WebAudio buffers. Shader-inspired gradients currently simulated via canvas compositing.</p>
+      <p class="dead-end">No blockers yet — physics interaction pass intentionally deferred for later collaborator.</p>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

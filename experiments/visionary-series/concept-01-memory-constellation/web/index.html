@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Constellation Navigator - Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #000510;
+            color: #e0e0ff;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            cursor: grab;
+        }
+
+        #canvas-container:active {
+            cursor: grabbing;
+        }
+
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .header {
+            padding: 2rem;
+            background: linear-gradient(180deg, rgba(0, 5, 16, 0.9) 0%, transparent 100%);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .hint {
+            font-size: 0.9rem;
+            color: #888;
+            font-style: italic;
+        }
+
+        .instructions {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: rgba(0, 5, 16, 0.85);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            max-width: 300px;
+        }
+
+        .instructions h3 {
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            color: #60a5fa;
+        }
+
+        .instructions p {
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .instructions kbd {
+            background: rgba(96, 165, 250, 0.2);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        .status {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            text-align: right;
+        }
+
+        .status-item {
+            background: rgba(0, 5, 16, 0.85);
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            border-left: 3px solid #60a5fa;
+            font-size: 0.9rem;
+        }
+
+        .status-item.warning {
+            border-left-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .status-item.success {
+            border-left-color: #34d399;
+            color: #34d399;
+        }
+
+        .proximity-meter {
+            position: fixed;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 200px;
+            background: rgba(0, 5, 16, 0.85);
+            border-radius: 20px;
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            padding: 5px;
+            display: none;
+        }
+
+        .proximity-meter.active {
+            display: block;
+        }
+
+        .proximity-fill {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg, #34d399, #60a5fa, #a855f7);
+            border-radius: 15px;
+            transition: height 0.2s ease;
+            position: absolute;
+            bottom: 5px;
+        }
+
+        .memory-reveal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 500px;
+            max-height: 600px;
+            background: rgba(0, 5, 16, 0.95);
+            border: 2px solid #60a5fa;
+            border-radius: 12px;
+            padding: 2rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            text-align: center;
+        }
+
+        .memory-reveal.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .memory-reveal h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #60a5fa;
+        }
+
+        .memory-reveal .memory-image {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            background: rgba(96, 165, 250, 0.1);
+            border-radius: 8px;
+            margin: 1rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            border: 2px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .memory-reveal .memory-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #c4b5fd;
+            font-style: italic;
+            margin-top: 1rem;
+        }
+
+        .reset-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(96, 165, 250, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.5);
+            color: #60a5fa;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background: rgba(96, 165, 250, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Loading indicator */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(96, 165, 250, 0.3);
+            border-top: 3px solid #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- COLLAB NOTE: Main canvas where Three.js renders the 3D scene -->
+    <div id="canvas-container"></div>
+
+    <!-- COLLAB NOTE: UI overlays for player guidance and feedback -->
+    <div class="ui-overlay">
+        <div class="header">
+            <h1>MEMORY CONSTELLATION NAVIGATOR</h1>
+            <p class="hint" id="memory-hint">Connect the stars to form a constellation, then find the hidden angle...</p>
+        </div>
+
+        <div class="status">
+            <div class="status-item" id="connection-status">
+                Connections: <span id="connection-count">0</span> / <span id="connection-target">8</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- COLLAB NOTE: Visual feedback for how close player is to correct angle -->
+    <div class="proximity-meter" id="proximityMeter">
+        <div class="proximity-fill" id="proximityFill"></div>
+    </div>
+
+    <!-- COLLAB NOTE: Instructions panel -->
+    <div class="instructions">
+        <h3>Controls</h3>
+        <p><kbd>Left Click</kbd> on stars to connect them</p>
+        <p><kbd>Right Click</kbd> to remove last connection</p>
+        <p><kbd>Drag</kbd> to rotate camera</p>
+        <p><kbd>Scroll</kbd> to zoom</p>
+        <p style="margin-top: 1rem; color: #888;">Once constellation is complete, rotate to find the memory angle</p>
+    </div>
+
+    <!-- COLLAB NOTE: Appears when player successfully aligns constellation -->
+    <div class="memory-reveal" id="memoryReveal">
+        <h2>Memory Unlocked</h2>
+        <div class="memory-image">✨</div>
+        <div class="memory-text" id="memoryText">
+            <!-- Memory narrative fragment appears here -->
+        </div>
+    </div>
+
+    <button class="reset-button" id="resetButton" onclick="resetPuzzle()">Reset Puzzle</button>
+
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <p>Loading constellation...</p>
+    </div>
+
+    <!-- COLLAB NOTE: Three.js for 3D rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // COLLAB NOTE: Core game state
+        let scene, camera, renderer, controls;
+        let stars = [];
+        let connections = [];
+        let connectionLines = [];
+        let targetConnections = [];
+        let correctViewAngle = new THREE.Vector3();
+        let puzzleComplete = false;
+        let memoryRevealed = false;
+
+        // COLLAB NOTE: Configuration parameters
+        const CONFIG = {
+            starCount: 15,
+            requiredConnections: 8,
+            alignmentTolerance: 12.0, // degrees
+            proximityWarningZone: 24.0, // degrees
+            starSize: 0.15,
+            connectionColor: 0x60a5fa,
+            starColor: 0xe0e0ff,
+            selectedStarColor: 0x60a5fa,
+        };
+
+        // COLLAB NOTE: Memory data - in production, this would be loaded from JSON
+        const MEMORY_DATA = {
+            hint: "Connect the stars to form a constellation, then find the hidden angle...",
+            narrative: "Under these same stars, we made promises we believed would last forever. The night was cold, but we didn't notice. We were invincible then, or so we thought.",
+            correctAngle: { x: 0.3, y: 0.8, z: -0.5 }, // normalized direction vector
+            constellation: [
+                // These indices define which stars should be connected
+                [0, 5], [5, 8], [8, 12], [12, 7],
+                [7, 3], [3, 1], [1, 9], [9, 14]
+            ]
+        };
+
+        // COLLAB NOTE: Initialize Three.js scene
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000510, 0.15);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(0, 0, 10);
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0x60a5fa, 1, 100);
+            pointLight.position.set(0, 0, 10);
+            scene.add(pointLight);
+
+            // Create stars
+            createStars();
+
+            // Set correct view angle from memory data
+            correctViewAngle.set(
+                MEMORY_DATA.correctAngle.x,
+                MEMORY_DATA.correctAngle.y,
+                MEMORY_DATA.correctAngle.z
+            ).normalize();
+
+            // Store target connections
+            targetConnections = MEMORY_DATA.constellation;
+
+            // Update UI
+            document.getElementById('memory-hint').textContent = MEMORY_DATA.hint;
+            document.getElementById('connection-target').textContent = CONFIG.requiredConnections;
+
+            // Mouse interaction
+            setupInteraction();
+
+            // Window resize handler
+            window.addEventListener('resize', onWindowResize, false);
+
+            // Hide loading
+            document.getElementById('loading').style.display = 'none';
+
+            // Start animation loop
+            animate();
+        }
+
+        // COLLAB NOTE: Create star field
+        function createStars() {
+            const starGeometry = new THREE.SphereGeometry(CONFIG.starSize, 8, 8);
+            const starMaterial = new THREE.MeshStandardMaterial({
+                color: CONFIG.starColor,
+                emissive: CONFIG.starColor,
+                emissiveIntensity: 0.5
+            });
+
+            // COLLAB NOTE: Positioning stars in a roughly spherical distribution
+            // In production, these positions would be carefully designed per-memory
+            for (let i = 0; i < CONFIG.starCount; i++) {
+                const star = new THREE.Mesh(starGeometry, starMaterial.clone());
+
+                // Random position in a spherical volume (radius 5-8 units)
+                const radius = 5 + Math.random() * 3;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+
+                star.position.set(
+                    radius * Math.sin(phi) * Math.cos(theta),
+                    radius * Math.sin(phi) * Math.sin(theta),
+                    radius * Math.cos(phi)
+                );
+
+                star.userData.index = i;
+                star.userData.selected = false;
+
+                stars.push(star);
+                scene.add(star);
+            }
+        }
+
+        // COLLAB NOTE: Mouse interaction for connecting stars
+        let selectedStar = null;
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+
+        function setupInteraction() {
+            const container = document.getElementById('canvas-container');
+
+            container.addEventListener('mousedown', (event) => {
+                if (event.button === 0) { // Left click
+                    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(stars);
+
+                    if (intersects.length > 0) {
+                        const clickedStar = intersects[0].object;
+                        handleStarClick(clickedStar);
+                    } else {
+                        isDragging = true;
+                        previousMousePosition = { x: event.clientX, y: event.clientY };
+                    }
+                }
+            });
+
+            container.addEventListener('contextmenu', (event) => {
+                event.preventDefault();
+                removeLastConnection();
+            });
+
+            container.addEventListener('mousemove', (event) => {
+                if (isDragging) {
+                    const deltaX = event.clientX - previousMousePosition.x;
+                    const deltaY = event.clientY - previousMousePosition.y;
+
+                    rotateCamera(deltaX, deltaY);
+
+                    previousMousePosition = { x: event.clientX, y: event.clientY };
+                }
+
+                // Hover effect
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                updateHover();
+            });
+
+            container.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            // Zoom with mouse wheel
+            container.addEventListener('wheel', (event) => {
+                event.preventDefault();
+                const delta = event.deltaY * 0.01;
+                camera.position.z = Math.max(3, Math.min(20, camera.position.z + delta));
+            });
+        }
+
+        // COLLAB NOTE: Connect two stars
+        function handleStarClick(star) {
+            if (puzzleComplete && memoryRevealed) return;
+
+            if (!selectedStar) {
+                // First star selection
+                selectedStar = star;
+                star.userData.selected = true;
+                star.material.color.setHex(CONFIG.selectedStarColor);
+                star.material.emissive.setHex(CONFIG.selectedStarColor);
+            } else if (selectedStar === star) {
+                // Deselect
+                deselectStar();
+            } else {
+                // Create connection
+                createConnection(selectedStar, star);
+                deselectStar();
+            }
+        }
+
+        function deselectStar() {
+            if (selectedStar) {
+                selectedStar.userData.selected = false;
+                selectedStar.material.color.setHex(CONFIG.starColor);
+                selectedStar.material.emissive.setHex(CONFIG.starColor);
+                selectedStar = null;
+            }
+        }
+
+        // COLLAB NOTE: Create line between stars
+        function createConnection(star1, star2) {
+            // Check if connection already exists
+            for (let conn of connections) {
+                if ((conn[0] === star1 && conn[1] === star2) ||
+                    (conn[0] === star2 && conn[1] === star1)) {
+                    return;
+                }
+            }
+
+            connections.push([star1, star2]);
+
+            // Create line geometry
+            const points = [star1.position, star2.position];
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({
+                color: CONFIG.connectionColor,
+                linewidth: 2
+            });
+            const line = new THREE.Line(geometry, material);
+
+            connectionLines.push(line);
+            scene.add(line);
+
+            // Update UI
+            updateConnectionCount();
+
+            // Play audio feedback (placeholder)
+            playConnectSound();
+
+            // Check if puzzle is complete
+            if (connections.length >= CONFIG.requiredConnections) {
+                puzzleComplete = true;
+                document.getElementById('connection-status').classList.add('success');
+                document.getElementById('proximityMeter').classList.add('active');
+            }
+        }
+
+        function removeLastConnection() {
+            if (connections.length === 0) return;
+
+            connections.pop();
+            const line = connectionLines.pop();
+            scene.remove(line);
+
+            updateConnectionCount();
+
+            if (connections.length < CONFIG.requiredConnections) {
+                puzzleComplete = false;
+                memoryRevealed = false;
+                document.getElementById('connection-status').classList.remove('success');
+                document.getElementById('proximityMeter').classList.remove('active');
+                document.getElementById('memoryReveal').classList.remove('visible');
+            }
+        }
+
+        function updateConnectionCount() {
+            document.getElementById('connection-count').textContent = connections.length;
+        }
+
+        // COLLAB NOTE: Camera rotation controls
+        function rotateCamera(deltaX, deltaY) {
+            const rotationSpeed = 0.005;
+
+            // Rotate around Y axis (left-right)
+            const angleY = deltaX * rotationSpeed;
+            const rotationMatrixY = new THREE.Matrix4().makeRotationY(angleY);
+            camera.position.applyMatrix4(rotationMatrixY);
+
+            // Rotate around X axis (up-down)
+            const angleX = deltaY * rotationSpeed;
+            const axis = new THREE.Vector3().crossVectors(
+                camera.position.clone().normalize(),
+                new THREE.Vector3(0, 1, 0)
+            ).normalize();
+            const rotationMatrixX = new THREE.Matrix4().makeRotationAxis(axis, angleX);
+            camera.position.applyMatrix4(rotationMatrixX);
+
+            camera.lookAt(0, 0, 0);
+        }
+
+        // COLLAB NOTE: Check if camera is aligned with correct viewing angle
+        function checkAlignment() {
+            if (!puzzleComplete || memoryRevealed) return;
+
+            // Calculate camera's look direction
+            const lookDir = new THREE.Vector3(0, 0, -1);
+            lookDir.applyQuaternion(camera.quaternion);
+
+            // Calculate angular difference
+            const angle = lookDir.angleTo(correctViewAngle);
+            const angleDegrees = THREE.MathUtils.radToDeg(angle);
+
+            // Update proximity meter
+            if (angleDegrees <= CONFIG.proximityWarningZone) {
+                const proximity = 1.0 - (angleDegrees / CONFIG.proximityWarningZone);
+                document.getElementById('proximityFill').style.height = (proximity * 100) + '%';
+            } else {
+                document.getElementById('proximityFill').style.height = '0%';
+            }
+
+            // Check for perfect alignment
+            if (angleDegrees <= CONFIG.alignmentTolerance) {
+                revealMemory();
+            }
+        }
+
+        // COLLAB NOTE: Reveal the hidden memory
+        function revealMemory() {
+            if (memoryRevealed) return;
+
+            memoryRevealed = true;
+            document.getElementById('memoryText').textContent = MEMORY_DATA.narrative;
+            document.getElementById('memoryReveal').classList.add('visible');
+
+            // Audio cue
+            playRevealSound();
+
+            // Highlight all connected stars
+            for (let conn of connections) {
+                conn[0].material.emissive.setHex(0x34d399);
+                conn[1].material.emissive.setHex(0x34d399);
+            }
+        }
+
+        // COLLAB NOTE: Reset puzzle state
+        function resetPuzzle() {
+            // Remove all connections
+            for (let line of connectionLines) {
+                scene.remove(line);
+            }
+            connections = [];
+            connectionLines = [];
+
+            // Reset stars
+            for (let star of stars) {
+                star.material.color.setHex(CONFIG.starColor);
+                star.material.emissive.setHex(CONFIG.starColor);
+                star.userData.selected = false;
+            }
+
+            selectedStar = null;
+            puzzleComplete = false;
+            memoryRevealed = false;
+
+            // Reset UI
+            document.getElementById('connection-status').classList.remove('success');
+            document.getElementById('proximityMeter').classList.remove('active');
+            document.getElementById('proximityFill').style.height = '0%';
+            document.getElementById('memoryReveal').classList.remove('visible');
+            updateConnectionCount();
+        }
+
+        // COLLAB NOTE: Hover feedback
+        function updateHover() {
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(stars);
+
+            // Reset all stars to default state (except selected)
+            for (let star of stars) {
+                if (!star.userData.selected) {
+                    star.scale.set(1, 1, 1);
+                }
+            }
+
+            // Highlight hovered star
+            if (intersects.length > 0) {
+                const hoveredStar = intersects[0].object;
+                if (!hoveredStar.userData.selected) {
+                    hoveredStar.scale.set(1.3, 1.3, 1.3);
+                }
+            }
+        }
+
+        // COLLAB NOTE: Placeholder audio functions
+        // In production, use Web Audio API or Howler.js
+        function playConnectSound() {
+            // TODO: Implement audio feedback
+            console.log('🎵 Connect sound');
+        }
+
+        function playRevealSound() {
+            // TODO: Implement audio feedback
+            console.log('🎵 Reveal sound');
+        }
+
+        // COLLAB NOTE: Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Gentle star pulse
+            const time = Date.now() * 0.001;
+            for (let star of stars) {
+                const pulse = 0.9 + Math.sin(time + star.userData.index) * 0.1;
+                star.material.emissiveIntensity = pulse * 0.5;
+            }
+
+            // Check alignment if puzzle is complete
+            if (puzzleComplete && !memoryRevealed) {
+                checkAlignment();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // COLLAB NOTE: Start the experience
+        init();
+    </script>
+</body>
+</html>

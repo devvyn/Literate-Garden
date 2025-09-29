@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Echoes in Neon — Rhythm Reflex Slice</title>
+  <style>
+    /* Core visual identity: neon gradients, rhythmic pulses */
+    :root {
+      --bg: radial-gradient(circle at 20% 20%, #0ff, #105);
+      --accent: #f0f;
+      --success: #4ef0c8;
+      --miss: #ff5178;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Orbitron', sans-serif;
+      background: var(--bg);
+      color: #f8f8ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hud {
+      text-align: center;
+      backdrop-filter: blur(12px);
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 2rem 3rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 40px rgba(240,0,240,0.3);
+    }
+    .beat-stream {
+      display: grid;
+      grid-template-columns: repeat(4, 70px);
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    .cue {
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 16px;
+      padding: 1.25rem 0;
+      font-size: 2rem;
+      position: relative;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .cue.active {
+      border-color: var(--accent);
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(240,0,240,0.4);
+    }
+    .cue.good {
+      border-color: var(--success);
+      box-shadow: 0 0 24px rgba(78,240,200,0.5);
+    }
+    .cue.bad {
+      border-color: var(--miss);
+      box-shadow: 0 0 24px rgba(255,81,120,0.5);
+    }
+    .log {
+      height: 4rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <main class="hud">
+    <h1>Echoes in Neon</h1>
+    <p>Hit the highlighted arrow on the beat. Beats land every 1.2 seconds — keep the courier sprinting.</p>
+    <div class="beat-stream" id="beatStream">
+      <!-- EXTENSION HOOK: Add more lanes or FX variations here. -->
+      <div class="cue" data-key="ArrowLeft">←</div>
+      <div class="cue" data-key="ArrowUp">↑</div>
+      <div class="cue" data-key="ArrowDown">↓</div>
+      <div class="cue" data-key="ArrowRight">→</div>
+    </div>
+    <p>Streak: <span id="streak">0</span> | Mood: <span id="mood">Steady</span></p>
+    <div class="log" id="log">Awaiting the pulse...</div>
+  </main>
+  <script>
+    // Control parameters for rhythm pacing.
+    const cues = Array.from(document.querySelectorAll('.cue'));
+    const logEl = document.getElementById('log');
+    const streakEl = document.getElementById('streak');
+    const moodEl = document.getElementById('mood');
+
+    let activeCue = null;
+    let streak = 0;
+    let beatTimer = null;
+
+    const moods = [
+      { threshold: 0, label: 'Steady' },
+      { threshold: 4, label: 'Surging' },
+      { threshold: 8, label: 'Blazing' }
+    ];
+
+    function updateMood() {
+      const current = moods
+        .slice()
+        .reverse()
+        .find(mood => streak >= mood.threshold);
+      moodEl.textContent = current ? current.label : 'Steady';
+    }
+
+    function highlightNextCue() {
+      if (activeCue) {
+        activeCue.classList.remove('active');
+      }
+      activeCue = cues[Math.floor(Math.random() * cues.length)];
+      activeCue.classList.remove('good', 'bad');
+      activeCue.classList.add('active');
+      logEl.textContent = 'Pulse incoming — focus.';
+    }
+
+    function resetCueState() {
+      cues.forEach(cue => cue.classList.remove('good', 'bad'));
+    }
+
+    function handleKeydown(event) {
+      if (!activeCue) return;
+      if (event.key === activeCue.dataset.key) {
+        streak += 1;
+        streakEl.textContent = streak;
+        updateMood();
+        resetCueState();
+        activeCue.classList.add('good');
+        logEl.textContent = 'Glide achieved! Maintain velocity.';
+        highlightNextCue();
+      } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+        streak = Math.max(0, streak - 2);
+        streakEl.textContent = streak;
+        updateMood();
+        resetCueState();
+        activeCue.classList.add('bad');
+        logEl.textContent = 'Slip detected. Realign on the next beat.';
+      }
+    }
+
+    function startBeatLoop() {
+      highlightNextCue();
+      beatTimer = setInterval(() => {
+        // EXTENSION HOOK: Sync with audio beat callbacks here.
+        resetCueState();
+        activeCue.classList.add('bad');
+        logEl.textContent = 'Missed the beat — regain flow!';
+        streak = Math.max(0, streak - 1);
+        streakEl.textContent = streak;
+        updateMood();
+        setTimeout(highlightNextCue, 250);
+      }, 1200);
+    }
+
+    window.addEventListener('keydown', handleKeydown);
+    startBeatLoop();
+  </script>
+</body>
+</html>

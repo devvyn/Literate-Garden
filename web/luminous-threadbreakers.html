@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminous Threadbreakers</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="scene.css" />
+</head>
+<body class="scene scene--luminous">
+  <!-- Collaboration Note: Starfield parameters live in scene.js under CONSTELLATION_PRESETS. Update there first. -->
+  <header class="scene__header">
+    <a class="scene__back" href="index.html">← Back to Showcase</a>
+    <h1>Luminous Threadbreakers</h1>
+    <p>Traverse the night by stitching constellations before the sky fractures.</p>
+  </header>
+
+  <main class="scene__main">
+    <section class="scene__panel">
+      <canvas id="constellationCanvas" width="500" height="320" aria-label="Constellation weaving demo"></canvas>
+      <button id="weaveButton" class="scene__button">Trigger Star Weave</button>
+    </section>
+
+    <aside class="scene__sidebar">
+      <h2>Pitch Beats</h2>
+      <ul>
+        <li>Thread-slingshot traversal merges parkour momentum with puzzle pacing.</li>
+        <li>Dynamic constellation logic supports speedrun showcases and narrative unlocks.</li>
+        <li>Award positioning: IndieCade, Day of the Devs, A MAZE.</li>
+      </ul>
+
+      <div class="scene__callout">
+        <h3>Feasibility Notes</h3>
+        <p>Rope physics prototyped with Verlet integration; production build shifts to Godot 4's native ropes.</p>
+      </div>
+    </aside>
+  </main>
+
+  <section class="scene__footer">
+    <h2>Next Actions</h2>
+    <ol>
+      <li>Polish weaving feedback with responsive audio grains.</li>
+      <li>Implement leaderboard API stubs (paired with analytics squad).</li>
+      <li>Author character vignettes for each Threadbreaker mentor.</li>
+    </ol>
+  </section>
+
+  <script src="scene.js"></script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Aurora Suture — Polyphonic Sky Weaver</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: radial-gradient(circle at top, rgba(38,57,94,0.95), rgba(6,12,30,0.98));
+      --accent: #8ef7ff;
+      --accent-2: #ff9bff;
+      --accent-3: #93ffad;
+    }
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      background: var(--bg);
+      color: #ecf8ff;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    header, footer {
+      padding: 1.5rem clamp(1rem, 4vw, 3rem);
+    }
+    header h1 {
+      margin: 0 0 0.25rem;
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    main {
+      position: relative;
+      padding: 0 clamp(1rem, 4vw, 3rem) 2rem;
+    }
+    canvas {
+      width: 100%;
+      height: 65vh;
+      border-radius: 24px;
+      box-shadow: 0 40px 60px rgba(4, 8, 20, 0.55);
+      border: 1px solid rgba(142, 247, 255, 0.25);
+      cursor: crosshair;
+      background: radial-gradient(circle at 50% 20%, rgba(126,175,255,0.25), rgba(5,9,18,0.9));
+    }
+    .controls {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 2rem;
+      align-items: center;
+    }
+    label {
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+    input[type="range"] {
+      width: clamp(160px, 30vw, 280px);
+    }
+    .status {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      max-width: 720px;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Version I — Aurora Suture</h1>
+    <p class="status">
+      Conduct healing brushstrokes across the sky. Drag to weave ribbons; adjust harmonic frequency to watch the aurora respond in real time.
+    </p>
+  </header>
+  <main>
+    <canvas id="loom" width="1200" height="700" aria-label="Aurora weaving canvas"></canvas>
+    <div class="controls">
+      <label for="freq">Harmonic Frequency</label>
+      <input id="freq" type="range" min="80" max="640" step="1" value="240" />
+      <label for="intensity">Solar Intensity</label>
+      <input id="intensity" type="range" min="0.2" max="1.2" step="0.01" value="0.7" />
+      <button id="clear">Reset Sky</button>
+    </div>
+  </main>
+  <footer>
+    <small>Inline comments note planned shader/audio integrations for the next build.</small>
+  </footer>
+  <script>
+    // === Canvas-based ribbon painter ======================================
+    const canvas = document.getElementById("loom");
+    const ctx = canvas.getContext("2d");
+
+    // Track brush state for smooth strokes.
+    const points = [];
+    let painting = false;
+
+    function addPoint(x, y) {
+      points.push({ x, y, life: 1 });
+    }
+
+    function draw() {
+      ctx.fillStyle = "rgba(2, 6, 16, 0.12)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Simulate FFT-derived hue blending using slider frequency.
+      const freq = parseFloat(freqInput.value);
+      const intensity = parseFloat(intensityInput.value);
+
+      points.forEach((pt, idx) => {
+        const life = Math.max(pt.life, 0);
+        const hue = (freq / 2 + idx * 2) % 360;
+        const alpha = life * intensity;
+        const size = 10 + Math.sin(idx * 0.6) * 6;
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${hue}, 95%, ${55 + intensity * 15}%, ${alpha})`;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = `hsla(${(hue + 40) % 360}, 90%, 70%, ${alpha})`;
+        ctx.arc(pt.x, pt.y, Math.max(size, 2), 0, Math.PI * 2);
+        ctx.fill();
+        pt.life -= 0.008; // Slow fade for ethereal feel.
+      });
+
+      // Cull faded particles to keep perf stable.
+      for (let i = points.length - 1; i >= 0; i--) {
+        if (points[i].life <= 0) {
+          points.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    function pointerPos(evt) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: ((evt.clientX || (evt.touches && evt.touches[0].clientX)) - rect.left) * (canvas.width / rect.width),
+        y: ((evt.clientY || (evt.touches && evt.touches[0].clientY)) - rect.top) * (canvas.height / rect.height),
+      };
+    }
+
+    function pointerDown(evt) {
+      painting = true;
+      const { x, y } = pointerPos(evt);
+      addPoint(x, y);
+    }
+
+    function pointerMove(evt) {
+      if (!painting) return;
+      const { x, y } = pointerPos(evt);
+      for (let i = 0; i < 5; i++) {
+        // Slight jitter to mimic aurora turbulence.
+        addPoint(x + (Math.random() - 0.5) * 12, y + (Math.random() - 0.5) * 12);
+      }
+    }
+
+    function pointerUp() {
+      painting = false;
+    }
+
+    canvas.addEventListener("mousedown", pointerDown);
+    canvas.addEventListener("mousemove", pointerMove);
+    window.addEventListener("mouseup", pointerUp);
+    canvas.addEventListener("touchstart", pointerDown);
+    canvas.addEventListener("touchmove", pointerMove);
+    window.addEventListener("touchend", pointerUp);
+
+    // === Harmonic controls + ambient audio scaffold ======================
+    const freqInput = document.getElementById("freq");
+    const intensityInput = document.getElementById("intensity");
+    const clearButton = document.getElementById("clear");
+
+    clearButton.addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      points.length = 0;
+    });
+
+    // Web Audio mock: create a soft pad to reinforce harmonic feel.
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = parseFloat(freqInput.value);
+    gainNode.gain.value = 0.0001; // Start silent to avoid abrupt sounds.
+    oscillator.connect(gainNode).connect(audioCtx.destination);
+    oscillator.start();
+
+    function updateFrequency() {
+      oscillator.frequency.setTargetAtTime(parseFloat(freqInput.value), audioCtx.currentTime, 0.1);
+    }
+
+    function updateIntensity() {
+      const base = parseFloat(intensityInput.value);
+      gainNode.gain.setTargetAtTime(base * 0.005, audioCtx.currentTime, 0.2);
+    }
+
+    freqInput.addEventListener("input", updateFrequency);
+    intensityInput.addEventListener("input", updateIntensity);
+
+    document.body.addEventListener("pointerdown", () => {
+      if (audioCtx.state !== "running") {
+        audioCtx.resume();
+        updateIntensity();
+      }
+    }, { once: true });
+
+    // NOTE: Real FFT integration blocked (needs mic permissions + UX pass).
+    // Keeping this annotation visible for next collaborator.
+    // TODO -> replace oscillator with live audio-reactive data stream once consent UI is approved.
+  </script>
+</body>
+</html>

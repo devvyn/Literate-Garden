@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Version D · Cloudforged Ritual</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Version D experiments with systemic ritual strategy -->
+  <main>
+    <header>
+      <h1>Version D · Cloudforged Ritual</h1>
+      <p class="tagline">Engineer weather rituals atop floating mesas to defend the frontier.</p>
+    </header>
+
+    <section class="concept">
+      <h2>Game Idea</h2>
+      <p><strong>Premise:</strong> Lead an order of stormcallers keeping aerial trade routes alive.</p>
+      <p><strong>Loop:</strong> Draft rituals → place elemental pylons → respond to migrating threats → celebrate victories with community feasts.</p>
+      <p><strong>Audience:</strong> Tactics fans, co-op LAN festivals, builders seeking cozy yet strategic play.</p>
+    </section>
+
+    <section class="feasibility">
+      <h2>Suitability &amp; Feasibility</h2>
+      <ul>
+        <li><strong>Technical Scope:</strong> Grid-based strategy, deterministic weather sim, couch co-op.</li>
+        <li><strong>Gameplay Loop:</strong> 10-minute seasonal cycles, asynchronous co-op planning.</li>
+        <li><strong>Festival Hook:</strong> Spectacular volumetric clouds, tactile controller glyphs.</li>
+      </ul>
+    </section>
+
+    <section class="demo" aria-label="Interactive ritual planner">
+      <h2>Ritual Layout Prototype</h2>
+      <p class="annotation">Drag pylons onto mesas to shape the storm. Each arrangement predicts a weather front.</p>
+      <div class="board" aria-label="Mesa board"></div>
+      <div class="palette" aria-label="Pylon palette">
+        <button class="pylon" data-element="wind">Wind</button>
+        <button class="pylon" data-element="rain">Rain</button>
+        <button class="pylon" data-element="ember">Ember</button>
+      </div>
+      <div class="forecast" aria-live="polite"></div>
+    </section>
+
+    <section class="handoff">
+      <h2>Next Agent TODOs</h2>
+      <ul>
+        <li><!-- Keep backlog transparent -->Need hover card art for pylon elements (blocked waiting on art drop ETA Friday).</li>
+        <li>Add websocket sync so two planners can collaborate live (stretch).</li>
+      </ul>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

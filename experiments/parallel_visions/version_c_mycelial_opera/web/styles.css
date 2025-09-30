@@ -1,0 +1,75 @@
+:root {
+  --bg: #080f13;
+  --accent: #8ff7cf;
+  --accent-2: #ffd6ff;
+  --text: #f4f9ff;
+  --muted: #8aa6b0;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at bottom left, rgba(143, 247, 207, 0.15), transparent 45%),
+    radial-gradient(circle at top right, rgba(255, 214, 255, 0.18), transparent 55%),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 2.4rem 1.5rem;
+}
+
+main {
+  max-width: 860px;
+  width: 100%;
+  background: rgba(9, 17, 20, 0.82);
+  border-radius: 24px;
+  box-shadow: 0 35px 80px rgba(8, 15, 19, 0.6);
+  padding: 2.5rem;
+  border: 1px solid rgba(143, 247, 207, 0.18);
+}
+
+header h1 {
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+}
+
+.tagline {
+  color: var(--accent);
+  margin-top: 0.25rem;
+}
+
+section {
+  margin-block: 2rem;
+}
+
+canvas {
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(143, 247, 207, 0.3);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.annotation {
+  color: var(--muted);
+  font-style: italic;
+}
+
+#log {
+  list-style: none;
+  padding: 0;
+  margin-top: 1.4rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+#log li {
+  background: rgba(143, 247, 207, 0.08);
+  border-left: 3px solid rgba(143, 247, 207, 0.7);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+}
+
+.dead-end {
+  font-style: italic;
+  color: #f78fb3;
+}

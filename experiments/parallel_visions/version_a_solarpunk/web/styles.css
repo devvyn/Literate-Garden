@@ -1,0 +1,83 @@
+:root {
+  color-scheme: light;
+  --bg: #f0f8f7;
+  --accent: #3da882;
+  --accent-2: #fbd38d;
+  --text: #1f363d;
+  --muted: #4f7a73;
+  font-family: "Fira Sans", "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #ffffff 0%, var(--bg) 60%);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+}
+
+main {
+  max-width: 900px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 24px;
+  box-shadow: 0 30px 60px rgba(31, 54, 61, 0.15);
+  padding: 2.5rem;
+}
+
+header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: 0.25rem;
+}
+
+.tagline {
+  font-size: 1.2rem;
+  color: var(--muted);
+  margin-top: 0;
+}
+
+section {
+  margin-block: 2rem;
+}
+
+.controls {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 1.5rem;
+}
+
+label {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+input[type="range"] {
+  width: 100%;
+}
+
+canvas {
+  width: 100%;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(61, 168, 130, 0.35), rgba(251, 211, 141, 0.3));
+  border: 2px solid rgba(61, 168, 130, 0.35);
+}
+
+#motifReadout {
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.annotation {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.dead-end {
+  color: #a35252;
+  font-style: italic;
+}

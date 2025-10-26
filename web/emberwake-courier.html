@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emberwake Courier Guild</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="scene.css" />
+</head>
+<body class="scene scene--ember">
+  <!-- Collaboration Note: Delivery routes are defined in scene.js. Append new checkpoints to the ROUTE graph. -->
+  <header class="scene__header">
+    <a class="scene__back" href="index.html">← Back to Showcase</a>
+    <h1>Emberwake Courier Guild</h1>
+    <p>Surf volcanic jetstreams to deliver ember-bound tales before they fade.</p>
+  </header>
+
+  <main class="scene__main">
+    <section class="scene__panel">
+      <div class="route">
+        <svg viewBox="0 0 400 260" role="img" aria-label="Emberwake route visualization">
+          <defs>
+            <linearGradient id="ember-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ffb347" />
+              <stop offset="100%" stop-color="#ff0844" />
+            </linearGradient>
+          </defs>
+          <path class="route__path" d="M40 220 C120 120, 180 240, 260 140 S360 40, 360 200" />
+          <circle class="route__node" cx="40" cy="220" r="10" />
+          <circle class="route__node" cx="140" cy="150" r="10" />
+          <circle class="route__node" cx="220" cy="200" r="10" />
+          <circle class="route__node" cx="300" cy="120" r="10" />
+          <circle class="route__node" cx="360" cy="200" r="10" />
+        </svg>
+        <div class="route__status" id="routeStatus">Momentum Chain: Stable</div>
+      </div>
+      <button id="routeButton" class="scene__button">Ignite Delivery Boost</button>
+    </section>
+
+    <aside class="scene__sidebar">
+      <h2>Pitch Beats</h2>
+      <ul>
+        <li>Momentum surfing links traversal skill with narrative delivery stakes.</li>
+        <li>Dynamic VO cards surface micro-fiction as players chain boosts.</li>
+        <li>Award positioning: Tribeca Games, BAFTA Game Beyond Entertainment.</li>
+      </ul>
+
+      <div class="scene__callout">
+        <h3>Feasibility Notes</h3>
+        <p>Greybox using Unity Cinemachine; final build swaps to custom spline solver for deterministic speeds.</p>
+      </div>
+    </aside>
+  </main>
+
+  <section class="scene__footer">
+    <h2>Next Actions</h2>
+    <ol>
+      <li>Import heat-haze post FX prototype from shared repo.</li>
+      <li>Record sample courier anecdotes (target: 90-second loop).</li>
+      <li>Playtest branching delivery routes for clarity vs. mastery tension.</li>
+    </ol>
+  </section>
+
+  <script src="scene.js"></script>
+</body>
+</html>

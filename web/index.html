@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Indie Dream Demos — Interaction Patterns Showcase</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- COLLAB NOTE: Keep this hero copy tight; marketing team will thread festival-specific slogans later. -->
+    <header class="hero">
+      <h1>Indie Dream Demos</h1>
+      <p>
+        Award-leaning interaction patterns distilled from our leading festival contenders. Explore the cards, toggle feasibility overlays, and grab inspiration for your own vertical slice.
+      </p>
+    </header>
+
+    <main>
+      <section aria-labelledby="patterns-title" class="patterns">
+        <div class="toolbar">
+          <h2 id="patterns-title">Pattern Library</h2>
+          <button id="toggle-feasibility" type="button" aria-pressed="false">
+            Show Feasibility Notes
+          </button>
+        </div>
+        <div class="card-grid" role="list" id="pattern-grid">
+          <!-- Cards injected by app.js to keep data-driven. -->
+        </div>
+      </section>
+
+      <section class="roadmap" aria-labelledby="roadmap-title">
+        <h2 id="roadmap-title">Prototype Roadmap Signals</h2>
+        <ol>
+          <li><strong>Clockwork Skylark:</strong> Flight spline prototype blocked pending wind shader moodboards.</li>
+          <li><strong>Nocturne Cartographers:</strong> Gesture dataset licensing unresolved—see documentation breadcrumbs.</li>
+          <li><strong>Echoes of the Tidelocked:</strong> Rollback networking tech decision awaiting latency bake-off.</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Built to align creative direction with actionable engineering steps. Drop follow-up findings in the docs folder so the async crew stays synced.
+      </p>
+    </footer>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

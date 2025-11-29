@@ -1,0 +1,619 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "id": "A_ROBERT_GREENE",
+      "label": "Robert Greene",
+      "type": "author",
+      "year": null,
+      "domain": null,
+      "role": "author"
+    },
+    {
+      "id": "G1_48_LAWS",
+      "label": "The 48 Laws of Power",
+      "type": "book",
+      "year": 1998,
+      "domain": "greene_book",
+      "role": null
+    },
+    {
+      "id": "G2_ART_SEDUCTION",
+      "label": "The Art of Seduction",
+      "type": "book",
+      "year": 2001,
+      "domain": "greene_book",
+      "role": null
+    },
+    {
+      "id": "G3_33_STRATEGIES_WAR",
+      "label": "The 33 Strategies of War",
+      "type": "book",
+      "year": 2006,
+      "domain": "greene_book",
+      "role": null
+    },
+    {
+      "id": "G4_50TH_LAW",
+      "label": "The 50th Law",
+      "type": "book",
+      "year": 2009,
+      "domain": "greene_book",
+      "role": null
+    },
+    {
+      "id": "G5_MASTERY",
+      "label": "Mastery",
+      "type": "book",
+      "year": 2012,
+      "domain": "greene_book",
+      "role": null
+    },
+    {
+      "id": "G6_LAWS_HUMAN_NATURE",
+      "label": "The Laws of Human Nature",
+      "type": "book",
+      "year": 2018,
+      "domain": "greene_book",
+      "role": null
+    },
+    {
+      "id": "G7_DAILY_LAWS",
+      "label": "The Daily Laws",
+      "type": "book",
+      "year": 2021,
+      "domain": "greene_book",
+      "role": null
+    },
+    {
+      "id": "S_SUN_TZU_ART_OF_WAR",
+      "label": "The Art of War",
+      "type": "work",
+      "year": null,
+      "domain": "military strategy",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_MACHIAVELLI_PRINCE",
+      "label": "The Prince",
+      "type": "work",
+      "year": null,
+      "domain": "political theory",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_CLAUSEWITZ_ON_WAR",
+      "label": "On War",
+      "type": "work",
+      "year": null,
+      "domain": "military strategy",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_CASANOVA_MEMOIRS",
+      "label": "History of My Life",
+      "type": "work",
+      "year": null,
+      "domain": "memoir/seduction",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_OVID_ART_OF_LOVE",
+      "label": "Ars Amatoria",
+      "type": "work",
+      "year": null,
+      "domain": "classical seduction",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_LA_ROCHEFOUCAULD_MAXIMS",
+      "label": "Maxims",
+      "type": "work",
+      "year": null,
+      "domain": "moral psychology",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_JOMINI_ART_OF_WAR",
+      "label": "The Art of War",
+      "type": "work",
+      "year": null,
+      "domain": "military strategy",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_MALCOLM_X_AUTOBIO",
+      "label": "Autobiography of Malcolm X",
+      "type": "work",
+      "year": null,
+      "domain": "social struggle",
+      "role": "primary_source"
+    },
+    {
+      "id": "A_50_CENT",
+      "label": "Curtis \"50 Cent\" Jackson",
+      "type": "collaborator",
+      "year": null,
+      "domain": null,
+      "role": "coauthor"
+    },
+    {
+      "id": "S_DARWIN_ORIGIN",
+      "label": "On the Origin of Species",
+      "type": "work",
+      "year": null,
+      "domain": "evolution",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_FRANKLIN_AUTOBIO",
+      "label": "Autobiography",
+      "type": "work",
+      "year": null,
+      "domain": "innovation/self-making",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_EDISON_BIO",
+      "label": "The Life of Thomas Edison",
+      "type": "work",
+      "year": null,
+      "domain": "invention",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_TOLSTOY",
+      "label": "Major works",
+      "type": "work",
+      "year": null,
+      "domain": "character psychology",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_CHEKHOV",
+      "label": "Short Stories",
+      "type": "work",
+      "year": null,
+      "domain": "character realism",
+      "role": "primary_source"
+    },
+    {
+      "id": "S_FREUD",
+      "label": "Psychoanalytic writings",
+      "type": "work",
+      "year": null,
+      "domain": "psychology",
+      "role": "primary_source"
+    },
+    {
+      "id": "D_RYAN_HOLIDAY",
+      "label": "Ryan Holiday",
+      "type": "downstream",
+      "year": null,
+      "domain": null,
+      "role": "author"
+    },
+    {
+      "id": "D_RH_OBSTACLE",
+      "label": "The Obstacle Is the Way",
+      "type": "work",
+      "year": null,
+      "domain": "downstream",
+      "role": null
+    },
+    {
+      "id": "D_RH_EGO",
+      "label": "Ego Is the Enemy",
+      "type": "work",
+      "year": null,
+      "domain": "downstream",
+      "role": null
+    },
+    {
+      "id": "D_NEIL_STRAUSS",
+      "label": "Neil Strauss",
+      "type": "downstream",
+      "year": null,
+      "domain": null,
+      "role": "author"
+    },
+    {
+      "id": "D_NS_GAME",
+      "label": "The Game",
+      "type": "work",
+      "year": null,
+      "domain": "downstream",
+      "role": null
+    },
+    {
+      "id": "D_50_CENT",
+      "label": "Curtis \"50 Cent\" Jackson",
+      "type": "downstream",
+      "year": null,
+      "domain": null,
+      "role": "coauthor"
+    }
+  ],
+  "edges": [
+    {
+      "src": "G1_48_LAWS",
+      "dst": "A_ROBERT_GREENE",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "G1_48_LAWS",
+      "target": "A_ROBERT_GREENE"
+    },
+    {
+      "src": "G1_48_LAWS",
+      "dst": "S_SUN_TZU_ART_OF_WAR",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G1_48_LAWS",
+      "target": "S_SUN_TZU_ART_OF_WAR"
+    },
+    {
+      "src": "G1_48_LAWS",
+      "dst": "S_MACHIAVELLI_PRINCE",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G1_48_LAWS",
+      "target": "S_MACHIAVELLI_PRINCE"
+    },
+    {
+      "src": "G1_48_LAWS",
+      "dst": "S_CLAUSEWITZ_ON_WAR",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G1_48_LAWS",
+      "target": "S_CLAUSEWITZ_ON_WAR"
+    },
+    {
+      "src": "G2_ART_SEDUCTION",
+      "dst": "A_ROBERT_GREENE",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "G2_ART_SEDUCTION",
+      "target": "A_ROBERT_GREENE"
+    },
+    {
+      "src": "G2_ART_SEDUCTION",
+      "dst": "S_CASANOVA_MEMOIRS",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G2_ART_SEDUCTION",
+      "target": "S_CASANOVA_MEMOIRS"
+    },
+    {
+      "src": "G2_ART_SEDUCTION",
+      "dst": "S_OVID_ART_OF_LOVE",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G2_ART_SEDUCTION",
+      "target": "S_OVID_ART_OF_LOVE"
+    },
+    {
+      "src": "G2_ART_SEDUCTION",
+      "dst": "S_LA_ROCHEFOUCAULD_MAXIMS",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G2_ART_SEDUCTION",
+      "target": "S_LA_ROCHEFOUCAULD_MAXIMS"
+    },
+    {
+      "src": "G3_33_STRATEGIES_WAR",
+      "dst": "A_ROBERT_GREENE",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "G3_33_STRATEGIES_WAR",
+      "target": "A_ROBERT_GREENE"
+    },
+    {
+      "src": "G3_33_STRATEGIES_WAR",
+      "dst": "S_SUN_TZU_ART_OF_WAR",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "reference_only",
+      "source": "G3_33_STRATEGIES_WAR",
+      "target": "S_SUN_TZU_ART_OF_WAR"
+    },
+    {
+      "src": "G3_33_STRATEGIES_WAR",
+      "dst": "S_CLAUSEWITZ_ON_WAR",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "reference_only",
+      "source": "G3_33_STRATEGIES_WAR",
+      "target": "S_CLAUSEWITZ_ON_WAR"
+    },
+    {
+      "src": "G3_33_STRATEGIES_WAR",
+      "dst": "S_JOMINI_ART_OF_WAR",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G3_33_STRATEGIES_WAR",
+      "target": "S_JOMINI_ART_OF_WAR"
+    },
+    {
+      "src": "G4_50TH_LAW",
+      "dst": "A_ROBERT_GREENE",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "G4_50TH_LAW",
+      "target": "A_ROBERT_GREENE"
+    },
+    {
+      "src": "G4_50TH_LAW",
+      "dst": "S_MALCOLM_X_AUTOBIO",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G4_50TH_LAW",
+      "target": "S_MALCOLM_X_AUTOBIO"
+    },
+    {
+      "src": "G4_50TH_LAW",
+      "dst": "S_MACHIAVELLI_PRINCE",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "reference_only",
+      "source": "G4_50TH_LAW",
+      "target": "S_MACHIAVELLI_PRINCE"
+    },
+    {
+      "src": "G4_50TH_LAW",
+      "dst": "S_SUN_TZU_ART_OF_WAR",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "reference_only",
+      "source": "G4_50TH_LAW",
+      "target": "S_SUN_TZU_ART_OF_WAR"
+    },
+    {
+      "src": "G4_50TH_LAW",
+      "dst": "A_50_CENT",
+      "type": "coauthored",
+      "weight": 1.0,
+      "note": null,
+      "source": "G4_50TH_LAW",
+      "target": "A_50_CENT"
+    },
+    {
+      "src": "G5_MASTERY",
+      "dst": "A_ROBERT_GREENE",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "G5_MASTERY",
+      "target": "A_ROBERT_GREENE"
+    },
+    {
+      "src": "G5_MASTERY",
+      "dst": "S_DARWIN_ORIGIN",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G5_MASTERY",
+      "target": "S_DARWIN_ORIGIN"
+    },
+    {
+      "src": "G5_MASTERY",
+      "dst": "S_FRANKLIN_AUTOBIO",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G5_MASTERY",
+      "target": "S_FRANKLIN_AUTOBIO"
+    },
+    {
+      "src": "G5_MASTERY",
+      "dst": "S_EDISON_BIO",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G5_MASTERY",
+      "target": "S_EDISON_BIO"
+    },
+    {
+      "src": "G6_LAWS_HUMAN_NATURE",
+      "dst": "A_ROBERT_GREENE",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "G6_LAWS_HUMAN_NATURE",
+      "target": "A_ROBERT_GREENE"
+    },
+    {
+      "src": "G6_LAWS_HUMAN_NATURE",
+      "dst": "S_TOLSTOY",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G6_LAWS_HUMAN_NATURE",
+      "target": "S_TOLSTOY"
+    },
+    {
+      "src": "G6_LAWS_HUMAN_NATURE",
+      "dst": "S_CHEKHOV",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G6_LAWS_HUMAN_NATURE",
+      "target": "S_CHEKHOV"
+    },
+    {
+      "src": "G6_LAWS_HUMAN_NATURE",
+      "dst": "S_FREUD",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": "primary",
+      "source": "G6_LAWS_HUMAN_NATURE",
+      "target": "S_FREUD"
+    },
+    {
+      "src": "G7_DAILY_LAWS",
+      "dst": "A_ROBERT_GREENE",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "G7_DAILY_LAWS",
+      "target": "A_ROBERT_GREENE"
+    },
+    {
+      "src": "G7_DAILY_LAWS",
+      "dst": "G1_48_LAWS",
+      "type": "self_derivative",
+      "weight": 1.0,
+      "note": null,
+      "source": "G7_DAILY_LAWS",
+      "target": "G1_48_LAWS"
+    },
+    {
+      "src": "G7_DAILY_LAWS",
+      "dst": "G2_ART_SEDUCTION",
+      "type": "self_derivative",
+      "weight": 1.0,
+      "note": null,
+      "source": "G7_DAILY_LAWS",
+      "target": "G2_ART_SEDUCTION"
+    },
+    {
+      "src": "G7_DAILY_LAWS",
+      "dst": "G3_33_STRATEGIES_WAR",
+      "type": "self_derivative",
+      "weight": 1.0,
+      "note": null,
+      "source": "G7_DAILY_LAWS",
+      "target": "G3_33_STRATEGIES_WAR"
+    },
+    {
+      "src": "G7_DAILY_LAWS",
+      "dst": "G4_50TH_LAW",
+      "type": "self_derivative",
+      "weight": 1.0,
+      "note": null,
+      "source": "G7_DAILY_LAWS",
+      "target": "G4_50TH_LAW"
+    },
+    {
+      "src": "G7_DAILY_LAWS",
+      "dst": "G5_MASTERY",
+      "type": "self_derivative",
+      "weight": 1.0,
+      "note": null,
+      "source": "G7_DAILY_LAWS",
+      "target": "G5_MASTERY"
+    },
+    {
+      "src": "G7_DAILY_LAWS",
+      "dst": "G6_LAWS_HUMAN_NATURE",
+      "type": "self_derivative",
+      "weight": 1.0,
+      "note": null,
+      "source": "G7_DAILY_LAWS",
+      "target": "G6_LAWS_HUMAN_NATURE"
+    },
+    {
+      "src": "D_RYAN_HOLIDAY",
+      "dst": "A_ROBERT_GREENE",
+      "type": "apprenticed_under",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_RYAN_HOLIDAY",
+      "target": "A_ROBERT_GREENE"
+    },
+    {
+      "src": "D_RYAN_HOLIDAY",
+      "dst": "G1_48_LAWS",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_RYAN_HOLIDAY",
+      "target": "G1_48_LAWS"
+    },
+    {
+      "src": "D_RYAN_HOLIDAY",
+      "dst": "G5_MASTERY",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_RYAN_HOLIDAY",
+      "target": "G5_MASTERY"
+    },
+    {
+      "src": "D_RYAN_HOLIDAY",
+      "dst": "G6_LAWS_HUMAN_NATURE",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_RYAN_HOLIDAY",
+      "target": "G6_LAWS_HUMAN_NATURE"
+    },
+    {
+      "src": "D_RH_OBSTACLE",
+      "dst": "D_RYAN_HOLIDAY",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_RH_OBSTACLE",
+      "target": "D_RYAN_HOLIDAY"
+    },
+    {
+      "src": "D_RH_EGO",
+      "dst": "D_RYAN_HOLIDAY",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_RH_EGO",
+      "target": "D_RYAN_HOLIDAY"
+    },
+    {
+      "src": "D_NEIL_STRAUSS",
+      "dst": "G2_ART_SEDUCTION",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_NEIL_STRAUSS",
+      "target": "G2_ART_SEDUCTION"
+    },
+    {
+      "src": "D_NEIL_STRAUSS",
+      "dst": "G1_48_LAWS",
+      "type": "influenced_by",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_NEIL_STRAUSS",
+      "target": "G1_48_LAWS"
+    },
+    {
+      "src": "D_NS_GAME",
+      "dst": "D_NEIL_STRAUSS",
+      "type": "derives_from",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_NS_GAME",
+      "target": "D_NEIL_STRAUSS"
+    },
+    {
+      "src": "D_50_CENT",
+      "dst": "G4_50TH_LAW",
+      "type": "coauthored",
+      "weight": 1.0,
+      "note": null,
+      "source": "D_50_CENT",
+      "target": "G4_50TH_LAW"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{ "greene_books": [
+    {"id": "G1_48_LAWS", "title": "The 48 Laws of Power", "year": 1998},
+    {"id": "G2_ART_SEDUCTION", "title": "The Art of Seduction", "year": 2001},
+    {"id": "G3_33_STRATEGIES_WAR", "title": "The 33 Strategies of War", "year": 2006},
+    {"id": "G4_50TH_LAW", "title": "The 50th Law", "year": 2009},
+    {"id": "G5_MASTERY", "title": "Mastery", "year": 2012},
+    {"id": "G6_LAWS_HUMAN_NATURE", "title": "The Laws of Human Nature", "year": 2018},
+    {"id": "G7_DAILY_LAWS", "title": "The Daily Laws", "year": 2021}
+  ],
+  "seed_sources": [
+    {"greene_book_id": "G1_48_LAWS", "primary_sources": [
+      {"id": "S_SUN_TZU_ART_OF_WAR", "work": "The Art of War", "author": "Sun Tzu", "domain": "military strategy"},
+      {"id": "S_MACHIAVELLI_PRINCE", "work": "The Prince", "author": "Niccolò Machiavelli", "domain": "political theory"},
+      {"id": "S_CLAUSEWITZ_ON_WAR", "work": "On War", "author": "Carl von Clausewitz", "domain": "military strategy"}
+    ]},
+    {"greene_book_id": "G2_ART_SEDUCTION", "primary_sources": [
+      {"id": "S_CASANOVA_MEMOIRS", "work": "History of My Life", "author": "Giacomo Casanova", "domain": "memoir/seduction"},
+      {"id": "S_OVID_ART_OF_LOVE", "work": "Ars Amatoria", "author": "Ovid", "domain": "classical seduction"},
+      {"id": "S_LA_ROCHEFOUCAULD_MAXIMS", "work": "Maxims", "author": "François de La Rochefoucauld", "domain": "moral psychology"}
+    ]},
+    {"greene_book_id": "G3_33_STRATEGIES_WAR", "primary_sources": [
+      {"id": "S_SUN_TZU_ART_OF_WAR", "ref_only": true},
+      {"id": "S_CLAUSEWITZ_ON_WAR", "ref_only": true},
+      {"id": "S_JOMINI_ART_OF_WAR", "work": "The Art of War", "author": "A.-H. Jomini", "domain": "military strategy"}
+    ]},
+    {"greene_book_id": "G4_50TH_LAW", "primary_sources": [
+      {"id": "S_MALCOLM_X_AUTOBIO", "work": "Autobiography of Malcolm X", "author": "Malcolm X & Alex Haley", "domain": "social struggle"},
+      {"id": "S_MACHIAVELLI_PRINCE", "ref_only": true},
+      {"id": "S_SUN_TZU_ART_OF_WAR", "ref_only": true}
+    ],
+    "coauthor": {"id": "A_50_CENT", "name": "Curtis \"50 Cent\" Jackson"}},
+    {"greene_book_id": "G5_MASTERY", "primary_sources": [
+      {"id": "S_DARWIN_ORIGIN", "work": "On the Origin of Species", "author": "Charles Darwin", "domain": "evolution"},
+      {"id": "S_FRANKLIN_AUTOBIO", "work": "Autobiography", "author": "Benjamin Franklin", "domain": "innovation/self-making"},
+      {"id": "S_EDISON_BIO", "work": "The Life of Thomas Edison", "author": "Biographers", "domain": "invention"}
+    ]},
+    {"greene_book_id": "G6_LAWS_HUMAN_NATURE", "primary_sources": [
+      {"id": "S_TOLSTOY", "work": "Major works", "author": "Leo Tolstoy", "domain": "character psychology"},
+      {"id": "S_CHEKHOV", "work": "Short Stories", "author": "Anton Chekhov", "domain": "character realism"},
+      {"id": "S_FREUD", "work": "Psychoanalytic writings", "author": "Sigmund Freud", "domain": "psychology"}
+    ]},
+    {"greene_book_id": "G7_DAILY_LAWS", "primary_sources": [
+      {"id": "G1_48_LAWS", "type": "self_derivative"},
+      {"id": "G2_ART_SEDUCTION", "type": "self_derivative"},
+      {"id": "G3_33_STRATEGIES_WAR", "type": "self_derivative"},
+      {"id": "G4_50TH_LAW", "type": "self_derivative"},
+      {"id": "G5_MASTERY", "type": "self_derivative"},
+      {"id": "G6_LAWS_HUMAN_NATURE", "type": "self_derivative"}
+    ]}
+  ],
+  "downstream_nodes": [
+    {"id": "D_RYAN_HOLIDAY", "name": "Ryan Holiday", "role": "author",
+     "relationship": [
+       {"type": "APPRENTICED_UNDER", "to": "A_ROBERT_GREENE"},
+       {"type": "INFLUENCED_BY", "to": "G1_48_LAWS"},
+       {"type": "INFLUENCED_BY", "to": "G5_MASTERY"},
+       {"type": "INFLUENCED_BY", "to": "G6_LAWS_HUMAN_NATURE"}
+     ],
+     "works": [
+       {"id": "D_RH_OBSTACLE", "title": "The Obstacle Is the Way"},
+       {"id": "D_RH_EGO", "title": "Ego Is the Enemy"}
+     ]},
+    {"id": "D_NEIL_STRAUSS", "name": "Neil Strauss", "role": "author",
+     "relationship": [
+       {"type": "INFLUENCED_BY", "to": "G2_ART_SEDUCTION"},
+       {"type": "INFLUENCED_BY", "to": "G1_48_LAWS"}
+     ],
+     "works": [
+       {"id": "D_NS_GAME", "title": "The Game"}
+     ]},
+    {"id": "D_50_CENT", "name": "Curtis \"50 Cent\" Jackson", "role": "coauthor",
+     "relationship": [
+       {"type": "COAUTHORED", "to": "G4_50TH_LAW"}
+     ]}
+  ]
+}

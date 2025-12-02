@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Monument Echo — Resonant Memory Labyrinth</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: radial-gradient(circle at top, #0f0f1a, #010106 80%);
+      --accent: #7d9bff;
+      --future: #ff9f80;
+      --past: #8ef2d4;
+    }
+    body {
+      margin: 0;
+      font-family: "Manrope", system-ui, sans-serif;
+      background: var(--bg);
+      color: #f5f7ff;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    header {
+      padding: 1.5rem clamp(1rem, 4vw, 3rem);
+    }
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 3vw, 2.8rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    header p {
+      max-width: 660px;
+      line-height: 1.6;
+      opacity: 0.8;
+    }
+    main {
+      padding: 0 clamp(1rem, 4vw, 3rem) 2.5rem;
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) 1fr;
+      gap: clamp(1rem, 5vw, 3rem);
+      align-items: center;
+    }
+    aside {
+      background: rgba(20, 22, 38, 0.7);
+      border-radius: 22px;
+      padding: 1.4rem 1.6rem;
+      border: 1px solid rgba(125, 155, 255, 0.3);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+    }
+    label {
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    .timeline-meta {
+      margin-top: 1.4rem;
+      display: grid;
+      gap: 0.8rem;
+      font-size: 0.95rem;
+    }
+    .timeline-meta strong {
+      display: block;
+      font-size: 1.1rem;
+    }
+    .chamber {
+      position: relative;
+      perspective: 1400px;
+      height: 70vh;
+    }
+    .layers {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    .layer-card {
+      position: absolute;
+      width: clamp(220px, 30vw, 380px);
+      min-height: 260px;
+      padding: 1.4rem;
+      border-radius: 18px;
+      background: rgba(18, 20, 36, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      transform-style: preserve-3d;
+      transition: opacity 0.7s, transform 0.7s;
+    }
+    .layer-card h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+    .layer-card p {
+      line-height: 1.5;
+      opacity: 0.85;
+    }
+    footer {
+      padding: 1rem clamp(1rem, 4vw, 3rem) 2rem;
+      font-size: 0.85rem;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Version III — Monument Echo</h1>
+    <p>Spin resonance lenses to align the monument's timelines. Each layer reveals architecture and memory fragments from a different era.</p>
+  </header>
+  <main>
+    <aside>
+      <label for="dial">Resonance Dial</label>
+      <input id="dial" type="range" min="-100" max="100" value="0" />
+      <div class="timeline-meta" aria-live="polite">
+        <div>
+          <span>Dominant Era</span>
+          <strong id="era">Present Mantle</strong>
+        </div>
+        <div>
+          <span>Memory Integrity</span>
+          <strong id="integrity">Stable</strong>
+        </div>
+        <div>
+          <span>Unlocked Insight</span>
+          <strong id="insight">"Choir pits resonate with visitors at twilight."</strong>
+        </div>
+      </div>
+      <p style="margin-top:1.2rem; line-height:1.5; opacity:0.8;">
+        <!-- next: replace static insight strings with branching narrative graph -->
+        Note: Integrity shifts warn of structural collapse during extreme scrubbing.
+      </p>
+    </aside>
+    <section class="chamber" aria-label="Temporal layers visualization">
+      <div class="layers" id="layers">
+        <article class="layer-card" data-era="past" style="transform: translate3d(-220px, 40px, -220px) rotateY(12deg);">
+          <h2 style="color: var(--past);">Past // River Temple</h2>
+          <p>Sandstone pillars hum with river hymnals. Pilgrims leave resonance shells that store whispered histories.</p>
+        </article>
+        <article class="layer-card" data-era="present" style="transform: translate3d(0, 0, 0) rotateY(0deg);">
+          <h2 style="color: var(--accent);">Present // Archivist Atrium</h2>
+          <p>Docent automatons guide visitors through echo galleries. Floor glyphs pulse when correct harmonics are played.</p>
+        </article>
+        <article class="layer-card" data-era="future" style="transform: translate3d(220px, -60px, -260px) rotateY(-14deg);">
+          <h2 style="color: var(--future);">Future // Speculative Observatory</h2>
+          <p>Crystalline conduits refract potential futures. Choir drones shift architecture based on empathy readings.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer>
+    Resonance stability warnings fire at ±80 dial positions; interpolation table documented inline below.
+  </footer>
+  <script>
+    const dial = document.getElementById("dial");
+    const layers = document.getElementById("layers");
+    const cards = Array.from(document.querySelectorAll(".layer-card"));
+    const eraLabel = document.getElementById("era");
+    const integrityLabel = document.getElementById("integrity");
+    const insightLabel = document.getElementById("insight");
+
+    const insights = {
+      past: [
+        "River hymns reveal the architects' names.",
+        "Hidden passage opens when wind chimes align.",
+        "Floodglyphs warn of the coming drought."
+      ],
+      present: [
+        "Choir pits resonate with visitors at twilight.",
+        "Archivists debate whether echoes possess agency.",
+        "A child decodes the atrium's luminescent patterns."
+      ],
+      future: [
+        "Speculative observatory predicts empathy orbits.",
+        "Architecture reconfigures when hope levels spike.",
+        "Visitors imprint memories as holographic seeds."
+      ]
+    };
+
+    const offsets = {
+      past: { x: -220, y: 40, z: -220, rot: 12 },
+      present: { x: 0, y: 0, z: 0, rot: 0 },
+      future: { x: 220, y: -60, z: -260, rot: -14 }
+    };
+
+    function updateScene(value) {
+      const t = value / 100;
+      const focus = t > 0.2 ? "future" : t < -0.2 ? "past" : "present";
+
+      cards.forEach((card) => {
+        const key = card.dataset.era;
+        const offset = offsets[key];
+        const depthShift = key === "present" ? 0 : key === "past" ? -t * 90 : t * 120;
+        const rotShift = key === "present" ? -t * 8 : key === "past" ? 12 + t * 10 : -14 + t * 12;
+        card.style.transform = `translate3d(${offset.x + depthShift}px, ${offset.y + t * -30}px, ${offset.z + Math.abs(t) * -80}px) rotateY(${rotShift}deg)`;
+        card.style.opacity = focus === key ? 1 : 0.55;
+      });
+
+      layers.style.transform = `rotateY(${t * -18}deg) translateY(${t * -12}px)`;
+
+      const integrity = Math.abs(t) > 0.8 ? "Critical" : Math.abs(t) > 0.55 ? "Strained" : "Stable";
+      integrityLabel.textContent = integrity;
+      eraLabel.textContent =
+        focus === "past" ? "Ancient Substructure" : focus === "future" ? "Speculative Observatory" : "Present Mantle";
+
+      const bucket = insights[focus];
+      const index = Math.floor(((t + 1) / 2) * (bucket.length - 1));
+      insightLabel.textContent = `"${bucket[index]}"`;
+    }
+
+    dial.addEventListener("input", (event) => {
+      updateScene(Number(event.target.value));
+    });
+
+    updateScene(Number(dial.value));
+
+    // NOTE: Branching narrative system paused — awaiting schema from narrative pod.
+  </script>
+</body>
+</html>

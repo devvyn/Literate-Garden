@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solstice Run — Radiant Rhythm Courier</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: linear-gradient(180deg, #18061a 0%, #06121c 70%, #010507 100%);
+      --sun: #ffef8b;
+      --pulse: #ff7ad0;
+      --city: rgba(255, 255, 255, 0.1);
+    }
+    body {
+      margin: 0;
+      font-family: "Outfit", system-ui, sans-serif;
+      background: var(--bg);
+      color: #fdf7ff;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    header {
+      padding: 1.5rem clamp(1rem, 4vw, 3rem);
+    }
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 3vw, 2.8rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    header p {
+      max-width: 640px;
+      line-height: 1.6;
+      opacity: 0.8;
+    }
+    main {
+      padding: 0 clamp(1rem, 4vw, 3rem) 2rem;
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) 1fr;
+      gap: clamp(1rem, 4vw, 3rem);
+      align-items: center;
+    }
+    aside {
+      background: rgba(24, 10, 25, 0.7);
+      border-radius: 24px;
+      padding: 1.4rem 1.6rem;
+      border: 1px solid rgba(255, 180, 220, 0.3);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.45);
+    }
+    label {
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem 1.3rem;
+      margin-top: 1.4rem;
+      font-size: 0.95rem;
+    }
+    .stat-grid strong {
+      display: block;
+      font-size: 1.15rem;
+      color: var(--sun);
+    }
+    canvas {
+      width: 100%;
+      height: 70vh;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 228, 122, 0.2);
+      background: linear-gradient(180deg, rgba(255, 205, 135, 0.15), rgba(7, 9, 26, 0.9));
+      box-shadow: 0 40px 70px rgba(0, 0, 0, 0.5);
+    }
+    footer {
+      padding: 1rem clamp(1rem, 4vw, 3rem) 2rem;
+      font-size: 0.85rem;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Version IV — Solstice Run</h1>
+    <p>Ride the solar beat through a desert metropolis. Time jumps with the metronome to keep the ritual energy coursing through the city.</p>
+  </header>
+  <main>
+    <aside>
+      <label for="tempo">Solar Tempo (BPM)</label>
+      <input id="tempo" type="range" min="80" max="180" value="128" />
+      <label for="offset">Input Offset (ms)</label>
+      <input id="offset" type="range" min="-120" max="120" value="0" />
+      <div class="stat-grid" aria-live="polite">
+        <div>
+          <span>Combo</span>
+          <strong id="combo">0</strong>
+        </div>
+        <div>
+          <span>Solar Charge</span>
+          <strong id="charge">58%</strong>
+        </div>
+        <div>
+          <span>Mirror Alignment</span>
+          <strong id="alignment">Calibrating</strong>
+        </div>
+        <div>
+          <span>Beat Accuracy</span>
+          <strong id="accuracy">—</strong>
+        </div>
+      </div>
+      <p style="margin-top:1.2rem; line-height:1.5; opacity:0.8;">
+        <!-- next: Integrate ghost playback visualizer once telemetry format is finalized -->
+        Tip: Press space or tap to leap on beat; keep the charge above 50% to prevent dusk from encroaching.
+      </p>
+    </aside>
+    <section>
+      <canvas id="runner" width="1200" height="700" aria-label="Solar runner visualization"></canvas>
+    </section>
+  </main>
+  <footer>
+    Beat sync derived from oscillator phase — replaced later by full track stems.
+  </footer>
+  <script>
+    const canvas = document.getElementById("runner");
+    const ctx = canvas.getContext("2d");
+
+    const tempoSlider = document.getElementById("tempo");
+    const offsetSlider = document.getElementById("offset");
+    const comboLabel = document.getElementById("combo");
+    const chargeLabel = document.getElementById("charge");
+    const alignmentLabel = document.getElementById("alignment");
+    const accuracyLabel = document.getElementById("accuracy");
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const metronome = audioCtx.createOscillator();
+    const metGain = audioCtx.createGain();
+    metronome.type = "sawtooth";
+    metGain.gain.value = 0.0001;
+    metronome.connect(metGain).connect(audioCtx.destination);
+    metronome.start();
+
+    let combo = 0;
+    let solarCharge = 0.58;
+    let lastBeatTime = 0;
+    let beatInterval = 60 / Number(tempoSlider.value);
+    let beatAccuracy = "—";
+    let lastTapTime = null;
+
+    const runner = {
+      y: canvas.height - 180,
+      vy: 0,
+      onGround: true
+    };
+
+    const parallaxLayers = [
+      { speed: 40, color: "rgba(255, 215, 150, 0.12)", height: 120 },
+      { speed: 90, color: "rgba(255, 140, 200, 0.15)", height: 190 },
+      { speed: 140, color: "rgba(255, 255, 255, 0.12)", height: 260 }
+    ];
+
+    const pulses = [];
+
+    function scheduleBeat() {
+      const now = audioCtx.currentTime;
+      beatInterval = 60 / Number(tempoSlider.value);
+      const nextBeat = Math.ceil((now - offsetSlider.value / 1000) / beatInterval) * beatInterval + offsetSlider.value / 1000;
+      lastBeatTime = nextBeat;
+      metronome.frequency.setValueAtTime(880, nextBeat);
+      metGain.gain.cancelScheduledValues(now);
+      metGain.gain.setValueAtTime(0.0001, now);
+      metGain.gain.setValueAtTime(0.08, nextBeat);
+      metGain.gain.exponentialRampToValueAtTime(0.0001, nextBeat + 0.1);
+    }
+
+    function updateRunner(delta) {
+      runner.vy += 1600 * delta;
+      runner.y += runner.vy * delta;
+      if (runner.y >= canvas.height - 180) {
+        runner.y = canvas.height - 180;
+        runner.vy = 0;
+        runner.onGround = true;
+      }
+    }
+
+    let lastFrame = performance.now();
+
+    function loop(timestamp) {
+      const delta = Math.min((timestamp - lastFrame) / 1000, 0.03);
+      lastFrame = timestamp;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      parallaxLayers.forEach((layer, i) => {
+        const offset = (timestamp / 1000) * layer.speed % canvas.width;
+        ctx.fillStyle = layer.color;
+        ctx.fillRect(-offset, canvas.height - layer.height, canvas.width * 2, layer.height);
+        if (i === parallaxLayers.length - 1) {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+          for (let x = -offset; x < canvas.width * 2; x += 120) {
+            ctx.fillRect(x, canvas.height - layer.height - 40, 10, 40);
+          }
+        }
+      });
+
+      pulses.forEach((pulse, index) => {
+        pulse.radius += delta * 260;
+        pulse.alpha -= delta * 0.7;
+        if (pulse.alpha <= 0) {
+          pulses.splice(index, 1);
+        } else {
+          ctx.strokeStyle = `rgba(255, 239, 139, ${pulse.alpha})`;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(pulse.x, pulse.y, pulse.radius, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+
+      ctx.fillStyle = "rgba(255, 180, 60, 0.12)";
+      ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
+
+      ctx.fillStyle = "#ffd66f";
+      ctx.beginPath();
+      ctx.ellipse(260, 160 + Math.sin(timestamp / 800) * 14, 80, 80, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.arc(200, runner.y, 26, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "var(--pulse)";
+      ctx.fillRect(195, runner.y, 10, 46);
+
+      updateRunner(delta);
+
+      scheduleBeat();
+      requestAnimationFrame(loop);
+    }
+
+    function triggerJump() {
+      const now = audioCtx.currentTime;
+      if (runner.onGround) {
+        runner.onGround = false;
+        runner.vy = -640;
+        pulses.push({ x: 200, y: runner.y, radius: 12, alpha: 0.9 });
+      }
+      const beatTime = lastBeatTime;
+      const diff = Math.abs(now - beatTime);
+      beatAccuracy = diff < 0.06 ? "Perfect" : diff < 0.12 ? "Good" : "Off";
+      if (beatAccuracy === "Perfect") {
+        combo += 1;
+        solarCharge = Math.min(1, solarCharge + 0.05);
+      } else if (beatAccuracy === "Good") {
+        combo = Math.max(0, combo);
+        solarCharge = Math.max(0, solarCharge + 0.01);
+      } else {
+        combo = 0;
+        solarCharge = Math.max(0, solarCharge - 0.07);
+      }
+      comboLabel.textContent = combo;
+      chargeLabel.textContent = `${Math.round(solarCharge * 100)}%`;
+      alignmentLabel.textContent = solarCharge > 0.7 ? "Radiant" : solarCharge > 0.45 ? "Calibrated" : "Fading";
+      accuracyLabel.textContent = beatAccuracy;
+      lastTapTime = now;
+    }
+
+    document.body.addEventListener("keydown", (event) => {
+      if (event.code === "Space") {
+        triggerJump();
+      }
+    });
+
+    document.body.addEventListener("pointerdown", () => {
+      triggerJump();
+    });
+
+    tempoSlider.addEventListener("input", () => {
+      combo = 0;
+      beatAccuracy = "—";
+      comboLabel.textContent = combo;
+      accuracyLabel.textContent = beatAccuracy;
+      scheduleBeat();
+    });
+
+    offsetSlider.addEventListener("input", scheduleBeat);
+
+    document.body.addEventListener("pointerdown", () => {
+      if (audioCtx.state !== "running") {
+        audioCtx.resume();
+        metGain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        metGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
+      }
+    }, { once: true });
+
+    scheduleBeat();
+    requestAnimationFrame(loop);
+
+    // NOTE: Telemetry export blocked — waiting for data schema from analytics agent.
+  </script>
+</body>
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recursive Garden Architect - Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a3a1a 0%, #0d1f0d 100%);
+            color: #c8e6c9;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .header {
+            padding: 2rem;
+            background: linear-gradient(180deg, rgba(13, 31, 13, 0.9) 0%, transparent 100%);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            color: #81c784;
+        }
+
+        .depth-indicator {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(13, 31, 13, 0.9);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid #4caf50;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .depth-level {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #66bb6a;
+            margin-bottom: 0.5rem;
+        }
+
+        .depth-label {
+            font-size: 0.9rem;
+            color: #81c784;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: rgba(13, 31, 13, 0.9);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid #4caf50;
+            max-width: 300px;
+            pointer-events: all;
+        }
+
+        .controls h3 {
+            margin-bottom: 1rem;
+            color: #81c784;
+            font-size: 1rem;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1rem;
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #81c784;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .btn:hover {
+            background: rgba(76, 175, 80, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn.active {
+            background: rgba(76, 175, 80, 0.5);
+            border-color: #66bb6a;
+        }
+
+        .instruction {
+            font-size: 0.8rem;
+            color: #a5d6a7;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(76, 175, 80, 0.3);
+            line-height: 1.5;
+        }
+
+        .instruction kbd {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        .zoom-hint {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(13, 31, 13, 0.95);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            border: 2px solid #4caf50;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            font-size: 1.2rem;
+            color: #66bb6a;
+        }
+
+        .zoom-hint.visible {
+            opacity: 1;
+        }
+
+        .fractal-info {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(13, 31, 13, 0.9);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 2px solid #4caf50;
+            text-align: right;
+            max-width: 250px;
+        }
+
+        .fractal-info .stat {
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .fractal-info .stat-label {
+            color: #81c784;
+            margin-right: 0.5rem;
+        }
+
+        .fractal-info .stat-value {
+            color: #66bb6a;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- COLLAB NOTE: Canvas for rendering fractal garden -->
+    <canvas id="canvas"></canvas>
+
+    <!-- COLLAB NOTE: UI Overlays -->
+    <div class="ui-overlay">
+        <div class="header">
+            <h1>RECURSIVE GARDEN ARCHITECT</h1>
+        </div>
+    </div>
+
+    <div class="depth-indicator">
+        <div class="depth-level" id="depthLevel">1</div>
+        <div class="depth-label">Recursion Depth</div>
+    </div>
+
+    <div class="controls">
+        <h3>Garden Tools</h3>
+        <div class="control-row">
+            <button class="btn active" id="plantBtn" onclick="setMode('plant')">🌱 Plant</button>
+            <button class="btn" id="pruneBtn" onclick="setMode('prune')">✂️ Prune</button>
+        </div>
+        <div class="control-row">
+            <button class="btn" onclick="zoomIn()">🔍 Zoom In</button>
+            <button class="btn" onclick="zoomOut()">🔍 Zoom Out</button>
+        </div>
+        <div class="control-row">
+            <button class="btn" onclick="resetGarden()">♻️ Reset</button>
+        </div>
+        <div class="instruction">
+            <strong>Click</strong> to plant/prune<br>
+            <kbd>Scroll</kbd> to zoom<br>
+            <kbd>Click plant</kbd> then <kbd>Zoom In</kbd> to explore its recursive garden
+        </div>
+    </div>
+
+    <div class="zoom-hint" id="zoomHint">
+        🌸 Entering recursive depth...
+    </div>
+
+    <div class="fractal-info">
+        <div class="stat">
+            <span class="stat-label">Plants:</span>
+            <span class="stat-value" id="plantCount">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Total (All Depths):</span>
+            <span class="stat-value" id="totalPlants">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">Iteration:</span>
+            <span class="stat-value" id="iteration">1</span>
+        </div>
+    </div>
+
+    <script>
+        // COLLAB NOTE: Core garden state
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let gardens = []; // Tree structure: each garden contains sub-gardens
+        let currentDepth = 0;
+        let currentGarden = null;
+        let mode = 'plant'; // 'plant' or 'prune'
+        let selectedPlant = null;
+        let iteration = 0;
+
+        // COLLAB NOTE: L-System configuration
+        const LSYSTEM_RULES = {
+            axiom: "F",
+            rules: {
+                "F": "F[+F]F[-F]F"  // Simple branching rule
+            },
+            angle: 25,
+            stepLength: 10,
+            maxDepth: 2  // L-system iteration depth
+        };
+
+        // COLLAB NOTE: Visual configuration
+        const CONFIG = {
+            maxRecursionDepth: 4,
+            plantSize: 30,
+            plantColor: '#66bb6a',
+            stemColor: '#4caf50',
+            backgroundColor: '#0d1f0d',
+            gridSize: 50,
+        };
+
+        // COLLAB NOTE: Garden data structure
+        class Garden {
+            constructor(depth, parent = null) {
+                this.depth = depth;
+                this.parent = parent;
+                this.plants = [];
+                this.subGardens = new Map(); // Map: plantId -> Garden
+            }
+
+            addPlant(x, y) {
+                const plant = {
+                    id: Date.now() + Math.random(),
+                    x: x,
+                    y: y,
+                    size: CONFIG.plantSize,
+                    lsystem: generateLSystem(LSYSTEM_RULES.maxDepth),
+                    age: 0
+                };
+                this.plants.push(plant);
+
+                // Create recursive sub-garden inside this plant
+                if (this.depth < CONFIG.maxRecursionDepth) {
+                    this.subGardens.set(plant.id, new Garden(this.depth + 1, this));
+                }
+
+                return plant;
+            }
+
+            removePlant(plant) {
+                const index = this.plants.indexOf(plant);
+                if (index > -1) {
+                    this.plants.splice(index, 1);
+                    this.subGardens.delete(plant.id);
+                }
+            }
+
+            countAllPlants() {
+                let total = this.plants.length;
+                for (let subGarden of this.subGardens.values()) {
+                    total += subGarden.countAllPlants();
+                }
+                return total;
+            }
+        }
+
+        // COLLAB NOTE: L-System generation
+        function generateLSystem(depth) {
+            let result = LSYSTEM_RULES.axiom;
+
+            for (let i = 0; i < depth; i++) {
+                let next = "";
+                for (let char of result) {
+                    next += LSYSTEM_RULES.rules[char] || char;
+                }
+                result = next;
+            }
+
+            return result;
+        }
+
+        // COLLAB NOTE: Convert L-system string to drawing commands
+        function drawLSystem(lstring, x, y, size) {
+            let position = { x: x, y: y };
+            let angle = -90; // Start facing up
+            let stack = [];
+
+            const angleIncrement = LSYSTEM_RULES.angle;
+            const stepLength = size / 10;
+
+            ctx.strokeStyle = CONFIG.stemColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            for (let char of lstring) {
+                switch(char) {
+                    case 'F':
+                        // Draw forward
+                        const newX = position.x + Math.cos(angle * Math.PI / 180) * stepLength;
+                        const newY = position.y + Math.sin(angle * Math.PI / 180) * stepLength;
+                        ctx.moveTo(position.x, position.y);
+                        ctx.lineTo(newX, newY);
+                        position = { x: newX, y: newY };
+                        break;
+                    case '+':
+                        angle += angleIncrement;
+                        break;
+                    case '-':
+                        angle -= angleIncrement;
+                        break;
+                    case '[':
+                        stack.push({ pos: {...position}, ang: angle });
+                        break;
+                    case ']':
+                        const state = stack.pop();
+                        position = state.pos;
+                        angle = state.ang;
+                        ctx.moveTo(position.x, position.y);
+                        break;
+                }
+            }
+
+            ctx.stroke();
+
+            // Draw flower at the end
+            ctx.fillStyle = CONFIG.plantColor;
+            ctx.beginPath();
+            ctx.arc(position.x, position.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // COLLAB NOTE: Initialize garden
+        function init() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Create root garden
+            gardens = [new Garden(0)];
+            currentGarden = gardens[0];
+
+            // Canvas interactions
+            canvas.addEventListener('click', handleCanvasClick);
+            canvas.addEventListener('wheel', handleWheel, { passive: false });
+
+            // Start animation loop
+            animate();
+        }
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        // COLLAB NOTE: Handle user interactions
+        function handleCanvasClick(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            if (mode === 'plant') {
+                // Plant new flora
+                currentGarden.addPlant(x, y);
+                iteration++;
+                updateUI();
+            } else if (mode === 'prune') {
+                // Remove plant if clicked on one
+                const plant = findPlantAt(x, y);
+                if (plant) {
+                    currentGarden.removePlant(plant);
+                    iteration++;
+                    updateUI();
+                }
+            }
+        }
+
+        function findPlantAt(x, y) {
+            for (let plant of currentGarden.plants) {
+                const dist = Math.hypot(plant.x - x, plant.y - y);
+                if (dist < plant.size / 2) {
+                    return plant;
+                }
+            }
+            return null;
+        }
+
+        function handleWheel(event) {
+            event.preventDefault();
+            if (event.deltaY < 0) {
+                zoomIn();
+            } else {
+                zoomOut();
+            }
+        }
+
+        // COLLAB NOTE: Zoom into recursive depth
+        function zoomIn() {
+            if (currentDepth >= CONFIG.maxRecursionDepth) {
+                showZoomHint("🌸 Maximum depth reached");
+                return;
+            }
+
+            // For simplicity, zoom into first plant
+            // In full game, player would select which plant to enter
+            if (currentGarden.plants.length === 0) {
+                showZoomHint("🌱 Plant something first!");
+                return;
+            }
+
+            const targetPlant = currentGarden.plants[0];
+            const subGarden = currentGarden.subGardens.get(targetPlant.id);
+
+            if (subGarden) {
+                currentDepth++;
+                currentGarden = subGarden;
+                selectedPlant = targetPlant;
+                showZoomHint("🌸 Entering recursive garden...");
+                updateUI();
+            }
+        }
+
+        function zoomOut() {
+            if (currentDepth === 0) {
+                showZoomHint("🌍 Already at root level");
+                return;
+            }
+
+            currentDepth--;
+            currentGarden = currentGarden.parent;
+            selectedPlant = null;
+            showZoomHint("🌍 Returning to macro view...");
+            updateUI();
+        }
+
+        function showZoomHint(message) {
+            const hint = document.getElementById('zoomHint');
+            hint.textContent = message;
+            hint.classList.add('visible');
+            setTimeout(() => {
+                hint.classList.remove('visible');
+            }, 1500);
+        }
+
+        // COLLAB NOTE: UI mode switching
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('plantBtn').classList.toggle('active', mode === 'plant');
+            document.getElementById('pruneBtn').classList.toggle('active', mode === 'prune');
+        }
+
+        function resetGarden() {
+            if (confirm('Reset entire garden? This will clear all plants and sub-gardens.')) {
+                gardens = [new Garden(0)];
+                currentGarden = gardens[0];
+                currentDepth = 0;
+                selectedPlant = null;
+                iteration = 0;
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('depthLevel').textContent = currentDepth;
+            document.getElementById('plantCount').textContent = currentGarden.plants.length;
+            document.getElementById('totalPlants').textContent = gardens[0].countAllPlants();
+            document.getElementById('iteration').textContent = iteration;
+        }
+
+        // COLLAB NOTE: Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Clear canvas
+            ctx.fillStyle = CONFIG.backgroundColor;
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw subtle grid
+            drawGrid();
+
+            // Draw all plants in current garden
+            for (let plant of currentGarden.plants) {
+                plant.age += 0.01; // Gentle growth animation
+
+                // Draw L-system fractal plant
+                ctx.save();
+                drawLSystem(plant.lsystem, plant.x, plant.y, plant.size + Math.sin(plant.age) * 2);
+                ctx.restore();
+
+                // Highlight if recursion available
+                if (currentDepth < CONFIG.maxRecursionDepth) {
+                    ctx.strokeStyle = 'rgba(102, 187, 106, 0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(plant.x, plant.y, plant.size / 2, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+
+            // Draw breadcrumb trail showing recursion path
+            drawBreadcrumbs();
+        }
+
+        function drawGrid() {
+            ctx.strokeStyle = 'rgba(76, 175, 80, 0.05)';
+            ctx.lineWidth = 1;
+
+            for (let x = 0; x < width; x += CONFIG.gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y < height; y += CONFIG.gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawBreadcrumbs() {
+            // Show current path through recursion
+            ctx.fillStyle = 'rgba(102, 187, 106, 0.1)';
+            ctx.font = '12px monospace';
+            ctx.fillText(`Depth: ${currentDepth} / ${CONFIG.maxRecursionDepth}`, 10, height - 10);
+        }
+
+        // COLLAB NOTE: Start the garden
+        init();
+        updateUI();
+    </script>
+</body>
+</html>

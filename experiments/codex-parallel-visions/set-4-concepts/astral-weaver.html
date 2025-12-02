@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Astral Weaver — Pattern Puzzle Slice</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1b2340, #060611 70%);
+      color: #d6d8ff;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .panel {
+      background: rgba(10,15,35,0.9);
+      border: 1px solid rgba(110,140,255,0.35);
+      border-radius: 22px;
+      padding: 2rem;
+      display: grid;
+      gap: 1.5rem;
+      box-shadow: 0 20px 60px rgba(15,20,60,0.6);
+    }
+    canvas {
+      border-radius: 18px;
+      background: rgba(20,28,60,0.8);
+    }
+    .status {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      opacity: 0.85;
+    }
+  </style>
+</head>
+<body>
+  <section class="panel">
+    <h1>Astral Weaver</h1>
+    <canvas id="board" width="360" height="360"></canvas>
+    <p class="status" id="status">Align the conduits by rotating fragments.</p>
+  </section>
+  <script>
+    const canvas = document.getElementById('board');
+    const ctx = canvas.getContext('2d');
+    const statusEl = document.getElementById('status');
+
+    const gridSize = 3;
+    const cellSize = canvas.width / gridSize;
+
+    // Tile library with directional connectors.
+    const tileLibrary = [
+      { pattern: [1,0,1,0], rarity: 'common' }, // vertical
+      { pattern: [0,1,0,1], rarity: 'common' }, // horizontal
+      { pattern: [1,1,0,0], rarity: 'rare' },   // elbow NE
+      { pattern: [0,1,1,0], rarity: 'rare' },   // elbow ES
+      { pattern: [1,0,0,1], rarity: 'rare' },   // elbow NW
+      { pattern: [0,0,1,1], rarity: 'rare' },   // elbow SW
+      { pattern: [1,1,1,1], rarity: 'legendary' } // cross
+    ];
+
+    function cloneTile(base) {
+      return { pattern: base.pattern.slice() };
+    }
+
+    const board = [];
+
+    for (let y = 0; y < gridSize; y++) {
+      const row = [];
+      for (let x = 0; x < gridSize; x++) {
+        const tile = cloneTile(tileLibrary[Math.floor(Math.random() * tileLibrary.length)]);
+        const rotations = Math.floor(Math.random() * 4);
+        for (let i = 0; i < rotations; i++) rotateTile(tile);
+        row.push(tile);
+      }
+      board.push(row);
+    }
+
+    const anchors = [
+      { x: 0, y: 0 }, // start anchor
+      { x: 2, y: 2 }  // goal anchor
+    ];
+
+    function rotateTile(tile) {
+      tile.pattern.unshift(tile.pattern.pop());
+    }
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          drawTile(x, y, board[y][x]);
+        }
+      }
+      drawAnchors();
+    }
+
+    function drawTile(x, y, tile) {
+      const px = x * cellSize;
+      const py = y * cellSize;
+      ctx.save();
+      ctx.translate(px, py);
+
+      ctx.strokeStyle = 'rgba(130,150,255,0.6)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(4, 4, cellSize - 8, cellSize - 8);
+
+      const centerX = cellSize / 2;
+      const centerY = cellSize / 2;
+
+      ctx.strokeStyle = 'rgba(210,220,255,0.9)';
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+
+      const directions = [
+        { dx: 0, dy: -1 }, // up
+        { dx: 1, dy: 0 },  // right
+        { dx: 0, dy: 1 },  // down
+        { dx: -1, dy: 0 }  // left
+      ];
+
+      tile.pattern.forEach((val, index) => {
+        if (!val) return;
+        const dir = directions[index];
+        const endX = centerX + dir.dx * (cellSize / 2 - 12);
+        const endY = centerY + dir.dy * (cellSize / 2 - 12);
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+      });
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 12, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(140,180,255,0.35)';
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawAnchors() {
+      ctx.fillStyle = '#ffd866';
+      anchors.forEach(anchor => {
+        const cx = anchor.x * cellSize + cellSize / 2;
+        const cy = anchor.y * cellSize + cellSize / 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function getCellFromCoords(x, y) {
+      return {
+        cx: Math.floor(x / cellSize),
+        cy: Math.floor(y / cellSize)
+      };
+    }
+
+    function handleClick(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const { cx, cy } = getCellFromCoords(x, y);
+      const tile = board[cy]?.[cx];
+      if (!tile) return;
+      rotateTile(tile);
+      drawBoard();
+      evaluateNetwork();
+    }
+
+    function evaluateNetwork() {
+      const visited = Array.from({ length: gridSize }, () => Array(gridSize).fill(false));
+      const queue = [{ x: anchors[0].x, y: anchors[0].y }];
+
+      while (queue.length) {
+        const { x, y } = queue.shift();
+        if (visited[y][x]) continue;
+        visited[y][x] = true;
+        const tile = board[y][x];
+        const connections = getConnections(x, y, tile);
+        connections.forEach(({ nx, ny }) => {
+          if (!visited[ny][nx]) queue.push({ x: nx, y: ny });
+        });
+      }
+
+      const goalReached = visited[anchors[1].y][anchors[1].x];
+      statusEl.textContent = goalReached
+        ? 'Conduits aligned — astral surge achieved.'
+        : 'Align the conduits by rotating fragments.';
+    }
+
+    function getConnections(x, y, tile) {
+      const dirs = [
+        { dx: 0, dy: -1, index: 0, opposite: 2 },
+        { dx: 1, dy: 0, index: 1, opposite: 3 },
+        { dx: 0, dy: 1, index: 2, opposite: 0 },
+        { dx: -1, dy: 0, index: 3, opposite: 1 }
+      ];
+      const connections = [];
+      dirs.forEach(dir => {
+        if (!tile.pattern[dir.index]) return;
+        const nx = x + dir.dx;
+        const ny = y + dir.dy;
+        const neighbor = board[ny]?.[nx];
+        if (!neighbor) return;
+        if (neighbor.pattern[dir.opposite]) {
+          connections.push({ nx, ny });
+        }
+      });
+      return connections;
+    }
+
+    canvas.addEventListener('click', handleClick);
+
+    drawBoard();
+    evaluateNetwork();
+
+    // EXTENSION HOOK: Drop in procedural puzzle seeding or scoring.
+  </script>
+</body>
+</html>

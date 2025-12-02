@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tidal Echo Composer - Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(180deg, #1a237e 0%, #0d47a1 50%, #006064 100%);
+            color: #b3e5fc;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .ui-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .header {
+            padding: 2rem;
+            background: linear-gradient(180deg, rgba(13, 71, 161, 0.9) 0%, transparent 100%);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            color: #81d4fa;
+        }
+
+        .header .subtitle {
+            font-size: 0.9rem;
+            color: #4fc3f7;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .controls-panel {
+            position: fixed;
+            left: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(13, 71, 161, 0.9);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 2px solid #29b6f6;
+            min-width: 280px;
+            pointer-events: all;
+        }
+
+        .control-group {
+            margin-bottom: 2rem;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: #81d4fa;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .control-value {
+            color: #29b6f6;
+            font-weight: bold;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(41, 182, 246, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #29b6f6;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(41, 182, 246, 0.5);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #29b6f6;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(41, 182, 246, 0.5);
+        }
+
+        .tide-info {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(13, 71, 161, 0.9);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 2px solid #29b6f6;
+            min-width: 250px;
+            text-align: center;
+        }
+
+        .tide-level-display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #29b6f6;
+            margin-bottom: 0.5rem;
+        }
+
+        .tide-label {
+            font-size: 0.9rem;
+            color: #81d4fa;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .active-tracks {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(41, 182, 246, 0.3);
+        }
+
+        .track-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .track-name {
+            color: #81d4fa;
+        }
+
+        .track-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(41, 182, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .track-status.active {
+            background: #29b6f6;
+            box-shadow: 0 0 12px #29b6f6;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .instructions {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(13, 71, 161, 0.9);
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            border: 2px solid #29b6f6;
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .instructions p {
+            font-size: 0.9rem;
+            color: #81d4fa;
+            line-height: 1.6;
+        }
+
+        .moon-phases {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+
+        .moon-icon {
+            font-size: 1.2rem;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .moon-icon.active {
+            opacity: 1;
+        }
+
+        .time-display {
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(41, 182, 246, 0.3);
+        }
+
+        .time-value {
+            font-size: 1.5rem;
+            color: #29b6f6;
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body>
+    <!-- COLLAB NOTE: Canvas for rendering coastal scene -->
+    <canvas id="canvas"></canvas>
+
+    <!-- COLLAB NOTE: UI Overlays -->
+    <div class="ui-container">
+        <div class="header">
+            <h1>TIDAL ECHO COMPOSER</h1>
+            <p class="subtitle">Manipulate the tide to reveal hidden melodies carved in stone</p>
+        </div>
+    </div>
+
+    <!-- COLLAB NOTE: Tidal control panel -->
+    <div class="controls-panel">
+        <div class="control-group">
+            <div class="control-label">
+                <span>Moon Phase</span>
+                <span class="control-value" id="moonValue">50%</span>
+            </div>
+            <input type="range" class="slider" id="moonSlider" min="0" max="100" value="50">
+            <div class="moon-phases">
+                <span class="moon-icon" id="moon0">🌑</span>
+                <span class="moon-icon" id="moon1">🌒</span>
+                <span class="moon-icon active" id="moon2">🌓</span>
+                <span class="moon-icon" id="moon3">🌔</span>
+                <span class="moon-icon" id="moon4">🌕</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Weather</span>
+                <span class="control-value" id="weatherValue">Calm</span>
+            </div>
+            <input type="range" class="slider" id="weatherSlider" min="0" max="100" value="70">
+        </div>
+
+        <div class="control-group">
+            <div class="control-label">
+                <span>Time Speed</span>
+                <span class="control-value" id="speedValue">1x</span>
+            </div>
+            <input type="range" class="slider" id="speedSlider" min="1" max="100" value="10">
+        </div>
+
+        <div class="time-display">
+            <div class="control-label" style="margin-bottom: 0.5rem;">
+                <span>Time of Day</span>
+            </div>
+            <div class="time-value" id="timeDisplay">12:00</div>
+        </div>
+    </div>
+
+    <!-- COLLAB NOTE: Tide level and active music tracks -->
+    <div class="tide-info">
+        <div class="tide-level-display" id="tideLevel">50%</div>
+        <div class="tide-label">Tide Level</div>
+
+        <div class="active-tracks">
+            <div class="track-indicator">
+                <span class="track-name">🎵 Base Melody</span>
+                <div class="track-status" id="track0"></div>
+            </div>
+            <div class="track-indicator">
+                <span class="track-name">🎵 Harmony</span>
+                <div class="track-status" id="track1"></div>
+            </div>
+            <div class="track-indicator">
+                <span class="track-name">🎵 Rhythm</span>
+                <div class="track-status" id="track2"></div>
+            </div>
+            <div class="track-indicator">
+                <span class="track-name">🎵 Counter-Melody</span>
+                <div class="track-status" id="track3"></div>
+            </div>
+            <div class="track-indicator">
+                <span class="track-name">🎵 Ambient</span>
+                <div class="track-status" id="track4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <p>
+            Adjust the <strong>moon phase</strong> and <strong>weather</strong> to change the tide level.
+            Different water heights reveal carved rocks that play musical layers.
+            Find the perfect combination to compose your symphony.
+        </p>
+    </div>
+
+    <script>
+        // COLLAB NOTE: Core simulation state
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        // COLLAB NOTE: Tidal simulator
+        class TidalSimulator {
+            constructor() {
+                this.baseLevel = 0.5;
+                this.moonPhase = 0.5;
+                this.weatherFactor = 0.7;
+                this.timeOfDay = 12.0;
+                this.timeSpeed = 10;
+            }
+
+            getTideLevel() {
+                // Primary tidal cycle (12.42 hour period)
+                const primaryTide = Math.sin(this.timeOfDay * Math.PI / 6.21);
+
+                // Secondary cycle
+                const secondaryTide = Math.sin(this.timeOfDay * Math.PI / 24);
+
+                // Moon influence
+                const moonInfluence = this.moonPhase * 0.3;
+
+                // Weather chaos
+                const weatherChaos = (1 - this.weatherFactor) *
+                                    Math.sin(this.timeOfDay * Math.PI * 3) * 0.1;
+
+                let tideLevel = this.baseLevel +
+                               (primaryTide * 0.3) +
+                               (secondaryTide * 0.1) +
+                               (primaryTide * moonInfluence) +
+                               weatherChaos;
+
+                return Math.max(0, Math.min(1, tideLevel));
+            }
+
+            update(deltaTime) {
+                this.timeOfDay += (deltaTime / 1000) * (this.timeSpeed / 10);
+                if (this.timeOfDay >= 24) this.timeOfDay -= 24;
+            }
+        }
+
+        const simulator = new TidalSimulator();
+
+        // COLLAB NOTE: Rock formations with musical triggers
+        const rocks = [
+            { x: 0.2, y: 0.7, size: 60, triggerMin: 0.1, triggerMax: 0.3, track: 0 },
+            { x: 0.35, y: 0.65, size: 50, triggerMin: 0.3, triggerMax: 0.5, track: 1 },
+            { x: 0.5, y: 0.75, size: 70, triggerMin: 0.4, triggerMax: 0.6, track: 2 },
+            { x: 0.65, y: 0.68, size: 55, triggerMin: 0.5, triggerMax: 0.7, track: 3 },
+            { x: 0.8, y: 0.72, size: 65, triggerMin: 0.7, triggerMax: 0.9, track: 4 },
+        ];
+
+        let activeTracks = new Set();
+
+        // COLLAB NOTE: Initialize
+        function init() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Control listeners
+            document.getElementById('moonSlider').addEventListener('input', (e) => {
+                simulator.moonPhase = e.target.value / 100;
+                updateUI();
+            });
+
+            document.getElementById('weatherSlider').addEventListener('input', (e) => {
+                simulator.weatherFactor = e.target.value / 100;
+                updateUI();
+            });
+
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                simulator.timeSpeed = parseFloat(e.target.value);
+                updateUI();
+            });
+
+            // Start animation
+            let lastTime = Date.now();
+            function animate() {
+                const now = Date.now();
+                const deltaTime = Math.min(now - lastTime, 100);
+                lastTime = now;
+
+                simulator.update(deltaTime);
+                updateUI();
+                render();
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        // COLLAB NOTE: Update UI displays
+        function updateUI() {
+            // Moon phase
+            const moonPercent = Math.round(simulator.moonPhase * 100);
+            document.getElementById('moonValue').textContent = moonPercent + '%';
+
+            // Update moon icons
+            for (let i = 0; i < 5; i++) {
+                const icon = document.getElementById('moon' + i);
+                icon.classList.toggle('active', Math.abs((i / 4) - simulator.moonPhase) < 0.15);
+            }
+
+            // Weather
+            const weatherPercent = Math.round(simulator.weatherFactor * 100);
+            let weatherLabel = 'Calm';
+            if (weatherPercent < 30) weatherLabel = 'Storm';
+            else if (weatherPercent < 60) weatherLabel = 'Choppy';
+            document.getElementById('weatherValue').textContent = weatherLabel;
+
+            // Speed
+            document.getElementById('speedValue').textContent = simulator.timeSpeed.toFixed(0) + 'x';
+
+            // Time of day
+            const hours = Math.floor(simulator.timeOfDay);
+            const minutes = Math.floor((simulator.timeOfDay % 1) * 60);
+            document.getElementById('timeDisplay').textContent =
+                hours.toString().padStart(2, '0') + ':' + minutes.toString().padStart(2, '0');
+
+            // Tide level
+            const tideLevel = simulator.getTideLevel();
+            document.getElementById('tideLevel').textContent = Math.round(tideLevel * 100) + '%';
+
+            // Check which tracks should be active
+            const newActiveTracks = new Set();
+            for (let rock of rocks) {
+                if (tideLevel >= rock.triggerMin && tideLevel <= rock.triggerMax) {
+                    newActiveTracks.add(rock.track);
+                }
+            }
+
+            // Update track indicators
+            for (let i = 0; i < 5; i++) {
+                const indicator = document.getElementById('track' + i);
+                indicator.classList.toggle('active', newActiveTracks.has(i));
+            }
+
+            // COLLAB NOTE: In full game, this would trigger actual audio playback
+            // For now, just visual feedback
+            activeTracks = newActiveTracks;
+        }
+
+        // COLLAB NOTE: Render coastal scene
+        function render() {
+            // Sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#1a237e');
+            gradient.addColorStop(0.5, '#0d47a1');
+            gradient.addColorStop(1, '#006064');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Water level
+            const tideLevel = simulator.getTideLevel();
+            const waterY = height * (1 - tideLevel);
+
+            // Water
+            ctx.fillStyle = 'rgba(0, 188, 212, 0.6)';
+            ctx.fillRect(0, waterY, width, height - waterY);
+
+            // Water surface shimmer
+            ctx.strokeStyle = 'rgba(129, 212, 250, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const waveAmplitude = 10;
+            const waveFrequency = 0.02;
+            for (let x = 0; x <= width; x += 5) {
+                const y = waterY + Math.sin(x * waveFrequency + Date.now() * 0.001) * waveAmplitude;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Rocks
+            for (let rock of rocks) {
+                const rockX = rock.x * width;
+                const rockY = height * 0.75;
+                const isRevealed = tideLevel >= rock.triggerMin && tideLevel <= rock.triggerMax;
+
+                // Rock body
+                ctx.fillStyle = '#37474f';
+                ctx.beginPath();
+                ctx.ellipse(rockX, rockY, rock.size, rock.size * 0.8, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Carvings (glyphs) - visible when in range
+                if (isRevealed) {
+                    ctx.strokeStyle = '#29b6f6';
+                    ctx.lineWidth = 3;
+                    ctx.globalAlpha = 0.8;
+
+                    // Draw mystical glyphs (simplified)
+                    ctx.beginPath();
+                    ctx.arc(rockX, rockY - 10, 15, 0, Math.PI, true);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(rockX - 10, rockY + 5);
+                    ctx.lineTo(rockX + 10, rockY + 5);
+                    ctx.stroke();
+
+                    // Glow effect
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#29b6f6';
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    ctx.globalAlpha = 1;
+                }
+
+                // Highlight if active
+                if (activeTracks.has(rock.track)) {
+                    ctx.strokeStyle = '#29b6f6';
+                    ctx.lineWidth = 4;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#29b6f6';
+                    ctx.beginPath();
+                    ctx.ellipse(rockX, rockY, rock.size + 5, rock.size * 0.8 + 5, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            // Foam/particles at water surface (simplified)
+            ctx.fillStyle = 'rgba(224, 247, 250, 0.3)';
+            for (let i = 0; i < 20; i++) {
+                const px = (Date.now() * 0.02 + i * 50) % width;
+                const py = waterY + Math.sin(px * 0.05 + Date.now() * 0.001) * 5;
+                ctx.beginPath();
+                ctx.arc(px, py, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // COLLAB NOTE: Start simulation
+        init();
+    </script>
+</body>
+</html>

@@ -87,7 +87,28 @@ See `CLAUDE.md` for full details.
 
 ## Active Experiments
 
-### 🎮 Game Demo Gallery (NEW!)
+### 🏗️ Agent Strata - Layered Agent Architecture (NEW!)
+
+**Proof-of-concept: Infrastructure as code via marimo cells**
+
+```bash
+marimo run agent_strata.py
+```
+
+Demonstrates that marimo's reactive cell dependency graph naturally implements agent call surface stacking:
+
+- **Strategic Layer**: High-level vision and goals
+- **Tactical Layer**: Task breakdown and orchestration
+- **Execution Layer**: Concrete actions and operations
+- **Reflection Layer**: Meta-cognitive learning and feedback
+
+**Key Insight**: Each marimo cell is an "agent surface" - the dependency graph IS the agent call stack. Changes propagate through strata reactively.
+
+**Status**: Playable prototype answering the question "Can marimo support agent stacking?" (Answer: Yes!)
+
+---
+
+### 🎮 Game Demo Gallery
 
 **Four parallel visions unified** — Interactive showcase of award-ready indie game concepts:
 
@@ -110,8 +131,9 @@ See [experiments/README.md](experiments/README.md) for details.
 ```
 Literate-Garden/
 ├── starter_seed.py           # Original agentic seed document
-├── game_demos_gallery.py     # Interactive showcase (NEW!)
-├── experiments/              # Four unified collections (NEW!)
+├── agent_strata.py           # Agent stacking proof-of-concept (NEW!)
+├── game_demos_gallery.py     # Interactive showcase
+├── experiments/              # Four unified collections
 │   ├── bloom/
 │   ├── clockwork/
 │   ├── palimpsest/

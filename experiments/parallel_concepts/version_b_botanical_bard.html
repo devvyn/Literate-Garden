@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Botanical Bard — Poem Garden Slice</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(180deg, #f2ffe6, #d4f0ff);
+      color: #32443f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: rgba(255,255,255,0.8);
+      border-radius: 24px;
+      box-shadow: 0 30px 60px rgba(80,140,120,0.2);
+      padding: 2.5rem;
+      max-width: 680px;
+      width: 100%;
+    }
+    button {
+      background: #5fb38a;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 0.8rem 1.4rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(95,179,138,0.35);
+    }
+    .poem {
+      margin-top: 1.5rem;
+      line-height: 1.6;
+      font-size: 1.1rem;
+      white-space: pre-line;
+    }
+    .mood-selector {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .badge {
+      background: rgba(95,179,138,0.15);
+      border-radius: 999px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <section class="card">
+    <h1>Botanical Bard</h1>
+    <p>Pick a mood and we will plant a stanza. Curate a pocket garden of verse.</p>
+    <div class="mood-selector" id="moodSelector">
+      <!-- EXTENSION HOOK: Append moods via CMS or AI suggestions. -->
+    </div>
+    <button id="grow">Grow New Stanza</button>
+    <div class="poem" id="poem">The garden awaits your first seed.</div>
+    <p class="badge" id="status">Status: Soil enriched.</p>
+  </section>
+  <script>
+    const moods = [
+      { id: 'serene', label: 'Serene', palette: ['dew', 'silk', 'hush'] },
+      { id: 'wistful', label: 'Wistful', palette: ['amber', 'echo', 'fall'] },
+      { id: 'radiant', label: 'Radiant', palette: ['sun', 'glow', 'flare'] },
+      { id: 'nocturne', label: 'Nocturne', palette: ['moon', 'shadow', 'glint'] }
+    ];
+
+    const templates = [
+      'A {tone} whisper winds between the {flora},\nrooted in {texture} memories.',
+      '{flora} bloom in {tone} cadence,\ninviting {texture} wanderers.',
+      'We weave {texture} tales among the {flora},\nwhile {tone} skies listen.',
+      'Every {texture} breeze coaxes {flora} to rise,\na {tone} chorus unfurling.'
+    ];
+
+    const flora = {
+      serene: ['mint-leaf lanterns', 'soft fern arches', 'cerulean moss'],
+      wistful: ['amber ivy', 'sleeping poppies', 'last-light thistle'],
+      radiant: ['helios blossoms', 'saffron reeds', 'cinder lilies'],
+      nocturne: ['midnight orchids', 'lunar reeds', 'starlit foxglove']
+    };
+
+    const textures = {
+      serene: ['silken', 'glimmering', 'featherlight'],
+      wistful: ['remembered', 'copper-toned', 'melancholy'],
+      radiant: ['ember-bright', 'auric', 'flaring'],
+      nocturne: ['dusklit', 'velvet', 'echoing']
+    };
+
+    let selectedMood = moods[0].id;
+
+    const moodSelector = document.getElementById('moodSelector');
+    const poemEl = document.getElementById('poem');
+    const statusEl = document.getElementById('status');
+
+    function renderMoodButtons() {
+      moodSelector.innerHTML = '';
+      moods.forEach(mood => {
+        const btn = document.createElement('button');
+        btn.textContent = mood.label;
+        btn.type = 'button';
+        btn.dataset.mood = mood.id;
+        btn.style.background = selectedMood === mood.id ? '#5fb38a' : 'rgba(95,179,138,0.3)';
+        btn.style.color = selectedMood === mood.id ? 'white' : '#2c4a3f';
+        btn.addEventListener('click', () => {
+          selectedMood = mood.id;
+          renderMoodButtons();
+          statusEl.textContent = `Status: Soil tuned for ${mood.label.toLowerCase()} blooms.`;
+        });
+        moodSelector.appendChild(btn);
+      });
+    }
+
+    function randomFrom(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    function sproutStanza() {
+      const template = randomFrom(templates);
+      const replacements = {
+        tone: randomFrom(moods.find(m => m.id === selectedMood).palette),
+        flora: randomFrom(flora[selectedMood]),
+        texture: randomFrom(textures[selectedMood])
+      };
+      const stanza = template.replace(/\{(\w+)\}/g, (_, key) => replacements[key]);
+      poemEl.textContent = stanza;
+      statusEl.textContent = 'Status: New stanza thriving.';
+    }
+
+    document.getElementById('grow').addEventListener('click', sproutStanza);
+    renderMoodButtons();
+  </script>
+</body>
+</html>

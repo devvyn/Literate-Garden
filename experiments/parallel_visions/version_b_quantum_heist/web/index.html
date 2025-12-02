@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Version B · Quantum Relay Heist</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Version B leans into neon noir systems hacking -->
+  <main>
+    <header>
+      <h1>Version B · Quantum Relay Heist</h1>
+      <p class="tagline">Design a superposition robbery that plays out across overlapping timelines.</p>
+    </header>
+
+    <section class="concept">
+      <h2>Game Idea</h2>
+      <p><strong>Core Fantasy:</strong> Assemble a crew of entangled specialists to break into a reality-shifting vault.</p>
+      <p><strong>Gameplay Loop:</strong> Plan phases → assign crew to quantum tiles → resolve paradox waves → extract relic.</p>
+      <p><strong>Audience Appeal:</strong> Fans of Into the Breach / Invisible Inc. who want crunchy tactics plus spectacle.</p>
+    </section>
+
+    <section class="feasibility">
+      <h2>Suitability &amp; Feasibility</h2>
+      <ul>
+        <li><strong>Technical Scope:</strong> Hex/tile tactics grid, deterministic simulation, WebAssembly optional.</li>
+        <li><strong>Festival Fit:</strong> Stylish heist UI, quick restarts, shareable "perfect run" seeds.</li>
+        <li><strong>Risk Areas:</strong> Communicating quantum state, UI clarity in chaotic overlays.</li>
+      </ul>
+    </section>
+
+    <section class="demo" aria-label="Interactive heist planner">
+      <h2>Timeline Overlay Planner</h2>
+      <p class="annotation">Click tiles to stage crew across two timelines. Fill a full row in both realities to trigger a clean extraction.</p>
+      <div class="grid" role="grid" aria-label="Quantum grid"></div>
+      <div class="status" aria-live="polite"></div>
+      <button id="reset">Reset Board</button>
+    </section>
+
+    <section class="handoff">
+      <h2>Collab Trail</h2>
+      <p><!-- Communicate partial progress -->Shader-based parallax planned but postponed; placeholder CSS glow stands in until art drop.</p>
+      <p class="blocker">Blocked on: Need probability visualizer design to avoid overwhelming players when paradox stack overflows.</p>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

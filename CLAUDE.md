@@ -211,6 +211,20 @@ cd ~/devvyn-meta-project
 ./scripts/bridge-receive.sh <agent>
 ```
 
+### Resource Provisioning
+```bash
+# Request software/datasets for experiments (via meta-project)
+cd ~/devvyn-meta-project
+./scripts/resource-request.sh \
+  --source "magnet:?xt=..." \
+  --purpose "PICO-8 for barkour prototyping"
+
+# Resources downloaded to: ~/infrastructure/shared-resources/
+# Pattern doc: knowledge-base/patterns/collective-resource-provisioning.md
+```
+
+**Example**: Barkour experiments needed PICO-8 fantasy console. Requested via torrent, now available to all projects in `shared-resources/`.
+
 ## Session Startup Checklist
 
 **Every time you work on Literate Garden:**

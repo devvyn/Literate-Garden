@@ -35,8 +35,10 @@ Interactive concepts:
 - **Lighthouse Palimpsest** — Rotate lighthouse to layer timelines
 - **MetroMycelium** — Bioluminescent fungal transit sim
 - **Echoes of Laurel Vault** — Rhythm-combat botanical defense
+- **Narrative Identity Playable** — Explore how AI narratives reshape identity (markdown → future marimo)
 
 **Explore:** [palimpsest/web/](palimpsest/web/)
+**New:** [Narrative Identity Exploration](palimpsest/narrative-identity-playable.md)
 
 ---
 
@@ -49,6 +51,18 @@ Distilled mechanics:
 - **Procedural Growth as Feedback** — Visual strategic mastery
 
 **Explore:** [patterns/web/index.html](patterns/web/index.html)
+
+---
+
+### 🦴 Barkour Collection
+**Focus:** Bacon-powered parkour with heartwarming narrative
+
+Based on a real dream about Tilly the Pekingese discovering supernatural parkour abilities.
+
+**Vision**: [`~/Documents/GitHub/barkour/`](../../barkour/)
+**Experiments**: [barkour/README.md](barkour/README.md)
+
+**Status**: Garden prepared, experiments pending
 
 ---
 

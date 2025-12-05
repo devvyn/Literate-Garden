@@ -1,0 +1,141 @@
+{
+  "collection": "AAFC Herbarium - Saskatchewan Flora",
+  "curator": "Tilly the Pekingese 🐕",
+  "description": "Real herbarium specimens collected in Saskatchewan, integrated into Barkour game world",
+
+  "specimens": [
+    {
+      "id": "SPECIMEN_001",
+      "catalogNumber": "AAFC-EXAMPLE-001",
+      "scientificName": "Rosa acicularis Lindl.",
+      "commonName": "Wild Rose",
+      "family": "Rosaceae",
+      "locality": "Saskatchewan Prairies, Canada",
+      "habitat": "Open grasslands and meadows",
+      "year": "1985",
+      "collector": "Prairie Research Team",
+      "notes": "Provincial flower of Alberta, common across prairies",
+      "rarity": "common",
+      "game_placement": {
+        "level": "ground",
+        "section": "prairie_grasslands",
+        "difficulty": "easy",
+        "x": 100,
+        "y": 450,
+        "hint": "Look for the first platform"
+      }
+    },
+    {
+      "id": "SPECIMEN_002",
+      "catalogNumber": "AAFC-EXAMPLE-002",
+      "scientificName": "Carex praticola Rydb.",
+      "commonName": "Northern Meadow Sedge",
+      "family": "Cyperaceae",
+      "locality": "Saskatoon area, Saskatchewan",
+      "habitat": "Moist meadows and wetland edges",
+      "year": "1992",
+      "collector": "SRDC Field Team",
+      "notes": "Important for wetland ecosystems, excellent for erosion control",
+      "rarity": "common",
+      "game_placement": {
+        "level": "buildings",
+        "section": "aspen_parkland",
+        "difficulty": "medium",
+        "x": 25,
+        "y": 320,
+        "hint": "Hidden near a wall - wall kick required"
+      }
+    },
+    {
+      "id": "SPECIMEN_003",
+      "catalogNumber": "AAFC-EXAMPLE-003",
+      "scientificName": "Picea glauca (Moench) Voss",
+      "commonName": "White Spruce",
+      "family": "Pinaceae",
+      "locality": "Prince Albert National Park, SK",
+      "habitat": "Boreal forest",
+      "year": "1978",
+      "collector": "Northern Forest Survey",
+      "notes": "Dominant boreal conifer, important timber species",
+      "rarity": "uncommon",
+      "game_placement": {
+        "level": "rooftops",
+        "section": "boreal_forest",
+        "difficulty": "hard",
+        "x": 95,
+        "y": 210,
+        "hint": "On a narrow rooftop platform - precision required"
+      }
+    },
+    {
+      "id": "SPECIMEN_004",
+      "catalogNumber": "AAFC-EXAMPLE-004",
+      "scientificName": "Cypripedium acaule Aiton",
+      "commonName": "Pink Lady's Slipper",
+      "family": "Orchidaceae",
+      "locality": "Northern Saskatchewan",
+      "habitat": "Acidic soils in coniferous forests",
+      "year": "2001",
+      "collector": "Rare Species Survey",
+      "notes": "Rare orchid, sensitive to disturbance, slow to establish",
+      "rarity": "rare",
+      "game_placement": {
+        "level": "rooftops",
+        "section": "boreal_forest",
+        "difficulty": "very_hard",
+        "x": 15,
+        "y": 175,
+        "hint": "Secret path - explore thoroughly!"
+      }
+    },
+    {
+      "id": "SPECIMEN_005",
+      "catalogNumber": "AAFC-EXAMPLE-005",
+      "scientificName": "Dryas octopetala L.",
+      "commonName": "Mountain Avens",
+      "family": "Rosaceae",
+      "locality": "Cypress Hills, SK/AB",
+      "habitat": "Alpine tundra and rocky slopes",
+      "year": "1995",
+      "collector": "Alpine Flora Project",
+      "notes": "Arctic-alpine species, found at high elevations in Cypress Hills",
+      "rarity": "very_rare",
+      "game_placement": {
+        "level": "clouds",
+        "section": "alpine_victory",
+        "difficulty": "reward",
+        "x": 64,
+        "y": 45,
+        "hint": "Ultimate prize at the peak!"
+      }
+    }
+  ],
+
+  "educational_notes": {
+    "about": "These specimens represent the diversity of Saskatchewan's ecosystems, from prairie grasslands to boreal forests to alpine tundra.",
+    "aafc_herbarium": "Agriculture and Agri-Food Canada maintains herbarium collections documenting Canadian plant biodiversity for research and conservation.",
+    "darwin_core": "Specimen data follows Darwin Core standards for biodiversity informatics (scientificName, locality, catalogNumber, etc.)",
+    "learn_more": "Visit GBIF.org to explore millions of biodiversity records worldwide"
+  },
+
+  "game_integration": {
+    "collection_bonus": {
+      "1_specimen": "🌿 Budding Botanist - First field specimen!",
+      "3_specimens": "🌿 Field Guide Started - Learning the flora!",
+      "all_specimens": "🌿 Master Naturalist - Complete collection! Herbarium gallery unlocked!"
+    },
+    "gallery_unlock": {
+      "condition": "collect_all_specimens",
+      "reward": "View full specimen details and real herbarium images",
+      "location": "Pause menu → Field Guide"
+    }
+  },
+
+  "metadata": {
+    "source_project": "AAFC Herbarium DWC Extraction",
+    "data_license": "CC0 - Public Domain (example data for game use)",
+    "real_data": "Based on Saskatchewan flora, specimen IDs are examples",
+    "created": "2025-10-12",
+    "cross_pollination": "Barkour ↔ AAFC Herbarium light integration"
+  }
+}

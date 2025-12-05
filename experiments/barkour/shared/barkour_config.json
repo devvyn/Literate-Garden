@@ -1,0 +1,90 @@
+{
+  "game": {
+    "title": "Barkour: Tilly's Dream",
+    "version": "0.1.0",
+    "screen": {
+      "width": 800,
+      "height": 600,
+      "fps": 60
+    }
+  },
+  "colors": {
+    "sky_blue": [135, 206, 235],
+    "ground_brown": [139, 90, 43],
+    "wall_gray": [100, 100, 120],
+    "tilly_beige": [210, 180, 140],
+    "tilly_black": [30, 30, 30],
+    "tilly_powered": [255, 215, 100],
+    "bacon_pink": [255, 105, 180],
+    "bacon_red": [220, 20, 60],
+    "power_glow": [255, 255, 150, 128]
+  },
+  "physics": {
+    "gravity": 0.5,
+    "base_jump_strength": -12,
+    "base_movement_speed": 5,
+    "max_fall_speed": 15,
+    "wall_slide_speed": 2,
+    "wall_jump_push": 8,
+    "wall_jump_strength": -13
+  },
+  "powerup": {
+    "duration_ms": 5000,
+    "speed_multiplier": 1.5,
+    "jump_multiplier": 1.2,
+    "wall_jump_multiplier": 1.3
+  },
+  "player": {
+    "width": 40,
+    "height": 40,
+    "start_x": 100,
+    "start_y": 100
+  },
+  "levels": {
+    "demo": {
+      "platforms": [
+        {"x": 0, "y": 550, "width": 800, "height": 50},
+        {"x": 200, "y": 450, "width": 150, "height": 20},
+        {"x": 450, "y": 350, "width": 150, "height": 20},
+        {"x": 100, "y": 250, "width": 120, "height": 20},
+        {"x": 600, "y": 200, "width": 150, "height": 20},
+        {"x": 350, "y": 150, "width": 100, "height": 20}
+      ],
+      "walls": [
+        {"x": 50, "y": 200, "width": 30, "height": 350},
+        {"x": 720, "y": 150, "width": 30, "height": 400},
+        {"x": 380, "y": 0, "width": 30, "height": 400}
+      ],
+      "bacon": [
+        {"x": 300, "y": 400},
+        {"x": 500, "y": 300},
+        {"x": 150, "y": 200},
+        {"x": 650, "y": 150},
+        {"x": 400, "y": 100}
+      ]
+    }
+  },
+  "architecture": {
+    "description": "Shared game design across implementations",
+    "core_components": [
+      "PowerUpManager - manages bacon power-up state and timer",
+      "Player - character with physics, movement, wall jump abilities",
+      "Bacon - collectible power-ups with bob animation",
+      "Level - platforms, walls, bacon placement from config"
+    ],
+    "game_loop": [
+      "1. Handle input (keys/touch)",
+      "2. Update player physics",
+      "3. Update power-up timer",
+      "4. Check collisions (platforms, walls, bacon)",
+      "5. Update animations",
+      "6. Render (platforms, walls, bacon, player, UI)",
+      "7. Display frame"
+    ],
+    "state_management": {
+      "player_state": ["position", "velocity", "on_ground", "touching_wall", "can_wall_jump"],
+      "powerup_state": ["powered", "timer"],
+      "level_state": ["bacon_collected"]
+    }
+  }
+}

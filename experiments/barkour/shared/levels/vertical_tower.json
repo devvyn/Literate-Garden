@@ -1,0 +1,375 @@
+{
+  "level_id": "vertical_tower",
+  "version": "0.1.0",
+  "type": "vertical_scroll",
+  "description": "Climb from ground to clouds - Tilly's dream come true",
+
+  "dimensions": {
+    "width": 128,
+    "height": 512,
+    "base_width": 800,
+    "base_height": 3200,
+    "comment": "Pico-8 uses 128x512, other platforms scale from base_width/base_height"
+  },
+
+  "sections": [
+    {
+      "name": "ground",
+      "y_start": 384,
+      "y_end": 512,
+      "difficulty": "tutorial",
+      "theme": "grass and earth",
+      "description": "Learn basic jumps and movement"
+    },
+    {
+      "name": "buildings",
+      "y_start": 256,
+      "y_end": 384,
+      "difficulty": "medium",
+      "theme": "brick buildings",
+      "description": "Practice wall kicks"
+    },
+    {
+      "name": "rooftops",
+      "y_start": 128,
+      "y_end": 256,
+      "difficulty": "hard",
+      "theme": "rooftop platforms",
+      "description": "Master wall jumps and precision"
+    },
+    {
+      "name": "clouds",
+      "y_start": 0,
+      "y_end": 128,
+      "difficulty": "victory",
+      "theme": "fluffy clouds",
+      "description": "Reach Tilly's dream!"
+    }
+  ],
+
+  "spawn_point": {
+    "x": 20,
+    "y": 460,
+    "description": "Start at bottom left of ground section"
+  },
+
+  "victory_condition": {
+    "type": "reach_y",
+    "threshold": 50,
+    "message": "☁️ you reached the clouds! Tilly's dream came true!"
+  },
+
+  "camera": {
+    "type": "follow_player_vertical",
+    "offset_y": -64,
+    "smooth": true,
+    "bounds_min_y": 0,
+    "bounds_max_y": 384
+  },
+
+  "platforms": [
+    {
+      "id": "ground_floor",
+      "x": 0,
+      "y": 480,
+      "width": 128,
+      "height": 16,
+      "type": "solid",
+      "section": "ground"
+    },
+    {
+      "id": "ground_1",
+      "x": 15,
+      "y": 450,
+      "width": 35,
+      "height": 4,
+      "type": "solid",
+      "section": "ground"
+    },
+    {
+      "id": "ground_2",
+      "x": 70,
+      "y": 430,
+      "width": 35,
+      "height": 4,
+      "type": "solid",
+      "section": "ground"
+    },
+    {
+      "id": "ground_3",
+      "x": 20,
+      "y": 400,
+      "width": 30,
+      "height": 4,
+      "type": "solid",
+      "section": "ground"
+    },
+    {
+      "id": "ground_to_buildings",
+      "x": 85,
+      "y": 370,
+      "width": 35,
+      "height": 4,
+      "type": "solid",
+      "section": "ground"
+    },
+    {
+      "id": "buildings_1",
+      "x": 10,
+      "y": 340,
+      "width": 25,
+      "height": 4,
+      "type": "solid",
+      "section": "buildings",
+      "note": "Requires wall kick to reach"
+    },
+    {
+      "id": "buildings_2",
+      "x": 90,
+      "y": 310,
+      "width": 30,
+      "height": 4,
+      "type": "solid",
+      "section": "buildings"
+    },
+    {
+      "id": "buildings_3",
+      "x": 30,
+      "y": 280,
+      "width": 40,
+      "height": 4,
+      "type": "solid",
+      "section": "buildings"
+    },
+    {
+      "id": "buildings_to_rooftops",
+      "x": 80,
+      "y": 250,
+      "width": 35,
+      "height": 4,
+      "type": "solid",
+      "section": "buildings"
+    },
+    {
+      "id": "rooftops_1",
+      "x": 15,
+      "y": 220,
+      "width": 25,
+      "height": 4,
+      "type": "solid",
+      "section": "rooftops",
+      "note": "Narrow platform - precision required"
+    },
+    {
+      "id": "rooftops_2",
+      "x": 90,
+      "y": 200,
+      "width": 25,
+      "height": 4,
+      "type": "solid",
+      "section": "rooftops"
+    },
+    {
+      "id": "rooftops_3",
+      "x": 40,
+      "y": 180,
+      "width": 30,
+      "height": 4,
+      "type": "solid",
+      "section": "rooftops"
+    },
+    {
+      "id": "rooftops_4",
+      "x": 85,
+      "y": 150,
+      "width": 30,
+      "height": 4,
+      "type": "solid",
+      "section": "rooftops"
+    },
+    {
+      "id": "rooftops_to_clouds",
+      "x": 30,
+      "y": 120,
+      "width": 35,
+      "height": 4,
+      "type": "solid",
+      "section": "rooftops"
+    },
+    {
+      "id": "cloud_1",
+      "x": 50,
+      "y": 90,
+      "width": 30,
+      "height": 4,
+      "type": "cloud",
+      "section": "clouds"
+    },
+    {
+      "id": "cloud_victory",
+      "x": 20,
+      "y": 60,
+      "width": 88,
+      "height": 4,
+      "type": "cloud",
+      "section": "clouds",
+      "note": "Main victory platform"
+    },
+    {
+      "id": "cloud_top",
+      "x": 40,
+      "y": 30,
+      "width": 50,
+      "height": 4,
+      "type": "cloud",
+      "section": "clouds",
+      "note": "Optional final platform"
+    }
+  ],
+
+  "walls": [
+    {
+      "id": "ground_wall",
+      "x": 5,
+      "y": 380,
+      "width": 4,
+      "height": 80,
+      "type": "wall_jumpable",
+      "section": "ground",
+      "note": "Tutorial wall - learn wall jumps"
+    },
+    {
+      "id": "buildings_wall_left",
+      "x": 5,
+      "y": 290,
+      "width": 4,
+      "height": 100,
+      "type": "wall_jumpable",
+      "section": "buildings",
+      "note": "Left side of wall kick gauntlet"
+    },
+    {
+      "id": "buildings_wall_right",
+      "x": 119,
+      "y": 240,
+      "width": 4,
+      "height": 120,
+      "type": "wall_jumpable",
+      "section": "buildings",
+      "note": "Right side of wall kick gauntlet"
+    },
+    {
+      "id": "rooftops_wall_left",
+      "x": 10,
+      "y": 150,
+      "width": 4,
+      "height": 100,
+      "type": "wall_jumpable",
+      "section": "rooftops"
+    },
+    {
+      "id": "rooftops_wall_right",
+      "x": 114,
+      "y": 120,
+      "width": 4,
+      "height": 130,
+      "type": "wall_jumpable",
+      "section": "rooftops"
+    },
+    {
+      "id": "clouds_wall",
+      "x": 60,
+      "y": 40,
+      "width": 4,
+      "height": 80,
+      "type": "wall_jumpable",
+      "section": "clouds",
+      "note": "Final wall challenge"
+    }
+  ],
+
+  "bacon": [
+    {
+      "id": "ground_bacon",
+      "x": 60,
+      "y": 450,
+      "difficulty": "easy",
+      "section": "ground",
+      "note": "First bacon - easy to find"
+    },
+    {
+      "id": "buildings_bacon",
+      "x": 10,
+      "y": 340,
+      "difficulty": "medium",
+      "section": "buildings",
+      "note": "Requires wall kick to reach"
+    },
+    {
+      "id": "rooftops_bacon_hidden",
+      "x": 110,
+      "y": 230,
+      "difficulty": "hard",
+      "section": "rooftops",
+      "note": "Hidden on side path"
+    },
+    {
+      "id": "rooftops_bacon_challenge",
+      "x": 30,
+      "y": 190,
+      "difficulty": "hard",
+      "section": "rooftops",
+      "note": "Requires precision platforming"
+    },
+    {
+      "id": "clouds_bacon_victory",
+      "x": 64,
+      "y": 60,
+      "difficulty": "reward",
+      "section": "clouds",
+      "note": "Victory reward at the top"
+    }
+  ],
+
+  "respawn": {
+    "trigger": "fall_below_y",
+    "threshold": 500,
+    "respawn_point": "spawn_point",
+    "reset_state": {
+      "velocity": true,
+      "powerup": true,
+      "bacon_collected": false
+    }
+  },
+
+  "ui": {
+    "height_indicator": {
+      "enabled": true,
+      "position": "top_right",
+      "format": "⬆️ {percent}%"
+    },
+    "powerup_timer": {
+      "enabled": true,
+      "position": "top_left",
+      "format": "🥓 bacon power\n{seconds}s"
+    },
+    "tutorial_text": {
+      "ground": "climb to clouds!",
+      "buildings": null,
+      "rooftops": null,
+      "clouds": null
+    }
+  },
+
+  "metadata": {
+    "created": "2025-10-12",
+    "author": "Code Agent + Devvyn",
+    "tested_platforms": ["pico8"],
+    "playtesting_notes": [
+      "Movement physics feel decent",
+      "Wall kick is cute and fun",
+      "Particle effect on wall slide well-received",
+      "Progression and exploration working"
+    ]
+  }
+}

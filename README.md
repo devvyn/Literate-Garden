@@ -2,6 +2,19 @@
 
 A self-incubating marimo-based research system integrated with multi-agent collaboration framework.
 
+## Agent Mesh
+
+This repository is operating in a **4× parallel development branch**. Agent instructions live in clearly marked paths:
+- Root rules: [`AGENTS.md`](AGENTS.md) (breadcrumb protocol + lane map)
+- Context nodes: [`agents/context/lanes.md`](agents/context/lanes.md) (lane goals + TODO hooks)
+- Experiments scope: [`experiments/AGENTS.md`](experiments/AGENTS.md) (collection-specific cues)
+
+Pick a lane when dropping breadcrumbs:
+- **Lane A — Telemetry & Gallery**
+- **Lane B — Budding & Governance**
+- **Lane C — Pattern SDK**
+- **Lane D — Narrative Layering**
+
 ## Philosophy
 
 **Make it playable, not perfect. Bud when it deserves structure.**
@@ -151,4 +164,7 @@ Related projects:
 - **Python Toolbox**: Shared utility functions
 
 All inherit coordination protocols from `~/devvyn-meta-project/`.
+
+### Agent Breadcrumbs (Lane B — Budding & Governance)
+- 2025-10-06: Added Agent Mesh index + lane map; root rules in `AGENTS.md` and context nodes in `agents/context/lanes.md`. Align future edits with breadcrumb protocol.
 

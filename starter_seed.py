@@ -168,3 +168,18 @@ def extension_protocol():
     )
     return protocol
 
+
+# CELL 9 — Agent breadcrumbs for parallel lanes
+@app.cell
+def agent_breadcrumbs():
+    breadcrumbs = dedent(
+        """
+    ## Agent Breadcrumbs (Lane D — Narrative Layering)
+    - 2025-10-06: Leave space for layered timeline + diegetic journal prototype as a new cell appended below.
+
+    ## Agent Breadcrumbs (Lane A — Telemetry & Gallery)
+    - 2025-10-06: When wiring telemetry, prefer additive cells that stream signals without mutating earlier loops.
+    """
+    )
+    return breadcrumbs
+

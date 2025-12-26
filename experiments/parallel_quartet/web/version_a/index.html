@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Version A — Aurora Loom Sketchpad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* === Aurora Loom Prototype === */
+    /* Collaboration Note: Palette + motion tuning lives here for quick iteration. */
+    :root {
+      color-scheme: dark;
+      --bg-start: #0b1026;
+      --bg-end: #1c2d4f;
+      --accent: #7dd6ff;
+      --text-muted: rgba(255, 255, 255, 0.75);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
+      font-family: "Fira Sans", "Segoe UI", sans-serif;
+      color: white;
+    }
+
+    main {
+      width: min(90vw, 960px);
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    header {
+      background: rgba(12, 25, 48, 0.7);
+      border: 1px solid rgba(125, 214, 255, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 18px 48px rgba(10, 20, 35, 0.45);
+    }
+
+    h1 {
+      margin: 0 0 0.25rem;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: 0.04em;
+    }
+
+    p {
+      margin: 0.3rem 0;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    #loom-canvas {
+      width: 100%;
+      height: clamp(420px, 60vh, 620px);
+      border-radius: 20px;
+      border: 1px solid rgba(125, 214, 255, 0.25);
+      background: rgba(4, 10, 24, 0.65);
+      box-shadow: inset 0 0 40px rgba(7, 14, 32, 0.8);
+      cursor: crosshair;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.55);
+    }
+  </style>
+</head>
+<body>
+  <!-- Context: Version A explores ambient synesthetic play for lounge/festival booths. -->
+  <main>
+    <header>
+      <h1>Aurora Loom — Ambient Bloomcraft</h1>
+      <p>Sketch ribbons of light across an endless canopy. Each gesture seeds a bioluminescent bloom that drifts, harmonizing hue and tempo.</p>
+      <p><strong>Prototype Goal:</strong> Validate tactile delight of weaving auroral threads with minimal UI.</p>
+      <p><em>Controls:</em> Click / drag to paint, scroll to shift palette mood, double-tap to clear.</p>
+    </header>
+    <canvas id="loom-canvas"></canvas>
+    <footer>
+      <!-- Annotation: Audio-reactive shaders flagged for next pass once soundbed is composed. -->
+      Future extensions: audio reactivity + saveable constellations.
+    </footer>
+  </main>
+
+  <script>
+    // === Aurora Loom Painter ===
+    // Collaboration Hook: Particle parameters exposed for rapid tuning.
+    const canvas = document.getElementById("loom-canvas");
+    const ctx = canvas.getContext("2d");
+
+    const state = {
+      hueShift: 190,
+      particles: [],
+      pointerDown: false,
+      frame: 0
+    };
+
+    const DPR = window.devicePixelRatio || 1;
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * DPR;
+      canvas.height = rect.height * DPR;
+      ctx.scale(DPR, DPR);
+      ctx.clearRect(0, 0, rect.width, rect.height);
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+
+    function spawnParticle(x, y) {
+      state.particles.push({
+        x,
+        y,
+        radius: 6 + Math.random() * 18,
+        life: 1,
+        drift: (Math.random() - 0.5) * 1.8,
+        hue: (state.hueShift + Math.random() * 60) % 360
+      });
+    }
+
+    function render() {
+      const rect = canvas.getBoundingClientRect();
+      ctx.fillStyle = "rgba(5, 12, 28, 0.18)";
+      ctx.fillRect(0, 0, rect.width, rect.height);
+
+      state.particles = state.particles.filter(p => p.life > 0.01);
+      for (const particle of state.particles) {
+        particle.life *= 0.96;
+        particle.x += Math.sin(state.frame / 40 + particle.drift) * 0.4;
+        particle.y -= Math.cos(state.frame / 55 + particle.drift) * 0.6;
+
+        const gradient = ctx.createRadialGradient(
+          particle.x,
+          particle.y,
+          0,
+          particle.x,
+          particle.y,
+          particle.radius
+        );
+        gradient.addColorStop(0, `hsla(${particle.hue}, 90%, 70%, ${particle.life})`);
+        gradient.addColorStop(1, "hsla(220, 100%, 10%, 0)");
+        ctx.beginPath();
+        ctx.fillStyle = gradient;
+        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      state.frame++;
+      requestAnimationFrame(render);
+    }
+
+    render();
+
+    function pointerPos(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (evt.clientX || (evt.touches?.[0]?.clientX ?? 0)) - rect.left;
+      const y = (evt.clientY || (evt.touches?.[0]?.clientY ?? 0)) - rect.top;
+      return { x, y };
+    }
+
+    function handlePointerMove(evt) {
+      if (!state.pointerDown) return;
+      evt.preventDefault();
+      const { x, y } = pointerPos(evt);
+      for (let i = 0; i < 3; i++) {
+        spawnParticle(
+          x + (Math.random() - 0.5) * 14,
+          y + (Math.random() - 0.5) * 14
+        );
+      }
+    }
+
+    canvas.addEventListener("pointerdown", evt => {
+      state.pointerDown = true;
+      handlePointerMove(evt);
+    });
+
+    window.addEventListener("pointerup", () => {
+      state.pointerDown = false;
+    });
+
+    canvas.addEventListener("pointermove", handlePointerMove, { passive: false });
+
+    canvas.addEventListener("wheel", evt => {
+      evt.preventDefault();
+      state.hueShift = (state.hueShift + Math.sign(evt.deltaY) * 20 + 360) % 360;
+    }, { passive: false });
+
+    canvas.addEventListener("dblclick", () => {
+      // Reset canvas gracefully (no dead end encountered yet).
+      state.particles.length = 0;
+      resize();
+    });
+  </script>
+</body>
+</html>

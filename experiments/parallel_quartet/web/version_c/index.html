@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Version C — Palimpsest Echo Narrative</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* === Narrative Layering Prototype === */
+    /* Collaboration Cue: Scene copy + slider beats defined in SCENES array below. */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0c0612;
+      color: #f5ecff;
+      font-family: "Cormorant Garamond", serif;
+      display: grid;
+      place-items: center;
+      padding: clamp(1.5rem, 4vw, 3rem);
+      box-sizing: border-box;
+    }
+
+    main {
+      width: min(960px, 95vw);
+      background: rgba(30, 14, 54, 0.65);
+      border-radius: 22px;
+      border: 1px solid rgba(194, 132, 255, 0.35);
+      box-shadow: 0 24px 60px rgba(8, 4, 18, 0.6);
+      padding: clamp(1.5rem, 5vw, 3rem);
+      display: grid;
+      gap: 2rem;
+    }
+
+    header h1 {
+      margin: 0 0 0.3rem;
+      font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    header p {
+      margin: 0.35rem 0;
+      line-height: 1.65;
+      color: rgba(245, 236, 255, 0.78);
+      font-size: 1.05rem;
+    }
+
+    .scene-text {
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+      line-height: 1.8;
+      color: rgba(255, 246, 255, 0.9);
+      min-height: 8rem;
+      position: relative;
+      transition: transform 160ms ease;
+    }
+
+    .scene-text::before {
+      content: attr(data-era);
+      position: absolute;
+      top: -2.2rem;
+      right: 0;
+      font-size: 0.85rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: rgba(214, 180, 255, 0.5);
+    }
+
+    .slider-wrapper {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(206, 172, 255, 0.25);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff9df5, #6d8bff);
+      cursor: pointer;
+      border: 2px solid rgba(17, 6, 36, 0.9);
+      box-shadow: 0 0 18px rgba(144, 104, 255, 0.6);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff9df5, #6d8bff);
+      cursor: pointer;
+      border: 2px solid rgba(17, 6, 36, 0.9);
+      box-shadow: 0 0 18px rgba(144, 104, 255, 0.6);
+    }
+
+    .beats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      color: rgba(235, 210, 255, 0.55);
+      text-transform: uppercase;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .actions button {
+      flex: 1;
+      min-width: 160px;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(194, 132, 255, 0.45);
+      background: rgba(74, 38, 112, 0.55);
+      color: white;
+      font: inherit;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .actions button:hover {
+      background: rgba(96, 56, 146, 0.7);
+    }
+
+    footer {
+      font-size: 0.85rem;
+      color: rgba(234, 210, 255, 0.6);
+      text-align: center;
+    }
+
+    .scene-text.pulse {
+      transform: scale(1.015);
+    }
+
+    @keyframes bookmarkFlash {
+      from { box-shadow: 0 0 0 rgba(255, 194, 255, 0); }
+      50% { box-shadow: 0 0 22px rgba(255, 194, 255, 0.55); }
+      to { box-shadow: 0 0 0 rgba(255, 194, 255, 0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Context: Version C targets narrative-first players seeking layered memories. -->
+  <main>
+    <header>
+      <h1>Glass Archives — Echo Weaving</h1>
+      <p>Glacial strata hold overlapping recollections from an ancient lighthouse. Glide between eras to align echoes and unlock hidden vows.</p>
+      <p><strong>Prototype Goal:</strong> Validate slider-driven narrative layering for exhibition kiosks.</p>
+    </header>
+
+    <section class="scene-text" id="scene" data-era=""></section>
+
+    <div class="slider-wrapper">
+      <input type="range" id="timeline" min="0" max="4" value="0" step="1" />
+      <div class="beats">
+        <span>Arrival</span>
+        <span>Bloom</span>
+        <span>Fracture</span>
+        <span>Vow</span>
+        <span>Resonance</span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="annotate">Annotate</button>
+      <button id="screenshot">Mark For Exhibit</button>
+    </div>
+
+    <footer>
+      <!-- Annotation: Export pipeline (PDF/storyboard) pending integration with gallery exporter. -->
+      Hold buttons to log beats once data layer is wired.
+    </footer>
+  </main>
+
+  <script>
+    // === Scene Data ===
+    // Collaboration Hook: Expand SCENES to branch story beats.
+    const SCENES = [
+      {
+        era: 'Arrival — Year 0',
+        text: 'You breach the ice halo as lantern-spores ignite. The keeper asks for your true name, but the wind answers first.'
+      },
+      {
+        era: 'Bloom — Year 6',
+        text: 'Coral glass spirals along the tower ribs. Your recordings tint the fog rose-gold, and travelers leave offerings of song.'
+      },
+      {
+        era: 'Fracture — Year 42',
+        text: 'Tectonic hum shatters three memory panes. You decide which vows to keep alive as the ocean tilts toward silence.'
+      },
+      {
+        era: 'Vow — Year 87',
+        text: 'Only the mechanical gull remains. You etch a promise onto its brass feathers: the archive will sing again.'
+      },
+      {
+        era: 'Resonance — Year 143',
+        text: 'The rebuilt lens casts five beams at once. Each visitor hears a different refrain, yet they hum in unison as they depart.'
+      }
+    ];
+
+    const sceneElement = document.getElementById('scene');
+    const timeline = document.getElementById('timeline');
+    const annotateButton = document.getElementById('annotate');
+    const screenshotButton = document.getElementById('screenshot');
+
+    function renderScene(index) {
+      const scene = SCENES[index];
+      sceneElement.dataset.era = scene.era;
+      sceneElement.textContent = scene.text;
+    }
+
+    timeline.addEventListener('input', () => {
+      renderScene(Number(timeline.value));
+    });
+
+    annotateButton.addEventListener('click', () => {
+      sceneElement.classList.add('pulse');
+      setTimeout(() => sceneElement.classList.remove('pulse'), 300);
+    });
+
+    screenshotButton.addEventListener('click', () => {
+      // Placeholder: hooking into gallery capture pipeline (next iteration).
+      alert('Exhibit marker queued. (Capture tool wires in next sprint)');
+    });
+
+    renderScene(0);
+  </script>
+</body>
+</html>

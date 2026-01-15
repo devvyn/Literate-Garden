@@ -1,0 +1,40 @@
+# Literate Garden KB Context
+# Experimental research prototyping workspace
+
+workspace: "Literate Garden (Experimental Prototypes)"
+
+contexts:
+  - interactive_research_notebooks
+  - agent_strata_architecture
+  - rapid_prototyping
+  - budding_experiments
+  - marimo_reactive_cells
+
+people:
+  - me: "Devvyn Murphy"
+
+policies:
+  - "Make it playable, not perfect"
+  - "Bud when it deserves structure"
+  - "MIT licensed"
+  - "Reactive cells, not procedural scripts"
+
+clues:
+  - "marimo"
+  - "agent strata"
+  - "research notebook"
+  - "interactive"
+  - "strategic layer"
+  - "tactical layer"
+  - "execution layer"
+  - "reflection layer"
+  - "experiment"
+  - "bud"
+
+notes: |
+  Self-incubating marimo-based research system.
+  Experiments graduate to dedicated repos when ready.
+
+  Agent strata pattern: Strategic → Tactical → Execution → Reflection
+  Each research thread becomes an interactive notebook.
+  Spawned from podcast digests and retro music analysis.

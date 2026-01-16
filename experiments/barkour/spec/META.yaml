@@ -1,0 +1,103 @@
+# Barkour: Formal Game Specification
+# META.yaml - Project metadata and versioning
+
+meta:
+  name: "Barkour: Tilly's Dream"
+  tagline: "Bacon-powered parkour platformer"
+  version: "1.0.0"
+  spec_format: "1.0"
+
+  authors:
+    - name: "Devvyn Murphy"
+      role: "Designer"
+
+  license: "CC BY-SA 4.0"
+
+  description: |
+    Tilly, a spirited Pekingese, dreams of parkour glory. In her dreams,
+    magical floating bacon grants her incredible speed and jumping power.
+    Navigate platforms, scale walls, and collect bacon to fuel your ascent.
+
+# Versioning follows SemVer with game-specific semantics:
+#   MAJOR: Breaking changes to core mechanics (recertification required)
+#   MINOR: New content, non-breaking mechanic additions
+#   PATCH: Bug fixes to spec, clarifications
+
+versioning:
+  current: "1.0.0"
+
+  changelog:
+    "1.0.0":
+      date: "2025-01-15"
+      type: "initial"
+      changes:
+        - "Initial formal specification"
+        - "Core mechanics: movement, jump, wall-jump, bacon boost"
+        - "Three certification levels defined"
+
+  compatibility:
+    minimum_spec_format: "1.0"
+
+# Specification document manifest
+documents:
+  required:
+    - MECHANICS.yaml      # Layer 1: Core rules (immutable)
+    - PRESENTATION.yaml   # Layer 2: Visual/audio (adaptable)
+
+  levels:
+    schema: LEVELS/level_schema.yaml
+    content:
+      - LEVELS/level_01.yaml
+      - LEVELS/level_02.yaml
+      - LEVELS/level_03.yaml
+
+  testing:
+    - TESTS/mechanics_tests.yaml
+    - TESTS/visual_tests.yaml
+    - TESTS/feel_tests.yaml
+
+  bindings:
+    directory: BINDINGS/
+    note: "Platform-specific mappings, one per implementation"
+
+# Certification requirements
+certification:
+  levels:
+    bronze:
+      name: "Spec-Compliant"
+      badge: "✓"
+      requires:
+        - "Pass all mechanics_tests.yaml automated tests"
+
+    silver:
+      name: "Verified"
+      badge: "✓✓"
+      requires:
+        - "Bronze certification"
+        - "Pass visual_tests.yaml within tolerance"
+        - "All three levels completable"
+
+    gold:
+      name: "Certified"
+      badge: "✓✓✓"
+      requires:
+        - "Silver certification"
+        - "Pass feel_tests.yaml (human validation)"
+        - "Speedrun input replay produces identical outcome"
+
+  validity:
+    tied_to_version: true
+    recertification_triggers:
+      - "Spec MAJOR version change"
+      - "Platform major version change"
+      - "Implementation architectural refactor"
+
+# Reference implementation
+reference:
+  platform: "pygame"
+  location: "implementations/pygame/"
+  status: "canonical"
+  note: |
+    The PyGame implementation serves as behavioral reference.
+    However, the SPECIFICATION is authoritative, not the code.
+    If reference implementation diverges from spec, spec wins.

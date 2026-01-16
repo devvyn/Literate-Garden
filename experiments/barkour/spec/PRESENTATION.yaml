@@ -1,0 +1,441 @@
+# Barkour: Formal Game Specification
+# PRESENTATION.yaml - Layer 2: Visual & Audio (Adaptable)
+#
+# This document defines presentation requirements.
+# Values here are ADAPTABLE for platform constraints.
+# See adaptation_rules for how to scale appropriately.
+
+specification:
+  layer: 2
+  name: "Presentation"
+  mutability: "adaptable"
+
+# =============================================================================
+# DISPLAY
+# =============================================================================
+
+display:
+  reference_resolution:
+    width: 320
+    height: 240
+    aspect_ratio: "4:3"
+    note: "Logical resolution; scale to display"
+
+  scaling:
+    method: "integer_or_aspect_preserving"
+    letterbox_color: "#000000"
+
+  orientation: "landscape"
+
+# =============================================================================
+# COLOR PALETTE
+# =============================================================================
+
+palette:
+  reference:
+    sky: "#87CEEB"           # Light blue
+    ground: "#8B5A2B"        # Brown
+    platform: "#646478"      # Gray
+    tilly_body: "#D2B48C"    # Tan/beige
+    tilly_dark: "#1E1E1E"    # Near black (ears, nose)
+    tilly_powered: "#FFD764" # Golden glow
+    bacon_light: "#FF69B4"   # Hot pink
+    bacon_dark: "#DC143C"    # Crimson
+    boost_glow: "#FFFF96"    # Pale yellow
+    text: "#FFFFFF"          # White
+    text_shadow: "#000000"   # Black
+
+  adaptation:
+    note: |
+      Constrained platforms may reduce palette.
+      Requirements for reduced palettes:
+        - Player must contrast with background
+        - Bacon must be visually distinct
+        - Platforms must be clearly solid
+        - Boost state must be visible
+
+    minimum_colors: 4
+
+    mappings:
+      "4_color":
+        background: "lightest"
+        platforms: "medium-dark"
+        player: "darkest"
+        bacon: "medium-light"
+        boost_indicator: "invert player"
+
+      "16_color":
+        full_palette: true
+        direct_mapping: "nearest color match"
+
+# =============================================================================
+# PLAYER VISUALS
+# =============================================================================
+
+player:
+  sprite:
+    reference: "REFERENCE/assets/tilly_sheet.png"
+
+    dimensions:
+      width: 16
+      height: 16
+      unit: "logical_pixels"
+      note: "Sprite size, larger than hitbox for visual appeal"
+
+    anchor: "bottom-center"
+
+  states:
+    required:
+      - idle
+      - walk
+      - jump_rise
+      - fall
+      - wall_slide
+
+    optional:
+      - run
+      - land_squash
+      - boost_idle
+      - boost_walk
+
+  animations:
+    idle:
+      frames: [1, 2]
+      frame_duration: 30
+      unit: "frames"
+      loop: true
+      note: "Subtle breathing or ear twitch"
+
+    walk:
+      frames: [3, 4, 5, 6]
+      frame_duration: 8
+      loop: true
+
+    jump_rise:
+      frames: [7]
+      static: true
+
+    fall:
+      frames: [8]
+      static: true
+
+    wall_slide:
+      frames: [9]
+      static: true
+      note: "Facing away from wall"
+
+  boost_effect:
+    type: "visual_modifier"
+    options:
+      - "color_swap"       # Change to golden palette
+      - "outline_glow"     # Add glowing outline
+      - "particle_trail"   # Emit particles while moving
+      - "sprite_swap"      # Alternate boost sprite set
+    minimum: "one of the above must indicate boost state"
+
+  facing:
+    method: "flip_horizontal"
+    default: "right"
+    change_on: "horizontal_input"
+
+# =============================================================================
+# BACON VISUALS
+# =============================================================================
+
+bacon:
+  sprite:
+    reference: "REFERENCE/assets/bacon.png"
+
+    dimensions:
+      width: 12
+      height: 8
+      unit: "logical_pixels"
+
+  animation:
+    float:
+      inherited_from: "MECHANICS.yaml/bacon/animation"
+
+    shimmer:
+      optional: true
+      type: "palette_cycle"
+      period: 20
+      unit: "frames"
+
+    rotation:
+      optional: true
+      speed: 3
+      unit: "degrees/frame"
+
+  collected_effect:
+    required: true
+    options:
+      - "instant_disappear"
+      - "pop_animation"
+      - "particle_burst"
+      - "fade_out"
+    duration_max: 15
+    unit: "frames"
+
+# =============================================================================
+# ENVIRONMENT VISUALS
+# =============================================================================
+
+environment:
+  platforms:
+    style: "solid_fill_with_edge"
+
+    rendering:
+      fill: "platform color from palette"
+      edge: "1px darker border (optional)"
+
+    texture:
+      optional: true
+      tile_size: 8
+      unit: "logical_pixels"
+
+  walls:
+    style: "same as platforms"
+    distinction: "optional color variation"
+
+  background:
+    layers:
+      - name: "sky"
+        type: "solid_color"
+        parallax: 0
+        required: true
+
+      - name: "far_background"
+        type: "tiled_or_gradient"
+        parallax: 0.2
+        optional: true
+
+      - name: "near_background"
+        type: "tiled_decorative"
+        parallax: 0.5
+        optional: true
+
+  boundaries:
+    screen_edge:
+      behavior: "block or wrap"
+      default: "block"
+
+    death_plane:
+      exists: false
+      note: "No bottomless pits in Barkour"
+
+# =============================================================================
+# USER INTERFACE
+# =============================================================================
+
+ui:
+  hud:
+    bacon_counter:
+      position: "top-left"
+      format: "BACON: {count}"
+      required: true
+
+    boost_indicator:
+      position: "below bacon counter OR player-attached"
+      display_when: "boost.active"
+      style: "bar, timer, or icon"
+      required: true
+
+    level_indicator:
+      position: "top-right"
+      format: "LEVEL {n}"
+      optional: true
+
+  text:
+    font:
+      type: "pixel_font"
+      size: 8
+      unit: "logical_pixels"
+      style: "monospace preferred"
+
+    rendering:
+      shadow: "1px offset, optional"
+      color: "high contrast with background"
+
+  screens:
+    title:
+      required: true
+      elements:
+        - "Game title"
+        - "Press START/SPACE to begin"
+
+    pause:
+      optional: true
+      trigger: "START or ESCAPE"
+
+    level_complete:
+      required: true
+      display: "bacon count for level"
+      auto_advance: 120
+      unit: "frames"
+
+    game_complete:
+      required: true
+      display: "total bacon collected"
+
+# =============================================================================
+# AUDIO
+# =============================================================================
+
+audio:
+  note: |
+    Audio is optional for certification but enhances experience.
+    Implementations without audio can achieve Gold certification
+    if all other requirements are met.
+
+  sound_effects:
+    jump:
+      trigger: "jump initiated"
+      style: "short upward pitch sweep"
+      duration_max: 200
+      unit: "ms"
+
+    land:
+      trigger: "grounded becomes true"
+      style: "soft thud"
+      duration_max: 150
+      unit: "ms"
+      optional: true
+
+    bacon_collect:
+      trigger: "bacon collected"
+      style: "bright chime or sparkle"
+      duration_max: 300
+      unit: "ms"
+      required_if_audio: true
+
+    boost_activate:
+      trigger: "boost.active becomes true"
+      style: "power-up jingle or whoosh"
+      duration_max: 500
+      unit: "ms"
+
+    boost_end:
+      trigger: "boost.active becomes false"
+      style: "descending tone"
+      duration_max: 300
+      unit: "ms"
+      optional: true
+
+    wall_slide:
+      trigger: "wall_slide state"
+      style: "continuous soft scrape"
+      loop: true
+      optional: true
+
+  music:
+    optional: true
+    style: "upbeat, cheerful, loopable"
+    note: "Music is entirely optional; gameplay is primary"
+
+# =============================================================================
+# CAMERA
+# =============================================================================
+
+camera:
+  type: "follow_player"
+
+  behavior:
+    horizontal:
+      method: "smooth_follow"
+      dead_zone: 32
+      unit: "logical_pixels"
+      smoothing: 0.1
+      formula: "camera.x += (target.x - camera.x) × smoothing"
+
+    vertical:
+      method: "smooth_follow"
+      dead_zone: 24
+      smoothing: 0.1
+
+  bounds:
+    constrain_to_level: true
+    formula: |
+      camera.x = clamp(camera.x, 0, level.width - screen.width)
+      camera.y = clamp(camera.y, 0, level.height - screen.height)
+
+  alternatives:
+    fixed_screen:
+      allowed: true
+      condition: "level fits in single screen"
+
+    room_based:
+      allowed: true
+      condition: "level designed as discrete rooms"
+
+# =============================================================================
+# ADAPTATION RULES
+# =============================================================================
+
+adaptation:
+  resolution_scaling:
+    formula: "scale = target_resolution / 320"
+
+    sprite_scaling:
+      method: "nearest_neighbor"
+      alternative: "redraw at target resolution"
+
+    position_scaling:
+      method: "multiply by scale, round to integer"
+
+  color_reduction:
+    priority:
+      1: "Player visibility"
+      2: "Bacon visibility"
+      3: "Platform clarity"
+      4: "Background distinction"
+
+    dithering:
+      allowed: true
+      patterns: ["checkerboard", "ordered", "custom"]
+
+  animation_reduction:
+    minimum_states: ["idle", "move", "jump"]
+    note: "May combine walk/run, rise/fall if constrained"
+
+  audio_reduction:
+    priority:
+      1: "bacon_collect"
+      2: "jump"
+      3: "boost_activate"
+      4: "others"
+
+    note: "Silence is acceptable if platform has no audio"
+
+# =============================================================================
+# PLATFORM-SPECIFIC NOTES
+# =============================================================================
+
+platform_notes:
+  pico8:
+    resolution: "128×128 (scale 0.4)"
+    colors: "16 fixed palette"
+    sprites: "8×8 base"
+    adaptation: |
+      - Tilly as 8×8 sprite (or 8×16 tall mode)
+      - Bacon as 8×8 sprite
+      - Levels scaled to fit screen
+      - HUD minimal (icon-based)
+
+  mono8:
+    resolution: "160×144 (scale 0.5)"
+    colors: "4 luminance levels"
+    sprites: "8×8 base"
+    adaptation: |
+      - High contrast critical
+      - Dithering for midtones
+      - Boost shown via sprite swap or flicker
+
+  terminal:
+    resolution: "80×24 characters"
+    colors: "16 ANSI"
+    sprites: "ASCII characters"
+    adaptation: |
+      - '@' for Tilly
+      - '~' for bacon
+      - '█' for platforms
+      - Radically different but recognizable

@@ -1,0 +1,467 @@
+# Barkour: Formal Game Specification
+# TESTS/mechanics_tests.yaml - Automated Verification Tests
+#
+# These tests verify implementation correctness.
+# ALL tests must pass for Bronze certification.
+
+test_suite:
+  name: "Mechanics Tests"
+  version: "1.0"
+  certification_level: "bronze"
+
+# =============================================================================
+# TEST FRAMEWORK
+# =============================================================================
+
+framework:
+  execution_model: |
+    Tests run against implementation via standardized API:
+      - impl.spawn_player(x, y)
+      - impl.press(action)
+      - impl.release(action)
+      - impl.advance_frames(n)
+      - impl.get_player_state() -> {x, y, vx, vy, grounded, ...}
+      - impl.spawn_bacon(x, y)
+      - impl.get_boost_state() -> {active, timer}
+
+  tolerance:
+    position: 1  # logical pixels
+    velocity: 0.01
+    timing: 0  # frames (must be exact)
+
+# =============================================================================
+# GRAVITY TESTS
+# =============================================================================
+
+gravity_tests:
+  - id: "gravity_001"
+    name: "Gravity acceleration"
+    description: "Verify gravity constant is correct"
+    steps:
+      - spawn_player: {x: 160, y: 100}
+      - set_grounded: false
+      - set_velocity: {vx: 0, vy: 0}
+      - advance_frames: 1
+    assert:
+      - player.vy: 0.5
+      - tolerance: 0.01
+
+  - id: "gravity_002"
+    name: "Gravity accumulation"
+    description: "Verify gravity accumulates over frames"
+    steps:
+      - spawn_player: {x: 160, y: 100}
+      - set_grounded: false
+      - set_velocity: {vx: 0, vy: 0}
+      - advance_frames: 10
+    assert:
+      - player.vy: 5.0  # 0.5 × 10 frames
+      - tolerance: 0.01
+
+  - id: "gravity_003"
+    name: "Terminal velocity"
+    description: "Verify falling speed caps at terminal velocity"
+    steps:
+      - spawn_player: {x: 160, y: 100}
+      - set_grounded: false
+      - set_velocity: {vx: 0, vy: 0}
+      - advance_frames: 60  # More than enough to reach terminal
+    assert:
+      - player.vy: 15.0  # terminal velocity
+      - tolerance: 0.01
+
+# =============================================================================
+# JUMP TESTS
+# =============================================================================
+
+jump_tests:
+  - id: "jump_001"
+    name: "Jump force application"
+    description: "Verify initial jump velocity"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - press: "jump"
+      - advance_frames: 1
+    assert:
+      - player.vy: -12.0
+      - tolerance: 0.01
+
+  - id: "jump_002"
+    name: "Jump apex height"
+    description: "Verify player reaches correct apex"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - record: {name: "start_y", value: "player.y"}
+      - press: "jump"
+      - advance_frames: 24  # time to apex
+    assert:
+      - expression: "start_y - player.y"
+        expected: 144  # apex height in pixels
+        tolerance: 2  # discrete stepping variance
+
+  - id: "jump_003"
+    name: "Jump time to apex"
+    description: "Verify apex timing"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - press: "jump"
+      - advance_frames: 24
+    assert:
+      - player.vy: 0  # at apex, vy should be ~0
+        tolerance: 0.5
+
+  - id: "jump_004"
+    name: "Variable jump height - early release"
+    description: "Releasing jump early reduces height"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - record: {name: "start_y", value: "player.y"}
+      - press: "jump"
+      - advance_frames: 5
+      - release: "jump"
+      - advance_until: "player.vy >= 0"
+    assert:
+      - expression: "start_y - player.y"
+        expected_less_than: 144
+        expected_greater_than: 30
+
+# =============================================================================
+# COYOTE TIME TESTS
+# =============================================================================
+
+coyote_tests:
+  - id: "coyote_001"
+    name: "Coyote time - frame 1"
+    description: "Jump valid 1 frame after leaving platform"
+    steps:
+      - spawn_player_on_platform: {x: 160}
+      - walk_off_platform: "right"
+      - advance_frames: 1
+      - press: "jump"
+    assert:
+      - player.vy: -12.0  # jump initiated
+      - tolerance: 0.01
+
+  - id: "coyote_002"
+    name: "Coyote time - frame 6"
+    description: "Jump valid at exactly 6 frames"
+    steps:
+      - spawn_player_on_platform: {x: 160}
+      - walk_off_platform: "right"
+      - advance_frames: 6
+      - press: "jump"
+    assert:
+      - player.vy: -12.0  # jump initiated
+      - tolerance: 0.5  # accounting for gravity during frames
+
+  - id: "coyote_003"
+    name: "Coyote time - frame 7 (expired)"
+    description: "Jump invalid at frame 7"
+    steps:
+      - spawn_player_on_platform: {x: 160}
+      - walk_off_platform: "right"
+      - advance_frames: 7
+      - record: {name: "vy_before", value: "player.vy"}
+      - press: "jump"
+      - advance_frames: 1
+    assert:
+      - expression: "player.vy > vy_before"  # still falling, jump didn't fire
+        expected: true
+
+# =============================================================================
+# JUMP BUFFER TESTS
+# =============================================================================
+
+buffer_tests:
+  - id: "buffer_001"
+    name: "Jump buffer - 4 frames before landing"
+    description: "Jump input buffered and executed on land"
+    steps:
+      - spawn_player_falling: {x: 160, y: 200, vy: 5}
+      - frames_until_landing: 10
+      - advance_frames: 6  # 4 frames before landing
+      - press: "jump"
+      - advance_frames: 4  # land
+      - advance_frames: 1  # buffer executes
+    assert:
+      - player.vy: -12.0  # jump executed
+      - tolerance: 0.5
+
+  - id: "buffer_002"
+    name: "Jump buffer - 5 frames before landing (expired)"
+    description: "Jump input too early is not buffered"
+    steps:
+      - spawn_player_falling: {x: 160, y: 200, vy: 5}
+      - frames_until_landing: 10
+      - advance_frames: 5  # 5 frames before landing
+      - press: "jump"
+      - release: "jump"
+      - advance_frames: 5  # land
+      - advance_frames: 1
+    assert:
+      - player.grounded: true
+      - player.vy: 0  # no jump, just landed
+
+# =============================================================================
+# WALL MECHANIC TESTS
+# =============================================================================
+
+wall_tests:
+  - id: "wall_001"
+    name: "Wall slide speed cap"
+    description: "Falling against wall caps at wall slide speed"
+    steps:
+      - spawn_player_against_wall: {x: 8, y: 100, wall_side: "left"}
+      - press: "move_left"  # hold toward wall
+      - set_velocity: {vy: 10}  # falling fast
+      - advance_frames: 5
+    assert:
+      - player.vy: 2.0  # wall slide max
+      - tolerance: 0.1
+
+  - id: "wall_002"
+    name: "Wall jump force"
+    description: "Wall jump applies correct forces"
+    steps:
+      - spawn_player_against_wall: {x: 8, y: 200, wall_side: "left"}
+      - press: "move_left"
+      - advance_frames: 1  # establish wall contact
+      - press: "jump"
+      - advance_frames: 1
+    assert:
+      - player.vx: 8.0   # pushed away from wall
+      - player.vy: -13.0  # upward force
+      - tolerance: 0.1
+
+  - id: "wall_003"
+    name: "Wall jump cooldown"
+    description: "Cannot immediately re-grab same wall"
+    steps:
+      - spawn_player_against_wall: {x: 8, y: 200, wall_side: "left"}
+      - press: "move_left"
+      - press: "jump"
+      - advance_frames: 1
+      - release: "jump"
+      - press: "move_left"  # try to grab wall again
+      - advance_frames: 5
+    assert:
+      - player.wall_side: 0  # not touching wall (cooldown)
+
+# =============================================================================
+# BACON TESTS
+# =============================================================================
+
+bacon_tests:
+  - id: "bacon_001"
+    name: "Bacon collection"
+    description: "Player collects bacon on overlap"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - spawn_bacon: {x: 180, y: 220}  # slightly ahead
+      - press: "move_right"
+      - advance_until: "bacon_collected OR frames > 60"
+    assert:
+      - bacon_collected: true
+      - boost.active: true
+
+  - id: "bacon_002"
+    name: "Boost duration exact"
+    description: "Boost lasts exactly 180 frames"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - spawn_bacon: {x: 160, y: 220}  # on player
+      - advance_frames: 1  # collect
+      - assert: {boost.active: true}
+      - advance_frames: 179
+      - assert: {boost.active: true}
+      - advance_frames: 1
+    assert:
+      - boost.active: false
+      - boost.timer: 0
+
+  - id: "bacon_003"
+    name: "Boost speed multiplier"
+    description: "Boost increases speed by 1.5x"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - spawn_bacon: {x: 160, y: 220}
+      - advance_frames: 1  # collect
+      - press: "move_right"
+      - advance_frames: 1
+    assert:
+      - player.vx: 4.5  # 3.0 × 1.5
+      - tolerance: 0.01
+
+  - id: "bacon_004"
+    name: "Boost jump multiplier"
+    description: "Boost increases jump by 1.2x"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - spawn_bacon: {x: 160, y: 220}
+      - advance_frames: 1
+      - press: "jump"
+      - advance_frames: 1
+    assert:
+      - player.vy: -14.4  # -12.0 × 1.2
+      - tolerance: 0.01
+
+  - id: "bacon_005"
+    name: "Boost stacking (refresh)"
+    description: "Collecting bacon during boost resets timer"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - spawn_bacon: {x: 160, y: 220}
+      - spawn_bacon: {x: 200, y: 220}
+      - advance_frames: 1  # collect first
+      - advance_frames: 90  # half boost duration
+      - assert: {boost.timer: 90}
+      - press: "move_right"
+      - advance_until: "bacon_collected_count == 2"
+    assert:
+      - boost.timer: 180  # reset to full
+
+# =============================================================================
+# MOVEMENT TESTS
+# =============================================================================
+
+movement_tests:
+  - id: "move_001"
+    name: "Walk speed"
+    description: "Walking applies correct velocity"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - press: "move_right"
+      - advance_frames: 1
+    assert:
+      - player.vx: 3.0
+      - tolerance: 0.01
+
+  - id: "move_002"
+    name: "Run speed"
+    description: "Running applies correct velocity"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - press: "move_right"
+      - press: "run"
+      - advance_frames: 1
+    assert:
+      - player.vx: 5.0
+      - tolerance: 0.01
+
+  - id: "move_003"
+    name: "Ground friction"
+    description: "Friction slows player when no input"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - set_velocity: {vx: 10}
+      - advance_frames: 1
+    assert:
+      - player.vx: 8.5  # 10 × 0.85
+      - tolerance: 0.1
+
+  - id: "move_004"
+    name: "Air friction"
+    description: "Air friction is lower than ground"
+    steps:
+      - spawn_player: {x: 160, y: 100}
+      - set_grounded: false
+      - set_velocity: {vx: 10, vy: 0}
+      - advance_frames: 1
+    assert:
+      - player.vx: 9.5  # 10 × 0.95
+      - tolerance: 0.1
+
+# =============================================================================
+# COLLISION TESTS
+# =============================================================================
+
+collision_tests:
+  - id: "collision_001"
+    name: "Landing on platform"
+    description: "Player lands and stops on platform"
+    steps:
+      - spawn_player_falling: {x: 160, y: 100, vy: 5}
+      - spawn_platform: {x: 120, y: 200, width: 80, height: 16}
+      - advance_until: "player.grounded OR frames > 60"
+    assert:
+      - player.grounded: true
+      - player.y: 200  # top of platform
+      - player.vy: 0
+
+  - id: "collision_002"
+    name: "Horizontal collision"
+    description: "Player stops when hitting wall"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - spawn_wall: {x: 180, y: 0, width: 16, height: 300}
+      - press: "move_right"
+      - advance_frames: 30
+    assert:
+      - player.x_less_than: 180
+      - player.vx: 0
+
+  - id: "collision_003"
+    name: "One-way platform - pass through bottom"
+    description: "Player can jump through one-way platform"
+    steps:
+      - spawn_player_on_ground: {x: 160}
+      - spawn_platform: {x: 120, y: 150, width: 80, height: 8, type: "one_way"}
+      - press: "jump"
+      - advance_frames: 24  # reach apex above platform
+    assert:
+      - player.y_less_than: 150  # passed through
+
+  - id: "collision_004"
+    name: "One-way platform - land on top"
+    description: "Player lands on one-way platform from above"
+    steps:
+      - spawn_player: {x: 160, y: 100}
+      - spawn_platform: {x: 120, y: 150, width: 80, height: 8, type: "one_way"}
+      - set_velocity: {vy: 5}  # falling
+      - advance_until: "player.grounded OR frames > 60"
+    assert:
+      - player.grounded: true
+      - player.y: 150
+
+# =============================================================================
+# INTEGRATION TESTS
+# =============================================================================
+
+integration_tests:
+  - id: "integration_001"
+    name: "Jump to platform and collect bacon"
+    description: "Complete gameplay sequence"
+    steps:
+      - spawn_player_on_ground: {x: 50}
+      - spawn_platform: {x: 100, y: 150, width: 60, height: 16}
+      - spawn_bacon: {x: 130, y: 120}
+      - press: "move_right"
+      - advance_frames: 10
+      - press: "jump"
+      - advance_until: "player.grounded AND player.y == 150"
+      - advance_frames: 20
+    assert:
+      - bacon_collected: true
+      - boost.active: true
+      - player.x_greater_than: 100
+
+  - id: "integration_002"
+    name: "Wall jump chain"
+    description: "Sequential wall jumps gain height"
+    steps:
+      - spawn_player_on_ground: {x: 50}
+      - spawn_wall: {x: 0, y: 0, width: 8, height: 400}
+      - spawn_wall: {x: 100, y: 0, width: 8, height: 400}
+      - press: "move_left"
+      - press: "jump"
+      - advance_frames: 10
+      - press: "jump"  # wall jump off left wall
+      - advance_frames: 10
+      - press: "move_left"
+      - advance_frames: 5
+      - press: "jump"  # wall jump off right wall
+      - record: {name: "final_y", value: "player.y"}
+    assert:
+      - expression: "final_y < spawn_y - 200"
+        expected: true
+        note: "Gained significant height through wall jumps"

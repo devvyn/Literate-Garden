@@ -1,0 +1,346 @@
+# Barkour: Formal Game Specification
+# TESTS/visual_tests.yaml - Visual Verification Tests
+#
+# These tests verify visual presentation compliance.
+# ALL tests must pass for Silver certification.
+
+test_suite:
+  name: "Visual Tests"
+  version: "1.0"
+  certification_level: "silver"
+
+# =============================================================================
+# TEST FRAMEWORK
+# =============================================================================
+
+framework:
+  capture_method: "screenshot_comparison"
+
+  comparison:
+    algorithm: "structural_similarity"
+    threshold: 0.85  # 85% similarity required
+    note: |
+      Exact pixel matching not required due to platform differences.
+      Structural similarity focuses on shape, contrast, positioning.
+
+  tolerance:
+    position: 2  # pixels (at reference resolution)
+    size: "10%"  # sprite size variance
+    color: "palette_mapped"  # must map to valid palette
+
+# =============================================================================
+# PLAYER VISUAL TESTS
+# =============================================================================
+
+player_tests:
+  - id: "vis_player_001"
+    name: "Player visible on spawn"
+    description: "Player sprite renders at spawn position"
+    setup:
+      - load_level: "level_01"
+      - advance_frames: 1
+    capture: "full_screen"
+    assert:
+      - player_sprite_visible: true
+      - player_at_spawn: true
+      - player_contrast_with_background: "sufficient"
+
+  - id: "vis_player_002"
+    name: "Player facing direction"
+    description: "Player sprite flips with movement direction"
+    setup:
+      - spawn_player_on_ground: {x: 160}
+      - press: "move_right"
+      - advance_frames: 5
+      - capture: {name: "facing_right"}
+      - release: "move_right"
+      - press: "move_left"
+      - advance_frames: 5
+      - capture: {name: "facing_left"}
+    assert:
+      - facing_right.player_orientation: "right"
+      - facing_left.player_orientation: "left"
+      - sprites_are_mirrored: true
+
+  - id: "vis_player_003"
+    name: "Player animation states"
+    description: "Distinct visuals for each state"
+    setup:
+      - capture_state: "idle"
+        steps: [spawn_player_on_ground, advance_frames: 30]
+      - capture_state: "walk"
+        steps: [press: "move_right", advance_frames: 20]
+      - capture_state: "jump"
+        steps: [press: "jump", advance_frames: 5]
+      - capture_state: "fall"
+        steps: [advance_frames: 30]
+    assert:
+      - states_visually_distinct: ["idle", "walk", "jump", "fall"]
+      - minimum_distinct_frames: 3  # at least 3 different sprites
+
+  - id: "vis_player_004"
+    name: "Boost visual indicator"
+    description: "Player appearance changes when boosted"
+    setup:
+      - spawn_player_on_ground: {x: 160}
+      - capture: {name: "normal"}
+      - spawn_bacon: {x: 160, y: 220}
+      - advance_frames: 1
+      - capture: {name: "boosted"}
+    assert:
+      - normal_and_boosted_different: true
+      - boost_indicator_visible: true
+      - note: "Color change, glow, particles, or sprite swap"
+
+# =============================================================================
+# BACON VISUAL TESTS
+# =============================================================================
+
+bacon_tests:
+  - id: "vis_bacon_001"
+    name: "Bacon visibility"
+    description: "Bacon sprite is clearly visible"
+    setup:
+      - spawn_bacon: {x: 160, y: 120}
+      - advance_frames: 1
+    capture: "full_screen"
+    assert:
+      - bacon_sprite_visible: true
+      - bacon_contrast_with_background: "high"
+
+  - id: "vis_bacon_002"
+    name: "Bacon float animation"
+    description: "Bacon visibly floats up and down"
+    setup:
+      - spawn_bacon: {x: 160, y: 120}
+      - capture_sequence:
+          frames: [0, 22, 45, 67, 90]  # full period
+          name: "float_sequence"
+    assert:
+      - y_position_varies: true
+      - amplitude_approximately: 4  # pixels
+      - motion_smooth: true
+
+  - id: "vis_bacon_003"
+    name: "Bacon collection effect"
+    description: "Visual feedback when bacon collected"
+    setup:
+      - spawn_player_on_ground: {x: 150}
+      - spawn_bacon: {x: 170, y: 220}
+      - press: "move_right"
+      - capture_on_event: "bacon_collected"
+      - advance_frames: 15
+      - capture: {name: "after_collect"}
+    assert:
+      - collection_effect_visible: true
+      - bacon_removed_from_scene: true
+
+# =============================================================================
+# ENVIRONMENT VISUAL TESTS
+# =============================================================================
+
+environment_tests:
+  - id: "vis_env_001"
+    name: "Platform rendering"
+    description: "Platforms render as solid surfaces"
+    setup:
+      - load_level: "level_01"
+      - advance_frames: 1
+    capture: "full_screen"
+    assert:
+      - platforms_visible: true
+      - platforms_solid_appearance: true
+      - platform_edges_defined: true
+
+  - id: "vis_env_002"
+    name: "Wall rendering"
+    description: "Walls render distinctly"
+    setup:
+      - load_level: "level_01"
+      - advance_frames: 1
+    capture: "full_screen"
+    assert:
+      - walls_visible: true
+      - walls_distinguishable_from_platforms: "recommended"
+
+  - id: "vis_env_003"
+    name: "Background rendering"
+    description: "Background provides visual context"
+    setup:
+      - load_level: "level_01"
+    capture: "full_screen"
+    assert:
+      - background_not_black: true  # unless intentional
+      - background_contrasts_with_platforms: true
+      - background_does_not_obscure_gameplay: true
+
+# =============================================================================
+# UI VISUAL TESTS
+# =============================================================================
+
+ui_tests:
+  - id: "vis_ui_001"
+    name: "Bacon counter display"
+    description: "HUD shows bacon count"
+    setup:
+      - load_level: "level_01"
+      - advance_frames: 1
+    capture: "top_left_quadrant"
+    assert:
+      - bacon_counter_visible: true
+      - counter_readable: true
+      - counter_shows_zero: true
+
+  - id: "vis_ui_002"
+    name: "Bacon counter updates"
+    description: "Counter increases when bacon collected"
+    setup:
+      - load_level: "level_01"
+      - capture: {name: "before", region: "hud"}
+      - collect_bacon: 0
+      - capture: {name: "after", region: "hud"}
+    assert:
+      - counter_value_changed: true
+      - after_shows_one: true
+
+  - id: "vis_ui_003"
+    name: "Boost indicator display"
+    description: "Boost state shown in UI when active"
+    setup:
+      - load_level: "level_01"
+      - collect_bacon: 0
+      - advance_frames: 1
+    capture: "hud_region"
+    assert:
+      - boost_indicator_visible: true
+      - boost_indicator_style: ["bar", "timer", "icon", "glow"]
+
+# =============================================================================
+# CAMERA TESTS
+# =============================================================================
+
+camera_tests:
+  - id: "vis_cam_001"
+    name: "Player stays on screen"
+    description: "Camera follows player"
+    setup:
+      - load_level: "level_01"
+      - press: "move_right"
+      - advance_frames: 120  # move significant distance
+    capture: "full_screen"
+    assert:
+      - player_visible: true
+      - player_not_at_edge: true  # within dead zone
+
+  - id: "vis_cam_002"
+    name: "Camera bounds"
+    description: "Camera doesn't show outside level"
+    setup:
+      - load_level: "level_01"
+      - move_player_to: {x: 0, y: 448}  # level corner
+    capture: "full_screen"
+    assert:
+      - no_void_visible: true
+      - level_edge_respected: true
+
+# =============================================================================
+# TRAJECTORY COMPARISON TESTS
+# =============================================================================
+
+trajectory_tests:
+  - id: "vis_traj_001"
+    name: "Jump trajectory visual match"
+    description: "Jump arc matches reference"
+    setup:
+      - spawn_player_on_ground: {x: 160}
+      - press: "jump"
+      - capture_trajectory:
+          duration: 48  # full jump
+          interval: 4   # every 4 frames
+    compare_to: "REFERENCE/trajectories/jump_basic.json"
+    assert:
+      - trajectory_deviation_max: 3  # pixels
+      - apex_position_match: true
+
+  - id: "vis_traj_002"
+    name: "Wall jump trajectory"
+    description: "Wall jump arc matches reference"
+    setup:
+      - spawn_player_against_wall: {x: 8}
+      - press: "move_left"
+      - press: "jump"
+      - capture_trajectory:
+          duration: 40
+          interval: 4
+    compare_to: "REFERENCE/trajectories/wall_jump.json"
+    assert:
+      - trajectory_deviation_max: 4  # pixels
+      - horizontal_push_visible: true
+
+# =============================================================================
+# PLATFORM ADAPTATION TESTS
+# =============================================================================
+
+adaptation_tests:
+  note: |
+    These tests verify constrained platforms meet minimum requirements.
+    Not all tests apply to all platforms.
+
+  - id: "vis_adapt_001"
+    name: "Minimum resolution playability"
+    platforms: ["pico8", "mono8", "tic80"]
+    description: "Game playable at reduced resolution"
+    assert:
+      - player_visible: true
+      - platforms_distinguishable: true
+      - bacon_visible: true
+      - hud_readable: true
+
+  - id: "vis_adapt_002"
+    name: "Reduced color palette"
+    platforms: ["mono8"]
+    description: "4-shade rendering maintains clarity"
+    assert:
+      - player_contrasts_with_background: true
+      - platforms_solid_vs_background: true
+      - bacon_distinct_from_environment: true
+
+  - id: "vis_adapt_003"
+    name: "ASCII representation"
+    platforms: ["terminal"]
+    description: "Text-mode rendering is interpretable"
+    assert:
+      - player_character_identifiable: true
+      - platform_characters_solid: true
+      - bacon_character_distinct: true
+      - movement_readable: true
+
+# =============================================================================
+# REFERENCE DATA
+# =============================================================================
+
+reference_data:
+  location: "REFERENCE/"
+
+  trajectories:
+    - name: "jump_basic.json"
+      description: "Standard jump from ground"
+      format: "array of {frame, x, y}"
+
+    - name: "wall_jump.json"
+      description: "Wall jump from left wall"
+      format: "array of {frame, x, y}"
+
+    - name: "boosted_jump.json"
+      description: "Jump with boost active"
+      format: "array of {frame, x, y}"
+
+  screenshots:
+    - name: "level_01_start.png"
+      description: "Level 1 initial state"
+
+    - name: "player_states.png"
+      description: "All player animation states"
+
+    - name: "boost_comparison.png"
+      description: "Normal vs boosted player"

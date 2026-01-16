@@ -1,0 +1,290 @@
+# Barkour: Platform Binding
+# BINDINGS/pygame.yaml - PyGame Implementation Mapping
+
+binding:
+  platform: "pygame"
+  version: "2.x"
+  language: "python"
+  status: "reference_implementation"
+
+# =============================================================================
+# DISPLAY MAPPING
+# =============================================================================
+
+display:
+  # Spec logical resolution: 320×240
+  # PyGame can scale to any window size
+
+  initialization: |
+    pygame.init()
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    logical_surface = pygame.Surface((320, 240))
+
+  scaling:
+    method: "integer_scale"
+    code: |
+      scale = min(WINDOW_WIDTH // 320, WINDOW_HEIGHT // 240)
+      scaled = pygame.transform.scale(logical_surface, (320 * scale, 240 * scale))
+      screen.blit(scaled, ((WINDOW_WIDTH - 320 * scale) // 2,
+                           (WINDOW_HEIGHT - 240 * scale) // 2))
+
+  frame_rate:
+    target: 60
+    code: |
+      clock = pygame.time.Clock()
+      clock.tick(60)
+
+# =============================================================================
+# INPUT MAPPING
+# =============================================================================
+
+input:
+  type: "keyboard"
+
+  mapping:
+    move_left:
+      keys: [pygame.K_LEFT, pygame.K_a]
+      check: "pygame.key.get_pressed()"
+
+    move_right:
+      keys: [pygame.K_RIGHT, pygame.K_d]
+      check: "pygame.key.get_pressed()"
+
+    jump:
+      keys: [pygame.K_SPACE, pygame.K_UP, pygame.K_w]
+      check_pressed: "event.type == pygame.KEYDOWN"
+      check_held: "pygame.key.get_pressed()"
+
+    run:
+      keys: [pygame.K_LSHIFT, pygame.K_RSHIFT]
+      check: "pygame.key.get_pressed()"
+
+  code_example: |
+    keys = pygame.key.get_pressed()
+
+    # Movement (held)
+    if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        input_state.move_left = True
+    if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+        input_state.move_right = True
+
+    # Jump (pressed - from event loop)
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.key in [pygame.K_SPACE, pygame.K_UP, pygame.K_w]:
+                input_state.jump_pressed = True
+
+    # Jump held (for variable height)
+    if keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_w]:
+        input_state.jump_held = True
+
+# =============================================================================
+# RENDERING MAPPING
+# =============================================================================
+
+rendering:
+  sprites:
+    format: "PNG with transparency"
+    loading: |
+      sprite = pygame.image.load("tilly.png").convert_alpha()
+
+    drawing: |
+      logical_surface.blit(sprite, (x, y))
+
+  primitives:
+    rectangle: |
+      pygame.draw.rect(surface, color, (x, y, width, height))
+
+    text: |
+      font = pygame.font.Font(None, 16)  # or custom pixel font
+      text_surface = font.render(text, False, color)
+      surface.blit(text_surface, (x, y))
+
+  colors:
+    format: "(R, G, B)"
+    palette_mapping:
+      sky: (135, 206, 235)
+      ground: (139, 90, 43)
+      platform: (100, 100, 120)
+      tilly_body: (210, 180, 140)
+      bacon_light: (255, 105, 180)
+      text: (255, 255, 255)
+
+# =============================================================================
+# PHYSICS IMPLEMENTATION
+# =============================================================================
+
+physics:
+  coordinate_system:
+    note: "PyGame uses top-left origin, y-down (matches spec)"
+
+  gravity:
+    implementation: |
+      player.vy += GRAVITY  # 0.5
+
+  collision:
+    method: "rect_based"
+    code: |
+      player_rect = pygame.Rect(player.x, player.y, PLAYER_WIDTH, PLAYER_HEIGHT)
+
+      for platform in platforms:
+          if player_rect.colliderect(platform.rect):
+              # Resolve collision
+
+  frame_timing:
+    fixed_timestep: true
+    code: |
+      accumulator = 0
+      FIXED_DT = 1/60
+
+      while running:
+          frame_time = clock.tick(60) / 1000.0
+          accumulator += frame_time
+
+          while accumulator >= FIXED_DT:
+              update(FIXED_DT)
+              accumulator -= FIXED_DT
+
+          render()
+
+# =============================================================================
+# AUDIO IMPLEMENTATION
+# =============================================================================
+
+audio:
+  initialization: |
+    pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
+
+  sound_loading: |
+    jump_sound = pygame.mixer.Sound("jump.wav")
+
+  sound_playing: |
+    jump_sound.play()
+
+  note: |
+    PyGame uses pre-recorded audio files.
+    Alternative: pygame.sndarray for synthesis.
+
+# =============================================================================
+# GAME LOOP STRUCTURE
+# =============================================================================
+
+game_loop:
+  structure: |
+    def main():
+        pygame.init()
+        setup()
+
+        running = True
+        while running:
+            # Handle events
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                handle_event(event)
+
+            # Update
+            update()
+
+            # Draw
+            render()
+
+            # Frame timing
+            clock.tick(60)
+
+        pygame.quit()
+
+  maps_to_spec:
+    _init: "setup()"
+    _update: "update()"
+    _draw: "render()"
+
+# =============================================================================
+# TEST HARNESS INTERFACE
+# =============================================================================
+
+test_harness:
+  note: |
+    For certification testing, implementation must expose:
+
+  required_interface:
+    spawn_player: |
+      def spawn_player(x, y):
+          player.x = x
+          player.y = y
+          player.vx = 0
+          player.vy = 0
+
+    get_player_state: |
+      def get_player_state():
+          return {
+              'x': player.x,
+              'y': player.y,
+              'vx': player.vx,
+              'vy': player.vy,
+              'grounded': player.grounded,
+              'wall_side': player.wall_side
+          }
+
+    advance_frames: |
+      def advance_frames(n):
+          for _ in range(n):
+              update()
+
+    press_action: |
+      def press(action):
+          input_state[action] = True
+
+    release_action: |
+      def release(action):
+          input_state[action] = False
+
+    spawn_bacon: |
+      def spawn_bacon(x, y):
+          bacon_list.append(Bacon(x, y))
+
+    get_boost_state: |
+      def get_boost_state():
+          return {
+              'active': boost.active,
+              'timer': boost.timer
+          }
+
+# =============================================================================
+# FILE STRUCTURE
+# =============================================================================
+
+file_structure:
+  recommended: |
+    implementations/pygame/
+    ├── main.py           # Entry point, game loop
+    ├── player.py         # Player class, physics
+    ├── entities.py       # Bacon, platforms, walls
+    ├── level.py          # Level loading from spec
+    ├── renderer.py       # Drawing functions
+    ├── input_handler.py  # Input processing
+    ├── audio.py          # Sound management
+    ├── constants.py      # Values from MECHANICS.yaml
+    ├── test_harness.py   # Certification test interface
+    ├── assets/
+    │   ├── tilly.png
+    │   ├── bacon.png
+    │   └── sounds/
+    └── README.md
+
+# =============================================================================
+# CERTIFICATION NOTES
+# =============================================================================
+
+certification:
+  status: "reference_implementation"
+
+  as_reference:
+    - "All mechanics tests use this as behavioral baseline"
+    - "Visual tests generate reference screenshots from this"
+    - "Feel tests use this as comparison target"
+
+  validation:
+    - "Self-validates against MECHANICS.yaml on startup"
+    - "Logs any deviation from spec constants"
+    - "Exposes test harness for automated verification"

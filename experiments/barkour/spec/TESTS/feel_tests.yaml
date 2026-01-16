@@ -1,0 +1,290 @@
+# Barkour: Formal Game Specification
+# TESTS/feel_tests.yaml - Human Validation Tests
+#
+# These tests require human judgment.
+# ALL tests must pass for Gold certification.
+
+test_suite:
+  name: "Feel Tests"
+  version: "1.0"
+  certification_level: "gold"
+
+# =============================================================================
+# TEST PROTOCOL
+# =============================================================================
+
+protocol:
+  tester_requirements:
+    - "Familiar with platformer games"
+    - "Has played reference implementation (PyGame)"
+    - "No prior exposure to test implementation"
+
+  environment:
+    - "Quiet testing environment"
+    - "Same input device type as reference (keyboard)"
+    - "No distractions during test"
+
+  documentation:
+    - "Record tester comments verbatim"
+    - "Note any hesitation or confusion"
+    - "Capture completion times"
+
+# =============================================================================
+# BLIND COMPARISON TESTS
+# =============================================================================
+
+blind_tests:
+  - id: "feel_001"
+    name: "Same Game Test"
+    description: "Tester identifies if two versions are the same game"
+    procedure:
+      1: "Tester plays Level 1 on Implementation A (randomized)"
+      2: "Tester plays Level 1 on Implementation B"
+      3: "Ask: 'Are these the same game, or different games?'"
+      4: "Ask: 'What differences, if any, did you notice?'"
+    pass_criteria:
+      - response: "Same game"
+        required_percentage: 80
+      - differences_noted: "none" OR "minor visual only"
+    sample_size: 5  # minimum testers
+
+  - id: "feel_002"
+    name: "Which Is Reference Test"
+    description: "Tester cannot reliably identify reference"
+    procedure:
+      1: "Tester plays both implementations (order randomized)"
+      2: "Ask: 'Which one is the original?'"
+      3: "Record confidence level (1-5)"
+    pass_criteria:
+      - correct_identification_rate: "<70%"
+        note: "Should be near chance (50%)"
+      - average_confidence: "<3.5"
+        note: "Low confidence indicates good parity"
+    sample_size: 5
+
+# =============================================================================
+# FEEL QUALITY TESTS
+# =============================================================================
+
+feel_tests:
+  - id: "feel_003"
+    name: "Jump Responsiveness"
+    description: "Jump feels immediate and responsive"
+    procedure:
+      1: "Tester performs 10 standing jumps"
+      2: "Tester performs 10 running jumps"
+      3: "Ask: 'Did the jump feel responsive? (1-5)'"
+      4: "Ask: 'Did you ever feel the game missed your input?'"
+    pass_criteria:
+      - responsiveness_rating: ">=4"
+      - missed_inputs: "0"
+
+  - id: "feel_004"
+    name: "Movement Feel"
+    description: "Movement feels smooth and controlled"
+    procedure:
+      1: "Tester navigates through Level 1 without time pressure"
+      2: "Ask: 'Did movement feel smooth? (1-5)'"
+      3: "Ask: 'Did you feel in control of the character?'"
+      4: "Ask: 'Any moments of unexpected behavior?'"
+    pass_criteria:
+      - smoothness_rating: ">=4"
+      - control_rating: ">=4"
+      - unexpected_behaviors: "<=1"
+
+  - id: "feel_005"
+    name: "Wall Jump Feel"
+    description: "Wall jumping feels natural and learnable"
+    procedure:
+      1: "Tester attempts wall section of Level 1"
+      2: "Note: attempts until successful"
+      3: "Ask: 'Did wall jumping make sense? (1-5)'"
+      4: "Ask: 'Did the wall jump go where you expected?'"
+    pass_criteria:
+      - comprehension_rating: ">=3"
+      - direction_predictable: "yes"
+      - max_attempts_to_learn: 5
+
+  - id: "feel_006"
+    name: "Boost Feel"
+    description: "Bacon boost feels powerful and noticeable"
+    procedure:
+      1: "Tester collects bacon and immediately moves"
+      2: "Ask: 'Did you notice a difference? (1-5)'"
+      3: "Ask: 'Did the boost feel satisfying?'"
+      4: "Ask: 'Was it clear when the boost ended?'"
+    pass_criteria:
+      - notice_rating: ">=4"
+      - satisfying: "yes"
+      - end_clear: "yes" OR "somewhat"
+
+# =============================================================================
+# GAMEPLAY FLOW TESTS
+# =============================================================================
+
+flow_tests:
+  - id: "feel_007"
+    name: "Level Completion Feel"
+    description: "Level feels completable and fair"
+    procedure:
+      1: "Tester attempts to complete Level 1"
+      2: "Record: time to completion, bacon collected"
+      3: "Ask: 'Did the level feel fair? (1-5)'"
+      4: "Ask: 'Any sections feel impossible or unfair?'"
+    pass_criteria:
+      - completion_rate: "100%"
+        note: "Tutorial level must be completable"
+      - fairness_rating: ">=4"
+      - unfair_sections: "0"
+
+  - id: "feel_008"
+    name: "Coyote Time Feel"
+    description: "Grace period feels natural, not exploitable"
+    procedure:
+      1: "Explain coyote time concept"
+      2: "Tester intentionally tests edge of platforms"
+      3: "Ask: 'Did late jumps feel forgiving or broken?'"
+      4: "Ask: 'Did it ever feel like cheating?'"
+    pass_criteria:
+      - feels_forgiving: "yes"
+      - feels_broken: "no"
+      - feels_like_cheating: "no"
+
+  - id: "feel_009"
+    name: "Overall Game Feel"
+    description: "Holistic assessment of game experience"
+    procedure:
+      1: "Tester plays through all available levels"
+      2: "Ask: 'Overall, how would you rate the feel? (1-5)'"
+      3: "Ask: 'Would you play more of this game?'"
+      4: "Ask: 'Any final comments on how it felt?'"
+    pass_criteria:
+      - overall_rating: ">=4"
+      - would_play_more: "yes" OR "probably"
+
+# =============================================================================
+# INPUT REPLAY TEST
+# =============================================================================
+
+replay_tests:
+  - id: "feel_010"
+    name: "Speedrun Replay Validity"
+    description: "Recorded inputs produce same outcome"
+    procedure:
+      1: "Record input sequence for Level 1 completion on reference"
+      2: "Replay exact input sequence on test implementation"
+      3: "Compare: final position, bacon collected, success/fail"
+    pass_criteria:
+      - outcome_matches: true
+        note: "Success/failure must match"
+      - final_position_delta: "<=16 pixels"
+      - bacon_collected_matches: true
+    note: |
+      This is semi-automated but requires human setup and verification.
+      Input recording must be frame-accurate.
+
+  - id: "feel_011"
+    name: "Timing Sensitivity Test"
+    description: "Frame-tight maneuvers work consistently"
+    procedure:
+      1: "Identify a frame-tight maneuver (e.g., coyote jump)"
+      2: "Record input sequence that uses full coyote window"
+      3: "Replay on test implementation"
+      4: "Verify: maneuver succeeds"
+    pass_criteria:
+      - maneuver_succeeds: true
+      - timing_preserved: true
+    note: |
+      This tests that frame-accurate mechanics are identical.
+      If reference allows a 6-frame coyote jump, test must too.
+
+# =============================================================================
+# COMPARATIVE RATING
+# =============================================================================
+
+comparative_rating:
+  - id: "feel_012"
+    name: "Side-by-Side Rating"
+    description: "Direct comparison on specific attributes"
+    procedure:
+      1: "Display both implementations side by side (if possible)"
+      2: "Or: alternate between them rapidly"
+      3: "Rate each attribute for each implementation"
+    attributes:
+      - name: "Responsiveness"
+        scale: "1-5"
+      - name: "Visual Clarity"
+        scale: "1-5"
+      - name: "Audio Feedback"
+        scale: "1-5 or N/A"
+      - name: "Overall Polish"
+        scale: "1-5"
+    pass_criteria:
+      - test_implementation_rating: ">= reference - 0.5"
+        note: "Test can be slightly lower but not significantly"
+      - no_attribute_below: 3
+        note: "No attribute should be 'bad'"
+
+# =============================================================================
+# EDGE CASE FEEL TESTS
+# =============================================================================
+
+edge_case_tests:
+  - id: "feel_013"
+    name: "Corner Collision Feel"
+    description: "Corners don't feel sticky or glitchy"
+    procedure:
+      1: "Tester deliberately runs into platform corners"
+      2: "Tester jumps against ceiling corners"
+      3: "Ask: 'Any moments where you got stuck?'"
+      4: "Ask: 'Any unexpected collision behavior?'"
+    pass_criteria:
+      - stuck_moments: "0"
+      - unexpected_collision: "0"
+
+  - id: "feel_014"
+    name: "Wall Slide Escape"
+    description: "Easy to stop wall sliding when desired"
+    procedure:
+      1: "Tester wall slides intentionally"
+      2: "Tester attempts to drop without jumping"
+      3: "Ask: 'Was it easy to disengage from the wall?'"
+    pass_criteria:
+      - easy_disengage: "yes"
+
+  - id: "feel_015"
+    name: "Boost Transition Feel"
+    description: "Speed changes don't feel jarring"
+    procedure:
+      1: "Tester runs with boost, lets it expire mid-run"
+      2: "Ask: 'Did the speed change feel abrupt?'"
+      3: "Ask: 'Did it cause any control issues?'"
+    pass_criteria:
+      - feels_abrupt: "no" OR "slightly"
+      - control_issues: "no"
+
+# =============================================================================
+# CERTIFICATION SUMMARY
+# =============================================================================
+
+certification:
+  minimum_testers: 3
+  required_pass_rate: "80%"
+
+  critical_tests:
+    - "feel_001"  # Same game test
+    - "feel_003"  # Jump responsiveness
+    - "feel_007"  # Level completion
+    - "feel_010"  # Input replay
+
+  note: |
+    Critical tests must pass with 100% of testers.
+    Other tests use 80% pass rate threshold.
+    Any test with "feels_broken: yes" is automatic fail.
+
+  documentation_required:
+    - "Tester demographics (gaming experience level)"
+    - "Test environment details"
+    - "Raw response data"
+    - "Verbatim comments"
+    - "Certification decision with rationale"

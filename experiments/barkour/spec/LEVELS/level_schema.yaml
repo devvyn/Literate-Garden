@@ -1,0 +1,248 @@
+# Barkour: Formal Game Specification
+# LEVELS/level_schema.yaml - Level data format definition
+
+schema:
+  version: "1.0"
+  format: "yaml"
+
+# =============================================================================
+# LEVEL STRUCTURE
+# =============================================================================
+
+level:
+  # Metadata
+  meta:
+    id:
+      type: "string"
+      required: true
+      format: "level_XX"
+      example: "level_01"
+
+    name:
+      type: "string"
+      required: true
+      example: "Tilly's First Dream"
+
+    difficulty:
+      type: "enum"
+      values: ["tutorial", "easy", "medium", "hard"]
+      required: false
+
+  # Dimensions
+  bounds:
+    width:
+      type: "integer"
+      unit: "logical_pixels"
+      required: true
+      minimum: 320
+
+    height:
+      type: "integer"
+      unit: "logical_pixels"
+      required: true
+      minimum: 240
+
+  # Player spawn
+  spawn:
+    x:
+      type: "integer"
+      unit: "logical_pixels"
+      required: true
+
+    y:
+      type: "integer"
+      unit: "logical_pixels"
+      required: true
+      note: "Y is bottom of player (feet position)"
+
+  # Goal condition
+  goal:
+    type:
+      type: "enum"
+      values: ["collect_all_bacon", "reach_position", "collect_n_bacon"]
+      required: true
+
+    # For reach_position type
+    position:
+      x: "integer"
+      y: "integer"
+      radius: "integer (logical_pixels)"
+      condition: "type == reach_position"
+
+    # For collect_n_bacon type
+    bacon_required:
+      type: "integer"
+      condition: "type == collect_n_bacon"
+
+# =============================================================================
+# ENTITY DEFINITIONS
+# =============================================================================
+
+entities:
+  platform:
+    description: "Solid surface player can stand on"
+    properties:
+      x:
+        type: "integer"
+        unit: "logical_pixels"
+        required: true
+
+      y:
+        type: "integer"
+        unit: "logical_pixels"
+        required: true
+
+      width:
+        type: "integer"
+        unit: "logical_pixels"
+        required: true
+        minimum: 8
+
+      height:
+        type: "integer"
+        unit: "logical_pixels"
+        required: true
+        minimum: 8
+
+      type:
+        type: "enum"
+        values: ["solid", "one_way"]
+        default: "solid"
+
+      style:
+        type: "string"
+        required: false
+        note: "Visual style hint (grass, stone, etc.)"
+
+  wall:
+    description: "Vertical surface for wall-jumping"
+    properties:
+      x:
+        type: "integer"
+        required: true
+
+      y:
+        type: "integer"
+        required: true
+
+      width:
+        type: "integer"
+        required: true
+        typical: 8
+
+      height:
+        type: "integer"
+        required: true
+
+      wall_jump:
+        type: "boolean"
+        default: true
+        note: "Can player wall-jump off this surface?"
+
+  bacon:
+    description: "Collectible power-up"
+    properties:
+      x:
+        type: "integer"
+        required: true
+        note: "Center X position"
+
+      y:
+        type: "integer"
+        required: true
+        note: "Center Y position (before float animation)"
+
+      id:
+        type: "integer"
+        required: false
+        note: "Unique identifier for tracking collection"
+
+  spawn_point:
+    description: "Alternative spawn locations"
+    properties:
+      x:
+        type: "integer"
+        required: true
+
+      y:
+        type: "integer"
+        required: true
+
+      checkpoint:
+        type: "boolean"
+        default: false
+
+# =============================================================================
+# VALIDATION RULES
+# =============================================================================
+
+validation:
+  spawn:
+    - "Spawn point must be above or on a platform"
+    - "Spawn point must have clearance for player hitbox"
+    - "Spawn point must be within level bounds"
+
+  platforms:
+    - "At least one platform must exist"
+    - "Platforms must not overlap spawn with no clearance"
+
+  bacon:
+    - "All bacon must be reachable from spawn"
+    - "Bacon must be within level bounds"
+
+  bounds:
+    - "All entities must be within level bounds"
+    - "Level must be at least one screen size"
+
+  goal:
+    - "If collect_all_bacon, at least one bacon must exist"
+    - "If reach_position, position must be reachable"
+
+# =============================================================================
+# COORDINATE NOTES
+# =============================================================================
+
+coordinates:
+  note: |
+    All coordinates are in logical pixels (320×240 base).
+
+    Platform/Wall coordinates define TOP-LEFT corner.
+    Bacon coordinates define CENTER.
+    Spawn coordinates define BOTTOM-CENTER (feet).
+
+    For scaled implementations:
+      scaled_value = value × (target_resolution / 320)
+      round to integer after scaling
+
+# =============================================================================
+# EXAMPLE LEVEL
+# =============================================================================
+
+example: |
+  # See level_01.yaml for full example
+
+  meta:
+    id: "level_01"
+    name: "Tilly's First Dream"
+    difficulty: "tutorial"
+
+  bounds:
+    width: 640
+    height: 480
+
+  spawn:
+    x: 32
+    y: 432
+
+  goal:
+    type: "collect_all_bacon"
+
+  platforms:
+    - {x: 0, y: 448, width: 640, height: 32}
+    - {x: 100, y: 368, width: 80, height: 16}
+
+  walls:
+    - {x: 0, y: 0, width: 8, height: 480}
+
+  bacon:
+    - {id: 0, x: 140, y: 340}

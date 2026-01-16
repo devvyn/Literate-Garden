@@ -1,0 +1,245 @@
+# Barkour: Level 01
+# "Tilly's First Dream"
+#
+# Tutorial level introducing core mechanics:
+# - Basic movement
+# - Jumping to platforms
+# - Bacon collection
+# - Wall-jumping (gentle introduction)
+
+meta:
+  id: "level_01"
+  name: "Tilly's First Dream"
+  difficulty: "tutorial"
+  bacon_count: 5
+  par_time: 45  # seconds, for speedrun reference
+
+bounds:
+  width: 640
+  height: 480
+
+spawn:
+  x: 48
+  y: 432  # Standing on ground
+
+goal:
+  type: "collect_all_bacon"
+
+# =============================================================================
+# PLATFORMS
+# =============================================================================
+
+platforms:
+  # Ground floor (full width)
+  - id: "ground"
+    x: 0
+    y: 448
+    width: 640
+    height: 32
+    type: "solid"
+    style: "grass"
+
+  # First jump (easy)
+  - id: "plat_01"
+    x: 120
+    y: 368
+    width: 80
+    height: 16
+    type: "solid"
+    note: "First jump target, bacon #1 above"
+
+  # Second jump (requires momentum)
+  - id: "plat_02"
+    x: 280
+    y: 320
+    width: 96
+    height: 16
+    type: "solid"
+    note: "Longer jump, teaches running"
+
+  # Vertical challenge start
+  - id: "plat_03"
+    x: 440
+    y: 368
+    width: 64
+    height: 16
+    type: "solid"
+    note: "Staging for wall-jump section"
+
+  # Wall-jump target platform
+  - id: "plat_04"
+    x: 520
+    y: 240
+    width: 80
+    height: 16
+    type: "solid"
+    note: "Reached via wall-jump, bacon #4 here"
+
+  # Final platform (requires boost)
+  - id: "plat_05"
+    x: 280
+    y: 128
+    width: 80
+    height: 16
+    type: "solid"
+    note: "Final bacon, easier with boost"
+
+  # One-way platform (teaches mechanic)
+  - id: "plat_06"
+    x: 160
+    y: 240
+    width: 64
+    height: 8
+    type: "one_way"
+    note: "Can jump through from below"
+
+# =============================================================================
+# WALLS
+# =============================================================================
+
+walls:
+  # Left boundary
+  - id: "wall_left"
+    x: 0
+    y: 0
+    width: 8
+    height: 480
+    wall_jump: false
+    note: "Boundary, not for wall-jumping"
+
+  # Right boundary
+  - id: "wall_right"
+    x: 632
+    y: 0
+    width: 8
+    height: 480
+    wall_jump: false
+
+  # Wall-jump tutorial wall
+  - id: "wall_tutorial"
+    x: 600
+    y: 200
+    width: 16
+    height: 248
+    wall_jump: true
+    note: "First wall-jump surface"
+
+  # Secondary wall for chaining
+  - id: "wall_chain"
+    x: 480
+    y: 160
+    width: 16
+    height: 160
+    wall_jump: true
+    note: "For wall-jump chaining to plat_05"
+
+# =============================================================================
+# BACON
+# =============================================================================
+
+bacon:
+  # Bacon #1: First platform reward
+  - id: 0
+    x: 160
+    y: 340
+    note: "Above plat_01, teaches basic jump collection"
+
+  # Bacon #2: Running jump reward
+  - id: 1
+    x: 328
+    y: 290
+    note: "Above plat_02, encourages running"
+
+  # Bacon #3: Ground-level, grants first boost
+  - id: 2
+    x: 540
+    y: 420
+    note: "Easy pickup, introduces boost for wall section"
+
+  # Bacon #4: Wall-jump reward
+  - id: 3
+    x: 560
+    y: 210
+    note: "On plat_04, requires wall-jump to reach"
+
+  # Bacon #5: Final challenge
+  - id: 4
+    x: 320
+    y: 100
+    note: "Above plat_05, easier with boost, possible without"
+
+# =============================================================================
+# DESIGN NOTES
+# =============================================================================
+
+design_notes:
+  flow: |
+    1. Player spawns on ground, bacon #1 visible ahead and up
+    2. Jump to plat_01, collect bacon #1
+    3. Running jump to plat_02, collect bacon #2
+    4. Drop down and right toward wall section
+    5. Collect bacon #3 on ground (grants boost)
+    6. Use boost + wall-jump to reach plat_04, bacon #4
+    7. Chain wall-jumps to plat_05 for final bacon #5
+       (or return here later with fresh boost)
+
+  teaching:
+    - "Platforms 01-02: Basic jumping"
+    - "Bacon #3 placement: Boost before challenge"
+    - "Wall section: Wall-sliding and wall-jumping"
+    - "One-way platform: Optional, shows mechanic exists"
+
+  difficulty_curve:
+    start: "Simple horizontal platforming"
+    middle: "Introduction to boost timing"
+    end: "Basic wall-jump, optional chaining"
+
+  par_route: |
+    Optimal route for 45-second par:
+    1. Run right, jump to plat_01 (bacon #1)
+    2. Running jump to plat_02 (bacon #2)
+    3. Drop, run right (bacon #3)
+    4. Wall-jump to plat_04 (bacon #4)
+    5. Wall-chain to plat_05 (bacon #5)
+    Total: ~35-45 seconds with clean execution
+
+# =============================================================================
+# VALIDATION CHECKPOINTS
+# =============================================================================
+
+validation:
+  reachability:
+    - from: "spawn"
+      to: "bacon_0"
+      method: "single_jump"
+      requires_boost: false
+
+    - from: "bacon_0"
+      to: "bacon_1"
+      method: "running_jump"
+      requires_boost: false
+
+    - from: "ground"
+      to: "bacon_2"
+      method: "walk"
+      requires_boost: false
+
+    - from: "bacon_2"
+      to: "bacon_3"
+      method: "wall_jump"
+      requires_boost: false
+      note: "Easier with boost from bacon_2"
+
+    - from: "bacon_3"
+      to: "bacon_4"
+      method: "wall_jump_chain"
+      requires_boost: false
+      note: "Tight without boost, comfortable with"
+
+  completable:
+    without_boost: true
+    note: "All bacon reachable without boost (skilled play)"
+
+  speedrun_viable:
+    bacon_order: [0, 1, 2, 3, 4]
+    skip_potential: "None - linear optimal route"

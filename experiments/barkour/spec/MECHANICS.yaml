@@ -1,0 +1,407 @@
+# Barkour: Formal Game Specification
+# MECHANICS.yaml - Layer 1: Core Rules (Immutable)
+#
+# This document defines the authoritative game mechanics.
+# All values are NON-NEGOTIABLE for certification.
+# Implementations MUST match these exactly.
+
+specification:
+  layer: 1
+  name: "Core Mechanics"
+  mutability: "immutable"
+
+# =============================================================================
+# COORDINATE SYSTEM
+# =============================================================================
+
+coordinates:
+  system: "screen"
+  origin: "top-left"
+  x_axis: "right-positive"
+  y_axis: "down-positive"
+  units: "logical pixels"
+
+  logical_resolution:
+    width: 320
+    height: 240
+    note: |
+      All mechanics defined in 320×240 logical space.
+      Implementations scale to display resolution.
+      Physics calculations use logical coordinates.
+
+# =============================================================================
+# TIME & FRAME MODEL
+# =============================================================================
+
+timing:
+  target_fps: 60
+  frame_duration_ms: 16.667
+
+  timing_model: "fixed_timestep"
+  note: |
+    All physics values assume 60fps fixed timestep.
+    Implementations using variable timestep must convert:
+      velocity_per_second = velocity_per_frame × 60
+      acceleration_per_second² = acceleration_per_frame × 3600
+
+  frame_tolerance:
+    acceptable_fps_range: [58, 62]
+    frame_skip_policy: "accumulate_and_catch_up"
+    max_accumulated_frames: 4
+
+# =============================================================================
+# PHYSICS CONSTANTS
+# =============================================================================
+
+physics:
+  gravity:
+    value: 0.5
+    unit: "logical_pixels/frame²"
+    formula: "velocity.y += gravity each frame"
+    non_negotiable: true
+
+  terminal_velocity:
+    value: 15
+    unit: "logical_pixels/frame"
+    formula: "velocity.y = min(velocity.y, terminal_velocity)"
+    non_negotiable: true
+
+  friction:
+    ground:
+      value: 0.85
+      formula: "velocity.x *= ground_friction when grounded and no input"
+
+    air:
+      value: 0.95
+      formula: "velocity.x *= air_friction when airborne and no input"
+
+    wall_slide:
+      max_speed: 2
+      unit: "logical_pixels/frame"
+      formula: "velocity.y = min(velocity.y, wall_slide_max) when touching wall"
+
+# =============================================================================
+# PLAYER ENTITY
+# =============================================================================
+
+player:
+  hitbox:
+    width: 12
+    height: 16
+    unit: "logical_pixels"
+    anchor: "bottom-center"
+    note: |
+      Hitbox is smaller than visual sprite for forgiving collision.
+      Anchor at bottom-center means position.y is feet position.
+
+  collision:
+    type: "AABB"
+    formula: |
+      overlap = (
+        a.left < b.right AND
+        a.right > b.left AND
+        a.top < b.bottom AND
+        a.bottom > b.top
+      )
+
+# =============================================================================
+# MOVEMENT MECHANICS
+# =============================================================================
+
+movement:
+  walk:
+    speed: 3.0
+    unit: "logical_pixels/frame"
+    acceleration: "instant"
+    note: "No acceleration curve; velocity set directly on input"
+
+  run:
+    speed: 5.0
+    unit: "logical_pixels/frame"
+    trigger: "hold run button OR powered state"
+
+  direction:
+    left: -1
+    right: +1
+    formula: "velocity.x = direction × speed"
+
+# =============================================================================
+# JUMP MECHANICS
+# =============================================================================
+
+jump:
+  # Core jump
+  force:
+    value: -12
+    unit: "logical_pixels/frame"
+    formula: "velocity.y = jump_force on jump input"
+    note: "Negative because y-axis is down-positive"
+
+  # Derived values (for testing)
+  derived:
+    apex_height:
+      formula: "jump_force² / (2 × gravity)"
+      value: 144
+      unit: "logical_pixels"
+      note: "Maximum height above jump origin"
+
+    time_to_apex:
+      formula: "-jump_force / gravity"
+      value: 24
+      unit: "frames"
+
+    total_airtime:
+      formula: "2 × time_to_apex"
+      value: 48
+      unit: "frames"
+      note: "Assuming landing at same height as takeoff"
+
+  # Coyote time (grace period after leaving platform)
+  coyote_time:
+    value: 6
+    unit: "frames"
+    duration_ms: 100
+    formula: |
+      can_jump = grounded OR (frames_since_grounded < coyote_time)
+    non_negotiable: true
+
+  # Jump buffering (input registered before landing)
+  jump_buffer:
+    value: 4
+    unit: "frames"
+    duration_ms: 67
+    formula: |
+      if jump_pressed:
+        jump_buffer_timer = jump_buffer_frames
+      if landed AND jump_buffer_timer > 0:
+        execute_jump()
+    non_negotiable: true
+
+  # Variable jump height (release early = lower jump)
+  variable_height:
+    enabled: true
+    early_release_damping: 0.5
+    formula: |
+      if jump_released AND velocity.y < 0:
+        velocity.y *= early_release_damping
+
+# =============================================================================
+# WALL MECHANICS
+# =============================================================================
+
+wall:
+  detection:
+    method: "horizontal_raycast"
+    distance: 2
+    unit: "logical_pixels"
+    formula: |
+      touching_wall = (
+        check_solid(player.x - detection_distance, player.y) OR
+        check_solid(player.x + player.width + detection_distance, player.y)
+      )
+
+  slide:
+    enabled: true
+    max_fall_speed: 2
+    unit: "logical_pixels/frame"
+    condition: "touching_wall AND velocity.y > 0 AND holding_toward_wall"
+    formula: "velocity.y = min(velocity.y, wall_slide_max_speed)"
+
+  jump:
+    horizontal_force: 8
+    vertical_force: -13
+    unit: "logical_pixels/frame"
+    cooldown: 6
+    unit_cooldown: "frames"
+    formula: |
+      velocity.x = wall_normal × horizontal_force
+      velocity.y = vertical_force
+      wall_jump_cooldown = cooldown_frames
+    note: "wall_normal is -1 for right wall, +1 for left wall"
+
+  derived:
+    wall_jump_apex:
+      formula: "vertical_force² / (2 × gravity)"
+      value: 169
+      unit: "logical_pixels"
+
+# =============================================================================
+# BACON (COLLECTIBLE / POWER-UP)
+# =============================================================================
+
+bacon:
+  hitbox:
+    width: 12
+    height: 8
+    unit: "logical_pixels"
+
+  collection:
+    method: "AABB_overlap"
+    trigger: "player.hitbox overlaps bacon.hitbox"
+
+  animation:
+    type: "float"
+    amplitude: 4
+    unit: "logical_pixels"
+    period: 90
+    unit_period: "frames"
+    formula: "offset_y = sin(frame / period × 2π) × amplitude"
+
+  boost:
+    duration:
+      value: 180
+      unit: "frames"
+      duration_ms: 3000
+      non_negotiable: true
+
+    speed_multiplier:
+      value: 1.5
+      formula: "effective_speed = base_speed × speed_multiplier"
+
+    jump_multiplier:
+      value: 1.2
+      formula: "effective_jump = base_jump × jump_multiplier"
+      result: -14.4
+      unit: "logical_pixels/frame"
+
+    wall_jump_multiplier:
+      value: 1.3
+      formula: "effective_wall_jump = base_wall_jump × multiplier"
+      result_horizontal: 10.4
+      result_vertical: -16.9
+
+    stacking:
+      policy: "refresh"
+      note: "Collecting bacon while boosted resets timer to full duration"
+
+# =============================================================================
+# COLLISION RESOLUTION
+# =============================================================================
+
+collision:
+  order:
+    - "Apply gravity and movement"
+    - "Check horizontal collision, resolve"
+    - "Check vertical collision, resolve"
+    - "Update grounded state"
+
+  horizontal:
+    formula: |
+      new_x = player.x + velocity.x
+      if solid_at(new_x, player.y):
+        player.x = nearest_non_solid_x
+        velocity.x = 0
+        touching_wall = true
+
+  vertical:
+    formula: |
+      new_y = player.y + velocity.y
+      if solid_at(player.x, new_y):
+        if velocity.y > 0:  # falling
+          player.y = platform_top
+          velocity.y = 0
+          grounded = true
+        else:  # jumping into ceiling
+          player.y = ceiling_bottom + player.height
+          velocity.y = 0
+
+  platform:
+    types:
+      solid:
+        collision: "all_sides"
+      one_way:
+        collision: "top_only"
+        formula: |
+          collide_one_way = (
+            player.bottom <= platform.top AND
+            player.bottom + velocity.y > platform.top
+          )
+
+# =============================================================================
+# GAME STATE
+# =============================================================================
+
+state:
+  player:
+    position: {x: "float", y: "float"}
+    velocity: {x: "float", y: "float"}
+    grounded: "boolean"
+    touching_wall: "boolean"
+    wall_side: "enum(-1, 0, 1)"  # -1 left, 0 none, 1 right
+    coyote_timer: "int (frames)"
+    jump_buffer_timer: "int (frames)"
+    wall_jump_cooldown: "int (frames)"
+    facing: "enum(-1, 1)"
+
+  boost:
+    active: "boolean"
+    timer: "int (frames)"
+
+  level:
+    bacon_collected: "list[int]"  # indices of collected bacon
+
+  game:
+    current_level: "int"
+    total_bacon: "int"
+
+# =============================================================================
+# INPUT MAPPING (ABSTRACT)
+# =============================================================================
+
+input:
+  actions:
+    move_left:
+      type: "held"
+      effect: "velocity.x = -speed"
+
+    move_right:
+      type: "held"
+      effect: "velocity.x = +speed"
+
+    jump:
+      type: "pressed"
+      effect: "initiate jump if can_jump"
+
+    jump_held:
+      type: "held"
+      effect: "variable jump height check"
+
+    run:
+      type: "held"
+      effect: "use run_speed instead of walk_speed"
+      optional: true
+      note: "Some platforms may default to run speed"
+
+  note: |
+    This defines abstract actions, not physical inputs.
+    Platform bindings map physical inputs to these actions.
+    Example: Pico-8 maps btn(4) to 'jump', keyboard maps Space.
+
+# =============================================================================
+# TOLERANCE & VARIANCE
+# =============================================================================
+
+tolerance:
+  position:
+    value: 1
+    unit: "logical_pixels"
+    note: "Acceptable variance in position calculations"
+
+  velocity:
+    value: 0.01
+    unit: "logical_pixels/frame"
+
+  timing:
+    value: 0
+    unit: "frames"
+    note: "Frame-count mechanics (coyote, buffer, boost) must be exact"
+
+  derived_values:
+    apex_height:
+      tolerance: 2
+      unit: "logical_pixels"
+      note: "Due to discrete frame stepping"
+
+  note: |
+    Implementations must match spec within these tolerances.
+    Zero tolerance items are EXACT; no variance permitted.

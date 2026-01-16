@@ -45,7 +45,7 @@ def discover_notebooks():
             "description": desc or p.stem
         })
 
-    return Path, garden, notebooks
+    return garden, notebooks
 
 
 @app.cell
@@ -86,32 +86,18 @@ def harvest_insights(notebooks):
             "next_steps": next_steps
         })
 
-    return extract_findings, extract_next_steps, harvested
+    return harvested
 
 
 @app.cell
-def display_overview(notebooks, harvested):
-    """Display garden overview."""
+def render_output(notebooks, harvested):
+    """Render all output in a single cell to avoid marimo variable conflicts."""
     import marimo as mo
 
     total_findings = sum(len(h["findings"]) for h in harvested)
     total_next_steps = sum(len(h["next_steps"]) for h in harvested)
 
-    output = mo.md(f"""
-# Garden Cycle
-
-**{len(notebooks)}** notebooks | **{total_findings}** findings | **{total_next_steps}** proposed directions
-
----
-""")
-    return output,
-
-
-@app.cell
-def display_notebooks(harvested):
-    """Display each notebook's harvest."""
-    import marimo as mo
-
+    # Build notebook sections
     sections = []
     for h in harvested:
         if not h["findings"] and not h["next_steps"]:
@@ -133,49 +119,16 @@ def display_notebooks(harvested):
 
         sections.append(section)
 
-    output = mo.md("\n---\n".join(sections))
-    return output,
-
-
-@app.cell
-def display_aggregate(harvested):
-    """Aggregate all next_steps as potential new experiments."""
-    import marimo as mo
-
+    # Build aggregate next steps
     all_steps = []
     for h in harvested:
         for step in h["next_steps"]:
             all_steps.append(f"- {step} *(from {h['name']})*")
 
-    if not all_steps:
-        steps_md = "*No next steps harvested yet. Add findings to your notebooks.*"
-    else:
-        steps_md = "\n".join(all_steps)
+    steps_md = "\n".join(all_steps) if all_steps else "*No next steps harvested yet.*"
 
-    output = mo.md(f"""
----
-
-## Potential New Experiments
-
-These directions emerged from existing notebooks:
-
-{steps_md}
-
----
-
-**To generate new experiments**: Copy this output and ask Claude Code:
-> "Based on these garden insights, propose 3 new experiments."
-
-""")
-    return output,
-
-
-@app.cell
-def scaffold():
-    """Minimal scaffold for new experiments."""
-    import marimo as mo
-
-    template = '''"""new_experiment.py
+    # Scaffold template
+    scaffold = '''"""new_experiment.py
 
 [Description of what you're exploring]
 
@@ -188,23 +141,14 @@ app = marimo.App(width="medium")
 
 @app.cell
 def explore():
-    """What are we investigating?"""
-    questions = [
-        "Question 1?",
-        "Question 2?",
-    ]
+    questions = ["Question 1?", "Question 2?"]
     return questions,
 
 
 @app.cell
 def findings(questions):
-    """What did we discover?"""
-    findings = [
-        # Add findings as you explore
-    ]
-    next_steps = [
-        # What should come next?
-    ]
+    findings = []
+    next_steps = []
     return findings, next_steps,
 
 
@@ -213,15 +157,37 @@ if __name__ == "__main__":
 '''
 
     output = mo.md(f"""
+# Garden Cycle
+
+**{len(notebooks)}** notebooks | **{total_findings}** findings | **{total_next_steps}** proposed directions
+
+---
+
+{"---".join(sections)}
+
+---
+
+## Potential New Experiments
+
+These directions emerged from existing notebooks:
+
+{steps_md}
+
+---
+
+**To generate new experiments**: Ask Claude Code:
+> "Based on these garden insights, propose 3 new experiments."
+
+---
+
 ## Scaffold
 
-When creating a new experiment:
-
 ```python
-{template}
+{scaffold}
 ```
 """)
-    return output, template
+
+    return output,
 
 
 if __name__ == "__main__":

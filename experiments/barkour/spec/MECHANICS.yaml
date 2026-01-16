@@ -109,16 +109,12 @@ player:
 # =============================================================================
 
 movement:
-  walk:
-    speed: 3.0
+  speed:
+    value: 5.0
     unit: "logical_pixels/frame"
     acceleration: "instant"
     note: "No acceleration curve; velocity set directly on input"
-
-  run:
-    speed: 5.0
-    unit: "logical_pixels/frame"
-    trigger: "hold run button OR powered state"
+    non_negotiable: true
 
   direction:
     left: -1

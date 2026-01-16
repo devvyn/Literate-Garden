@@ -88,11 +88,11 @@ def audit():
     comparisons = [
         ("physics.gravity.value", "GRAVITY", "physics.gravity"),
         ("physics.terminal_velocity.value", "MAX_FALL_SPEED", "physics.max_fall_speed"),
-        ("movement.walk.speed", None, None),  # New in spec
+        ("movement.walk.speed", None, None),  # Spec distinguishes walk/run, impl uses single speed
         ("movement.run.speed", "BASE_MOVEMENT_SPEED", "physics.base_movement_speed"),
         ("jump.force.value", "BASE_JUMP_STRENGTH", "physics.base_jump_strength"),
-        ("jump.coyote_time.value", None, None),  # New in spec
-        ("jump.jump_buffer.value", None, None),  # New in spec
+        ("jump.coyote_time.value", "COYOTE_TIME", "physics.coyote_time_frames"),
+        ("jump.jump_buffer.value", "JUMP_BUFFER", "physics.jump_buffer_frames"),
         ("wall.slide.max_fall_speed", "WALL_SLIDE_SPEED", "physics.wall_slide_speed"),
         ("wall.jump.horizontal_force", "WALL_JUMP_PUSH", "physics.wall_jump_push"),
         ("wall.jump.vertical_force", "WALL_JUMP_STRENGTH", "physics.wall_jump_strength"),

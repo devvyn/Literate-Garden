@@ -117,6 +117,10 @@ class Player {
         this.powerManager = powerManager;
         this.wallSlideParticles = [];
         this.config = config;
+        // Jump feel mechanics (per spec)
+        this.coyoteTimer = 0;
+        this.jumpBufferTimer = 0;
+        this.wasOnGround = false;
     }
 
     getMovementSpeed() {
@@ -158,7 +162,28 @@ class Player {
         return null;
     }
 
-    update(keys, platforms, walls) {
+    update(keys, platforms, walls, jumpPressed = false) {
+        const COYOTE_TIME = this.config.physics.coyote_time_frames || 6;
+        const JUMP_BUFFER = this.config.physics.jump_buffer_frames || 4;
+
+        // Track coyote time (frames since leaving ground)
+        if (this.wasOnGround && !this.onGround) {
+            // Just left the ground
+            this.coyoteTimer = COYOTE_TIME;
+        } else if (this.onGround) {
+            this.coyoteTimer = COYOTE_TIME;
+        } else if (this.coyoteTimer > 0) {
+            this.coyoteTimer--;
+        }
+        this.wasOnGround = this.onGround;
+
+        // Track jump buffer (frames since jump pressed)
+        if (jumpPressed) {
+            this.jumpBufferTimer = JUMP_BUFFER;
+        } else if (this.jumpBufferTimer > 0) {
+            this.jumpBufferTimer--;
+        }
+
         // Apply gravity (reduced when wall sliding)
         if (this.touchingWall && this.velocityY > 0 && !this.onGround) {
             this.velocityY = Math.min(this.velocityY + this.config.physics.gravity,
@@ -200,12 +225,18 @@ class Player {
         this.touchingWall = this.checkWallCollision(walls);
         this.canWallJump = this.touchingWall !== null && !this.onGround;
 
+        // Determine if we can jump (coyote time allows jumping shortly after leaving ground)
+        const canGroundJump = this.onGround || this.coyoteTimer > 0;
+        const wantToJump = jumpPressed || this.jumpBufferTimer > 0;
+
         // Jumping (regular or wall jump)
-        if (keys.Space || keys.ArrowUp) {
-            if (this.onGround) {
-                // Regular jump
+        if (wantToJump) {
+            if (canGroundJump) {
+                // Regular jump (or coyote jump)
                 this.velocityY = this.getJumpStrength();
                 this.onGround = false;
+                this.coyoteTimer = 0;  // Consume coyote time
+                this.jumpBufferTimer = 0;  // Consume buffer
             } else if (this.canWallJump) {
                 // WALL JUMP!
                 const pushDirection = this.touchingWall === "left" ?
@@ -215,6 +246,7 @@ class Player {
                 this.touchingWall = null;
                 this.canWallJump = false;
                 this.wallJumpCooldown = 10;
+                this.jumpBufferTimer = 0;  // Consume buffer
             }
         }
 
@@ -314,6 +346,7 @@ class Player {
 let canvas, ctx;
 let powerManager, player, platforms, walls, bacons;
 let keys = {};
+let jumpPressedThisFrame = false;
 let lastTime = 0;
 
 function initGame() {
@@ -335,7 +368,10 @@ function initGame() {
     // Input handling
     window.addEventListener('keydown', e => {
         keys[e.key] = true;
-        if (e.key === ' ') e.preventDefault(); // Prevent page scroll
+        if (e.key === ' ' || e.key === 'ArrowUp') {
+            jumpPressedThisFrame = true;
+            e.preventDefault(); // Prevent page scroll
+        }
     });
     window.addEventListener('keyup', e => keys[e.key] = false);
 
@@ -348,7 +384,8 @@ function gameLoop(currentTime) {
     lastTime = currentTime;
 
     // Update
-    player.update(keys, platforms, walls);
+    player.update(keys, platforms, walls, jumpPressedThisFrame);
+    jumpPressedThisFrame = false;  // Reset after use
     powerManager.update(dt);
     bacons.forEach(b => b.update());
 

@@ -40,11 +40,15 @@ WALL_SLIDE_SPEED = 2  # Slow fall when touching wall
 WALL_JUMP_PUSH = 8  # Horizontal push from wall
 WALL_JUMP_STRENGTH = -13  # Vertical jump from wall
 
+# Jump feel parameters (per spec)
+COYOTE_TIME = 6  # Frames after leaving platform where jump is still valid
+JUMP_BUFFER = 4  # Frames before landing where jump input is buffered
+
 # Power-up parameters
 POWERED_SPEED_MULTIPLIER = 1.5
 POWERED_JUMP_MULTIPLIER = 1.2
 POWERED_WALL_JUMP_MULTIPLIER = 1.3
-POWERUP_DURATION = 5000  # 5 seconds in milliseconds
+POWERUP_DURATION = 3000  # 3 seconds (180 frames at 60fps) - per spec
 
 
 class PowerUpManager:
@@ -128,6 +132,11 @@ class Player:
         self.wall_jump_cooldown = 0  # Prevent instant re-grab
         self.power_manager = power_manager
         self.wall_slide_particles = []
+        # Jump feel mechanics (per spec)
+        self.coyote_timer = 0  # Frames since leaving ground
+        self.jump_buffer_timer = 0  # Frames since jump was pressed
+        self.was_on_ground = False  # Track ground state changes
+        self.jump_pressed_this_frame = False  # For buffering
 
     def get_movement_speed(self):
         """Get current movement speed based on power-up state"""
@@ -165,7 +174,23 @@ class Player:
                     return "left"
         return None
 
-    def update(self, keys, platforms, walls):
+    def update(self, keys, platforms, walls, jump_pressed=False):
+        # Track coyote time (frames since leaving ground)
+        if self.was_on_ground and not self.on_ground:
+            # Just left the ground
+            self.coyote_timer = COYOTE_TIME
+        elif self.on_ground:
+            self.coyote_timer = COYOTE_TIME  # Reset when grounded
+        elif self.coyote_timer > 0:
+            self.coyote_timer -= 1
+        self.was_on_ground = self.on_ground
+
+        # Track jump buffer (frames since jump pressed)
+        if jump_pressed:
+            self.jump_buffer_timer = JUMP_BUFFER
+        elif self.jump_buffer_timer > 0:
+            self.jump_buffer_timer -= 1
+
         # Apply gravity (reduced when wall sliding)
         if self.touching_wall and self.velocity_y > 0 and not self.on_ground:
             # Wall slide - slow fall
@@ -202,12 +227,18 @@ class Player:
         self.touching_wall = self.check_wall_collision(walls)
         self.can_wall_jump = self.touching_wall is not None and not self.on_ground
 
+        # Determine if we can jump (coyote time allows jumping shortly after leaving ground)
+        can_ground_jump = self.on_ground or self.coyote_timer > 0
+        want_to_jump = jump_pressed or self.jump_buffer_timer > 0
+
         # Jumping - regular or wall jump
-        if keys[pygame.K_SPACE] or keys[pygame.K_UP]:
-            if self.on_ground:
-                # Regular jump
+        if want_to_jump:
+            if can_ground_jump:
+                # Regular jump (or coyote jump)
                 self.velocity_y = self.get_jump_strength()
                 self.on_ground = False
+                self.coyote_timer = 0  # Consume coyote time
+                self.jump_buffer_timer = 0  # Consume buffer
             elif self.can_wall_jump:
                 # WALL JUMP!
                 push_direction = WALL_JUMP_PUSH if self.touching_wall == "left" else -WALL_JUMP_PUSH
@@ -216,6 +247,7 @@ class Player:
                 self.touching_wall = None
                 self.can_wall_jump = False
                 self.wall_jump_cooldown = 10  # Brief cooldown to prevent instant re-grab
+                self.jump_buffer_timer = 0  # Consume buffer
 
         # Update position
         self.x += self.velocity_x
@@ -357,16 +389,19 @@ def main():
         dt = clock.tick(FPS)  # Delta time in milliseconds
 
         # Event handling
+        jump_pressed = False  # Track if jump was pressed THIS frame
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                if event.key in (pygame.K_SPACE, pygame.K_UP):
+                    jump_pressed = True
 
         # Update
         keys = pygame.key.get_pressed()
-        player.update(keys, platforms, walls)
+        player.update(keys, platforms, walls, jump_pressed)
         power_manager.update(dt)
 
         # Update bacons

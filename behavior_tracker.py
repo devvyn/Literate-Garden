@@ -275,64 +275,213 @@ def define_interpreter(Behavior, BehaviorType, World, Entity):
 
 
 @app.cell
-def create_demo_pattern(Pattern, Channel, spawn, move, jump, chase, shoot, say, nop, die, flag):
-    """Create a demo pattern showing the system in action."""
+def define_song_player(Song, Pattern, World, BehaviorInterpreter, nop):
+    """Song player: chains patterns together like a tracker song."""
+    from dataclasses import dataclass, field
+    from typing import List, Dict, Optional
 
-    # 16-tick demo pattern with 4 channels
-    demo = Pattern(name="chase_scene", length=16, channels=[
-        Channel(name="player", entity_type="player", rows=[
-            spawn(4, 14),    # T0: spawn player
-            nop(),           # T1: wait
-            move(1, 0),      # T2: move right
-            move(1, 0),      # T3: move right
-            jump(4),         # T4: jump!
-            nop(),           # T5: in air
-            nop(),           # T6: in air
-            move(1, 0),      # T7: move right while falling
-            nop(),           # T8: land
-            say("uh oh"),    # T9: see enemy
-            move(1, 0),      # T10: run!
-            move(1, 0),      # T11: run!
-            shoot(1, 0),     # T12: shoot right
-            move(1, 0),      # T13: keep running
-            move(1, 0),      # T14: keep running
-            flag("escaped"), # T15: made it!
+    @dataclass
+    class SongPosition:
+        """Current position in a song."""
+        pattern_index: int = 0  # which pattern in sequence
+        tick: int = 0           # which tick in current pattern
+        total_tick: int = 0     # global tick counter
+
+    @dataclass
+    class SongFrame:
+        """A frame from song playback."""
+        position: SongPosition
+        pattern_name: str
+        entities: Dict[str, dict]
+        messages: List[str]
+
+    class SongPlayer:
+        """Plays through a song's pattern sequence."""
+
+        def __init__(self, song: Song, world: World):
+            self.song = song
+            self.world = world
+            self.interpreter = BehaviorInterpreter(world)
+            self.position = SongPosition()
+            self.finished = False
+
+        def current_pattern(self) -> Optional[Pattern]:
+            if self.position.pattern_index >= len(self.song.sequence):
+                return None
+            pattern_name = self.song.sequence[self.position.pattern_index]
+            return self.song.patterns.get(pattern_name)
+
+        def step(self) -> Optional[SongFrame]:
+            """Execute one tick and return frame."""
+            pattern = self.current_pattern()
+            if not pattern:
+                self.finished = True
+                return None
+
+            # Get behaviors for current tick
+            behaviors = pattern.get_tick(self.position.tick)
+
+            # Capture frame
+            frame = SongFrame(
+                position=SongPosition(
+                    self.position.pattern_index,
+                    self.position.tick,
+                    self.position.total_tick
+                ),
+                pattern_name=pattern.name,
+                entities={
+                    name: {"x": e.x, "y": e.y, "alive": e.alive,
+                           "type": e.entity_type, "speech": e.speech}
+                    for name, e in self.world.entities.items()
+                },
+                messages=list(self.world.messages)
+            )
+            self.world.messages.clear()
+
+            # Clear speech
+            for e in self.world.entities.values():
+                e.speech = ""
+
+            # Execute
+            self.interpreter.execute_tick(behaviors)
+
+            # Advance position
+            self.position.tick += 1
+            self.position.total_tick += 1
+
+            # Check if pattern finished
+            if self.position.tick >= pattern.length:
+                self.position.tick = 0
+                self.position.pattern_index += 1
+
+                # Check for loop
+                if self.position.pattern_index >= len(self.song.sequence):
+                    if self.song.loop_point >= 0:
+                        self.position.pattern_index = self.song.loop_point
+                    else:
+                        self.finished = True
+
+            return frame
+
+        def run_all(self, max_ticks: int = 1000) -> List[SongFrame]:
+            """Run entire song and return all frames."""
+            frames = []
+            while not self.finished and len(frames) < max_ticks:
+                frame = self.step()
+                if frame:
+                    frames.append(frame)
+            return frames
+
+    return SongPosition, SongFrame, SongPlayer
+
+
+@app.cell
+def create_demo_patterns(Pattern, Channel, Song, spawn, move, jump, chase, flee, shoot, say, nop, die, flag):
+    """Create multiple patterns and a song that chains them."""
+
+    # Pattern 00: Intro - player enters, looks around
+    p_intro = Pattern(name="intro", length=8, channels=[
+        Channel("player", "player", [
+            spawn(2, 14),    # spawn at left
+            nop(),
+            move(1, 0),
+            move(1, 0),
+            say("hello?"),
+            nop(),
+            move(1, 0),
+            say("..."),
         ]),
-        Channel(name="enemy", entity_type="enemy", rows=[
-            nop(),           # T0: not yet
-            nop(),           # T1: not yet
-            nop(),           # T2: not yet
-            spawn(28, 14),   # T3: enemy spawns
-            nop(),           # T4: wait
-            chase("player"), # T5: start chasing
-            chase("player"), # T6: chase
-            chase("player"), # T7: chase
-            chase("player"), # T8: chase
-            say("gotcha!"),  # T9: taunt
-            chase("player"), # T10: chase faster
-            chase("player"), # T11: chase
-            die(),           # T12: hit by bullet!
-            nop(),           # T13: dead
-            nop(),           # T14: dead
-            nop(),           # T15: dead
+        Channel("enemy", "enemy", [nop()] * 8),
+        Channel("coin", "item", [spawn(20, 12)] + [nop()] * 7),
+    ])
+
+    # Pattern 01: Action - enemy appears, chase begins
+    p_action = Pattern(name="action", length=12, channels=[
+        Channel("player", "player", [
+            nop(),
+            say("!!"),
+            move(1, 0),
+            move(1, 0),
+            jump(4),
+            nop(),
+            move(1, 0),
+            nop(),
+            move(1, 0),
+            shoot(1, 0),
+            move(1, 0),
+            move(1, 0),
         ]),
-        Channel(name="coin1", entity_type="item", rows=[
-            spawn(12, 10),   # T0: coin floating
-            nop(), nop(), nop(), nop(), nop(), nop(), nop(),
-            nop(), nop(), nop(), nop(), nop(), nop(), nop(), nop(),
+        Channel("enemy", "enemy", [
+            spawn(28, 14),
+            say("found you!"),
+            chase("player"),
+            chase("player"),
+            chase("player"),
+            chase("player"),
+            chase("player"),
+            say("too slow!"),
+            chase("player"),
+            die(),           # hit by bullet
+            nop(),
+            nop(),
         ]),
-        Channel(name="world", entity_type="world", rows=[
-            nop(),           # T0: no gravity yet
-            nop(),           # T1
-            nop(),           # T2
-            nop(),           # T3
-            nop(),           # T4: gravity kicks in when player jumps
-            nop(), nop(), nop(), nop(), nop(), nop(), nop(),
-            nop(), nop(), nop(), nop(),
+        Channel("coin", "item", [nop()] * 12),
+    ])
+
+    # Pattern 02: Victory - player celebrates
+    p_victory = Pattern(name="victory", length=8, channels=[
+        Channel("player", "player", [
+            say("yes!"),
+            jump(3),
+            nop(),
+            nop(),
+            say("got the coin!"),
+            move(1, 0),
+            move(1, 0),
+            flag("win"),
+        ]),
+        Channel("enemy", "enemy", [nop()] * 8),
+        Channel("coin", "item", [
+            nop(),
+            nop(),
+            nop(),
+            nop(),
+            die(),  # collected
+            nop(),
+            nop(),
+            nop(),
         ]),
     ])
 
-    return demo,
+    # Pattern 03: Loop pattern - can be used for idle/waiting
+    p_idle = Pattern(name="idle", length=4, channels=[
+        Channel("player", "player", [
+            nop(),
+            say("..."),
+            nop(),
+            nop(),
+        ]),
+        Channel("enemy", "enemy", [nop()] * 4),
+        Channel("coin", "item", [nop()] * 4),
+    ])
+
+    # Build the song: intro → action → victory (no loop, plays once)
+    demo_song = Song(
+        name="mini_adventure",
+        patterns={
+            "intro": p_intro,
+            "action": p_action,
+            "victory": p_victory,
+            "idle": p_idle,
+        },
+        sequence=["intro", "action", "victory"],
+        loop_point=-1,  # -1 = no loop, play once
+    )
+
+    # Keep single pattern for backwards compatibility
+    demo = p_action
+
+    return demo, p_intro, p_action, p_victory, p_idle, demo_song
 
 
 @app.cell
@@ -392,6 +541,21 @@ def run_simulation(demo, World, BehaviorInterpreter):
     frames = run_pattern(demo)
 
     return Frame, run_pattern, frames
+
+
+@app.cell
+def run_song_simulation(demo_song, World, SongPlayer):
+    """Run the full song and collect frames."""
+
+    def run_song(song, gravity=0.3, max_ticks=500):
+        """Execute entire song and return frames."""
+        world = World(width=32, height=16, gravity=gravity)
+        player = SongPlayer(song, world)
+        return player.run_all(max_ticks)
+
+    song_frames = run_song(demo_song)
+
+    return run_song, song_frames
 
 
 @app.cell
@@ -468,6 +632,114 @@ def display_tracker_view(demo, nop):
 
 
 @app.cell
+def display_song_structure(demo_song):
+    """Show the song structure."""
+    import marimo as mo
+
+    patterns_md = "\n".join(
+        f"- **{name}**: {p.length} ticks, {len(p.channels)} channels"
+        for name, p in demo_song.patterns.items()
+    )
+
+    sequence_md = " → ".join(f"`{p}`" for p in demo_song.sequence)
+
+    total_ticks = sum(demo_song.patterns[p].length for p in demo_song.sequence)
+
+    song_structure = mo.md(f"""
+## Song: {demo_song.name}
+
+**Patterns:**
+{patterns_md}
+
+**Sequence:** {sequence_md}
+
+**Total length:** {total_ticks} ticks
+
+**Loop:** {"at pattern " + str(demo_song.loop_point) if demo_song.loop_point >= 0 else "none (plays once)"}
+""")
+
+    return song_structure,
+
+
+@app.cell
+def render_song_frames(song_frames):
+    """Render song frames for playback."""
+
+    def render_song_frame(frame, width=32, height=16):
+        grid = [['·' for _ in range(width)] for _ in range(height)]
+        for x in range(width):
+            grid[height-1][x] = '▀'
+
+        symbols = {"player": "P", "enemy": "E", "item": "◆", "bullet": "→"}
+        speeches = []
+
+        for name, e in frame.entities.items():
+            if not e["alive"]:
+                continue
+            x, y = int(e["x"]), int(e["y"])
+            if 0 <= x < width and 0 <= y < height:
+                grid[y][x] = symbols.get(e["type"], "?")
+                if e.get("speech"):
+                    speeches.append(f'{name}: "{e["speech"]}"')
+
+        lines = ["".join(row) for row in grid]
+        result = "\n".join(lines)
+        if speeches:
+            result += "\n" + " | ".join(speeches)
+        return result
+
+    rendered_song = [
+        (f.position.total_tick, f.pattern_name, f.position.tick,
+         render_song_frame(f), f.messages)
+        for f in song_frames
+    ]
+
+    return render_song_frame, rendered_song
+
+
+@app.cell
+def create_song_playback_ui(rendered_song):
+    """Create song playback slider."""
+    import marimo as mo
+
+    song_slider = mo.ui.slider(
+        start=0,
+        stop=len(rendered_song) - 1,
+        value=0,
+        label="Song Position",
+        show_value=True
+    )
+
+    return song_slider,
+
+
+@app.cell
+def display_song_frame(song_slider, rendered_song):
+    """Display song frame with pattern info."""
+    import marimo as mo
+
+    idx = song_slider.value
+    total_tick, pattern_name, pattern_tick, art, messages = rendered_song[idx]
+
+    messages_md = "\n".join(f"- {m}" for m in messages) if messages else "*no events*"
+
+    song_frame_output = mo.md(f"""
+## Song Playback
+
+**Pattern:** `{pattern_name}` (tick {pattern_tick}) | **Total:** tick {total_tick}
+
+```
+{art}
+```
+
+**Events:**
+{messages_md}
+""")
+
+    return song_frame_output,
+
+
+@app.cell
 def create_playback_ui(rendered_frames):
     """Create interactive playback."""
     import marimo as mo
@@ -508,8 +780,8 @@ def display_frame(tick_slider, rendered_frames):
 
 
 @app.cell
-def display_all(tracker_output, tick_slider, frame_output):
-    """Combine all displays."""
+def display_all(tracker_output, song_structure, song_slider, song_frame_output):
+    """Combine all displays - now featuring song mode!"""
     import marimo as mo
 
     intro = mo.md("""
@@ -520,48 +792,54 @@ but for entity actions.
 
 **Vocabulary**: spawn, move, jump, chase, flee, shoot, die, say, flag
 
-**Grid**: 16 ticks × 4 channels (player, enemy, coin, world)
+**Patterns**: Reusable behavior sequences (intro, action, victory, idle)
 
-**Playback**: Use the slider to step through the simulation.
+**Songs**: Chain patterns together → `intro` → `action` → `victory`
+
+**Playback**: Use the slider to step through the song.
 
 ---
 """)
 
-    controls = mo.vstack([
-        mo.md("### Playback"),
-        tick_slider,
+    song_controls = mo.vstack([
+        mo.md("### Song Playback"),
+        song_slider,
     ])
 
     layout = mo.vstack([
         intro,
-        mo.hstack([tracker_output, mo.vstack([controls, frame_output])], justify="start"),
+        mo.hstack([
+            mo.vstack([song_structure, tracker_output]),
+            mo.vstack([song_controls, song_frame_output])
+        ], justify="start"),
     ])
 
     return layout,
 
 
 @app.cell
-def reflection_layer(demo, frames):
+def reflection_layer(demo_song, song_frames):
     """What did we learn from building this?"""
 
+    total_ticks = sum(demo_song.patterns[p].length for p in demo_song.sequence)
+
     findings = [
-        f"Built working tracker with {len(demo.channels)} channels × {demo.length} ticks",
-        f"Simulation produced {len(frames)} frames of output",
-        "Tracker notation makes behavior sequences scannable at a glance",
-        "Pattern-based = easy to extend (just add more patterns)",
-        "Constraint (16 ticks, verb vocabulary) forces design economy",
+        f"Song '{demo_song.name}' chains {len(demo_song.sequence)} patterns",
+        f"Total song length: {total_ticks} ticks across patterns",
+        f"Patterns are reusable: defined {len(demo_song.patterns)} patterns",
+        f"Song produced {len(song_frames)} frames of continuous playback",
+        "Pattern transitions are seamless - entities persist across patterns",
     ]
 
     insights = [
-        "The tracker grid reveals RHYTHM in gameplay (spawn timings, chase patterns)",
-        "Entity behaviors compose like musical voices - harmony of actions",
-        "NOP/rest is as important in games as in music",
-        "Speech bubbles work like tracker annotations",
-        "This could work for cutscenes, tutorials, choreographed boss fights",
+        "Pattern chaining works exactly like tracker songs",
+        "Intro → Action → Victory creates natural game arc",
+        "Patterns can be reordered/repeated without code changes",
+        "Loop support enables idle states and endless modes",
+        "Song structure makes game pacing visible and editable",
     ]
 
     next_steps = [
-        "Add pattern chaining (song = sequence of patterns)",
         "Build visual editor with drag-drop behaviors",
         "Try making a real mini-game using only tracker patterns",
         "Add conditional behaviors (if flag set, do X)",

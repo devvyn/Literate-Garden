@@ -23,6 +23,7 @@ Tools: `uv` for packages, `fd` for files, `rg` for search.
 
 | Notebook | What it does |
 |----------|--------------|
+| `garden_cycle.py` | **Orchestrator** - harvests insights, proposes new experiments |
 | `agent_strata.py` | Layered agent architecture proof-of-concept |
 | `game_demos_gallery.py` | Interactive game concept showcase |
 | `build_greene_graph.py` | Robert Greene influence mapping |

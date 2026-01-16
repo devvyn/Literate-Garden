@@ -2,6 +2,14 @@
 
 Interactive marimo experiments. Run them, hack them, make new ones.
 
+## The Cycle
+
+```bash
+marimo run garden_cycle.py
+```
+
+The orchestrator harvests findings and next_steps from all notebooks and displays them. Then ask Claude Code to propose new experiments based on what you see. No API keys required - Claude Code does the generation when you ask.
+
 ## Experiments
 
 ### Agent Strata

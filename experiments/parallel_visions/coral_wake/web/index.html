@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Coral Wake Caravan — Living Trade Winds</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --reef-blue: #1e8fbf;
+      --reef-gold: #f7d779;
+      --reef-pink: #ff7dc0;
+      --bg: radial-gradient(circle at center, #041825 10%, #020811 60%, #00050c 100%);
+    }
+    body {
+      margin: 0;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: #effcff;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1.75rem clamp(1rem, 4vw, 3rem) 1rem;
+    }
+    header h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 3vw, 2.7rem);
+      letter-spacing: 0.05em;
+    }
+    header p {
+      margin: 0.5rem 0 0;
+      max-width: 640px;
+      line-height: 1.6;
+      opacity: 0.85;
+    }
+    main {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) 1fr;
+      gap: clamp(1rem, 5vw, 3rem);
+      padding: 0 clamp(1rem, 4vw, 3rem) 2rem;
+    }
+    aside {
+      background: rgba(6, 24, 40, 0.7);
+      border-radius: 20px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(78, 185, 255, 0.25);
+    }
+    label {
+      display: block;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.25rem;
+      opacity: 0.7;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem 1.25rem;
+      margin-top: 1.2rem;
+      font-size: 0.95rem;
+    }
+    .stat-grid strong {
+      display: block;
+      font-size: 1.2rem;
+      color: var(--reef-gold);
+    }
+    svg {
+      width: 100%;
+      height: 70vh;
+    }
+    footer {
+      padding: 1rem clamp(1rem, 4vw, 3rem) 2rem;
+      opacity: 0.8;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Version II — Coral Wake Caravan</h1>
+    <p>Guide biomechanical sails across a sentient archipelago. Tune sustainability and ambition to see the reef bloom or recoil in real time.</p>
+  </header>
+  <main>
+    <aside>
+      <label for="balance">Ecology vs. Ambition</label>
+      <input id="balance" type="range" min="0" max="100" value="65" />
+      <div class="stat-grid" aria-live="polite">
+        <div>
+          <span>Coral Vitality</span>
+          <strong id="vitality">82%</strong>
+        </div>
+        <div>
+          <span>Story Demand</span>
+          <strong id="demand">61%</strong>
+        </div>
+        <div>
+          <span>Empathy Ledger</span>
+          <strong id="empathy">+14</strong>
+        </div>
+        <div>
+          <span>Fleet Morale</span>
+          <strong id="morale">High</strong>
+        </div>
+      </div>
+      <p style="margin-top:1.4rem; line-height:1.5; opacity:0.8;">
+        <!-- next: Swap stubbed lore table with live weighted fragments -->
+        Dispatch log: "Echo-pilot Nima reports coral polyps humming approval along the Lyre Reef corridor."
+      </p>
+    </aside>
+    <section>
+      <svg viewBox="0 0 800 600" role="img" aria-label="Dynamic reef map">
+        <!-- Node positions approximated for quick iteration; upgrade to geoJSON later. -->
+        <defs>
+          <radialGradient id="nodeGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#fff5" />
+            <stop offset="60%" stop-color="#6ed6ff" />
+            <stop offset="100%" stop-color="#1b7aa6" />
+          </radialGradient>
+        </defs>
+        <path id="current" d="M80 520 C 200 420, 300 480, 420 360 S 660 120, 740 220" stroke="#53c2ff" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="12 14" />
+        <g id="nodes" fill="url(#nodeGradient)">
+          <circle data-name="Harbor of Words" cx="120" cy="480" r="32" />
+          <circle data-name="Lyre Reef" cx="300" cy="420" r="28" />
+          <circle data-name="Tideglass Gate" cx="450" cy="320" r="34" />
+          <circle data-name="Archive Shoal" cx="630" cy="220" r="30" />
+        </g>
+        <g id="glow">
+          <!-- Soft bloom replicating coral response -->
+          <circle cx="300" cy="420" r="62" fill="rgba(255, 204, 128, 0.2)" />
+        </g>
+        <text id="status-text" x="400" y="560" text-anchor="middle" fill="#dff6ff" font-size="20" letter-spacing="3">Empathy Current Stable</text>
+      </svg>
+    </section>
+  </main>
+  <footer>
+    Tide clock simulation omitted for brevity — see comments for future hook.
+  </footer>
+  <script>
+    const balance = document.getElementById("balance");
+    const vitality = document.getElementById("vitality");
+    const demand = document.getElementById("demand");
+    const empathy = document.getElementById("empathy");
+    const morale = document.getElementById("morale");
+    const statusText = document.getElementById("status-text");
+    const glow = document.querySelector("#glow circle");
+    const current = document.getElementById("current");
+    const nodes = document.querySelectorAll("#nodes circle");
+
+    function updateModel(value) {
+      const ecoWeight = value / 100;
+      const ecoScore = Math.round(40 + ecoWeight * 55);
+      const storyDemand = Math.round(45 + (1 - Math.abs(ecoWeight - 0.55)) * 35);
+      const empathyLedger = Math.round((ecoWeight - 0.5) * 40);
+
+      vitality.textContent = `${ecoScore}%`;
+      demand.textContent = `${storyDemand}%`;
+      empathy.textContent = empathyLedger >= 0 ? `+${empathyLedger}` : `${empathyLedger}`;
+      morale.textContent = ecoWeight > 0.65 ? "Elated" : ecoWeight > 0.4 ? "High" : "Concerned";
+
+      const glowRadius = 48 + ecoWeight * 48;
+      glow.setAttribute("r", glowRadius);
+      glow.setAttribute("fill", `rgba(${180 + ecoWeight * 40}, ${120 + ecoWeight * 100}, 180, ${0.15 + ecoWeight * 0.4})`);
+
+      const dash = 8 + ecoWeight * 18;
+      current.setAttribute("stroke-dasharray", `${dash} ${18 - ecoWeight * 6}`);
+
+      nodes.forEach((node, index) => {
+        const pulse = 0.9 + Math.sin(performance.now() / (900 + index * 200)) * 0.1;
+        node.setAttribute("transform", `scale(${pulse})`);
+      });
+
+      const status = ecoWeight > 0.75
+        ? "Reef is Flourishing — consider introducing gentle challenge."
+        : ecoWeight < 0.35
+          ? "Warning: Reef recoil imminent. Ease extraction cadence."
+          : "Empathy Current Stable";
+      statusText.textContent = status;
+    }
+
+    balance.addEventListener("input", (event) => {
+      updateModel(Number(event.target.value));
+    });
+
+    // Kick off with default slider value.
+    updateModel(Number(balance.value));
+
+    // NOTE: Tide clock + asynchronous state sharing paused here pending backend stub.
+  </script>
+</body>
+</html>

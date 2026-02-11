@@ -1,0 +1,109 @@
+:root {
+  --bg: linear-gradient(180deg, #18263b 0%, #0c1422 100%);
+  --accent: #f6d365;
+  --accent-2: #fda085;
+  --text: #fef6e4;
+  --muted: rgba(254, 246, 228, 0.7);
+  font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+}
+
+main {
+  max-width: 940px;
+  width: 100%;
+  background: rgba(21, 33, 51, 0.82);
+  border-radius: 28px;
+  padding: 2.8rem;
+  box-shadow: 0 50px 120px rgba(12, 20, 34, 0.65);
+  border: 1px solid rgba(246, 211, 101, 0.22);
+}
+
+header h1 {
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  margin-bottom: 0.2rem;
+}
+
+.tagline {
+  color: var(--accent);
+  margin-top: 0;
+}
+
+section {
+  margin-block: 2.2rem;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(70px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tile {
+  position: relative;
+  padding-top: 100%;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(246, 211, 101, 0.25);
+  overflow: hidden;
+}
+
+.tile::after {
+  content: attr(data-element);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(254, 246, 228, 0.75);
+}
+
+.palette {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pylon {
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 0.85rem 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: grab;
+  background: linear-gradient(120deg, rgba(246, 211, 101, 0.25), rgba(253, 160, 133, 0.35));
+  color: var(--text);
+}
+
+.pylon:active {
+  cursor: grabbing;
+}
+
+.forecast {
+  min-height: 1.5rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.annotation {
+  color: var(--muted);
+  font-style: italic;
+}
+
+ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+}
